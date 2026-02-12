@@ -1,7 +1,7 @@
 <template>
-  <div class="login-page">
+  <div class="register-page">
     <!-- 背景装饰 -->
-    <div class="login-background">
+    <div class="register-background">
       <div class="particles-container">
         <div
           v-for="(particle, index) in particles"
@@ -22,108 +22,40 @@
       <div class="glow-effect glow-2" />
     </div>
 
-    <div class="login-container">
+    <div class="register-container">
       <!-- Logo 区 -->
-      <div class="login-header">
+      <div class="register-header">
         <div class="logo-wrapper">
           <Logo :size="56" />
         </div>
-        <h1 class="title">FinAgents</h1>
-        <p class="subtitle">AI智能股票分析平台</p>
+        <h1 class="title">注册账号</h1>
+        <p class="subtitle">开启 AI 智能投资之旅</p>
       </div>
 
-      <!-- 登录卡片 -->
-      <el-card class="login-card" shadow="never">
-        <!-- 登录方式切换 -->
-        <div class="login-tabs">
-          <div
-            class="tab-item"
-            :class="{ active: loginType === 'password' }"
-            @click="switchLoginType('password')"
-          >
-            <svg class="tab-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zm6 10v8H6v-8h12zm-9-2V7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9z" fill="currentColor"/>
-            </svg>
-            <span>密码登录</span>
-          </div>
-          <div
-            class="tab-item"
-            :class="{ active: loginType === 'sms' }"
-            @click="switchLoginType('sms')"
-          >
-            <svg class="tab-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 6h16v.511l-8 5.333-8-5.333V6zm0 12V8.853l7.479 4.987a.997.997 0 001.042 0L20 8.853V18H4z" fill="currentColor"/>
-            </svg>
-            <span>验证码登录</span>
-          </div>
-        </div>
-
-        <!-- 密码登录表单 -->
+      <!-- 注册卡片 -->
+      <el-card class="register-card" shadow="never">
         <el-form
-          v-if="loginType === 'password'"
-          :model="passwordForm"
-          :rules="passwordRules"
-          ref="passwordFormRef"
+          :model="registerForm"
+          :rules="registerRules"
+          ref="registerFormRef"
           label-position="top"
           size="large"
-          class="login-form"
+          class="register-form"
         >
-          <el-form-item label="用户名" prop="identifier">
+          <!-- 用户名 -->
+          <el-form-item label="用户名" prop="username">
             <el-input
-              v-model="passwordForm.identifier"
+              v-model="registerForm.username"
               placeholder="请输入用户名"
               prefix-icon="User"
               clearable
             />
           </el-form-item>
 
-          <el-form-item label="密码" prop="password">
-            <el-input
-              v-model="passwordForm.password"
-              type="password"
-              placeholder="请输入密码"
-              prefix-icon="Lock"
-              show-password
-              clearable
-              @keyup.enter="handleLogin"
-            />
-          </el-form-item>
-
-          <el-form-item>
-            <div class="form-options">
-              <el-checkbox v-model="passwordForm.rememberMe">
-                记住我
-              </el-checkbox>
-            </div>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button
-              type="primary"
-              size="large"
-              class="login-button"
-              :loading="loginLoading"
-              @click="handleLogin"
-            >
-              <span v-if="!loginLoading">登录</span>
-              <span v-else>登录中...</span>
-            </el-button>
-          </el-form-item>
-        </el-form>
-
-        <!-- 短信验证码登录表单 -->
-        <el-form
-          v-else
-          :model="smsForm"
-          :rules="smsRules"
-          ref="smsFormRef"
-          label-position="top"
-          size="large"
-          class="login-form"
-        >
+          <!-- 手机号 -->
           <el-form-item label="手机号" prop="phone">
             <el-input
-              v-model="smsForm.phone"
+              v-model="registerForm.phone"
               placeholder="请输入手机号"
               prefix-icon="Iphone"
               maxlength="11"
@@ -131,15 +63,15 @@
             />
           </el-form-item>
 
-          <el-form-item label="验证码" prop="smsCode">
+          <!-- 短信验证码 -->
+          <el-form-item label="短信验证码" prop="smsCode">
             <div class="sms-input-wrapper">
               <el-input
-                v-model="smsForm.smsCode"
+                v-model="registerForm.smsCode"
                 placeholder="请输入验证码"
                 prefix-icon="Message"
                 maxlength="6"
                 clearable
-                @keyup.enter="handleLogin"
               />
               <el-button
                 class="sms-button"
@@ -152,39 +84,71 @@
             </div>
           </el-form-item>
 
-          <el-form-item>
-            <div class="form-options">
-              <el-checkbox v-model="smsForm.rememberMe">
-                记住我
-              </el-checkbox>
-            </div>
+          <!-- 邮箱 -->
+          <el-form-item label="邮箱" prop="email">
+            <el-input
+              v-model="registerForm.email"
+              placeholder="请输入邮箱"
+              prefix-icon="Message"
+              clearable
+            />
           </el-form-item>
 
+          <!-- 密码 -->
+          <el-form-item label="密码" prop="password">
+            <el-input
+              v-model="registerForm.password"
+              type="password"
+              placeholder="至少8个字符，包含字母和数字"
+              prefix-icon="Lock"
+              show-password
+              clearable
+            />
+          </el-form-item>
+
+          <!-- 确认密码 -->
+          <el-form-item label="确认密码" prop="confirmPassword">
+            <el-input
+              v-model="registerForm.confirmPassword"
+              type="password"
+              placeholder="请再次输入密码"
+              prefix-icon="Lock"
+              show-password
+              clearable
+              @keyup.enter="handleRegister"
+            />
+          </el-form-item>
+
+          <!-- 用户协议 -->
+          <el-form-item prop="agreement">
+            <el-checkbox v-model="registerForm.agreement">
+              我已阅读并同意
+              <el-link type="primary" :underline="false">《用户协议》</el-link>
+              和
+              <el-link type="primary" :underline="false">《隐私政策》</el-link>
+            </el-checkbox>
+          </el-form-item>
+
+          <!-- 注册按钮 -->
           <el-form-item>
             <el-button
               type="primary"
               size="large"
-              class="login-button"
-              :loading="loginLoading"
-              @click="handleLogin"
+              class="register-button"
+              :loading="registerLoading"
+              @click="handleRegister"
             >
-              <span v-if="!loginLoading">登录</span>
-              <span v-else>登录中...</span>
+              <span v-if="!registerLoading">立即注册</span>
+              <span v-else>注册中...</span>
             </el-button>
           </el-form-item>
         </el-form>
 
         <!-- 底部提示 -->
-        <div class="login-footer-tip">
+        <div class="register-footer-tip">
           <el-text type="info" size="small">
-            <template v-if="loginType === 'password'">
-              没有账号？
-              <router-link to="/register">立即注册</router-link>
-            </template>
-            <template v-else>
-              没有账号？
-              <router-link to="/register">立即注册</router-link>
-            </template>
+            已有账号？
+            <router-link to="/login">立即登录</router-link>
           </el-text>
         </div>
       </el-card>
@@ -192,7 +156,7 @@
       <!-- 免责声明 -->
       <div class="disclaimer">
         <p class="disclaimer-text">
-          FinAgents 是一个 AI 多 Agents 的股票分析学习平台。平台中的分析结论、观点和“投资建议”均由 AI 自动生成，仅用于学习、研究与交流，不构成任何形式的投资建议或承诺。市场有风险，入市需谨慎。
+          FinAgents 是一个 AI 多 Agents 的股票分析学习平台。平台中的分析结论、观点和"投资建议"均由 AI 自动生成，仅用于学习、研究与交流，不构成任何形式的投资建议或承诺。市场有风险，入市需谨慎。
         </p>
       </div>
     </div>
@@ -203,23 +167,17 @@
 import { reactive, ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
-import { useAuthStore } from '@/stores/auth'
 import { authApi } from '@/api/auth'
 import Logo from '@/components/Logo.vue'
-import type { LoginForm } from '@/types/auth'
+import type { RegisterForm } from '@/types/auth'
 
 const router = useRouter()
-const authStore = useAuthStore()
-
-// 登录方式
-const loginType = ref<'password' | 'sms'>('password')
 
 // 表单引用
-const passwordFormRef = ref()
-const smsFormRef = ref()
+const registerFormRef = ref()
 
 // 加载状态
-const loginLoading = ref(false)
+const registerLoading = ref(false)
 const sendingSms = ref(false)
 const smsCountdown = ref(0)
 
@@ -231,21 +189,18 @@ const particles = ref<Array<{
   opacity: number
 }>>([])
 
-// 密码登录表单
-const passwordForm = reactive({
-  identifier: '',
-  password: '',
-  rememberMe: false
-})
-
-// 短信登录表单
-const smsForm = reactive({
+// 注册表单
+const registerForm = reactive({
+  username: '',
   phone: '',
   smsCode: '',
-  rememberMe: false
+  email: '',
+  password: '',
+  confirmPassword: '',
+  agreement: false
 })
 
-// 手机号校验规则
+// 手机号校验
 const phoneValidator = (rule: any, value: string, callback: any) => {
   if (!value) {
     callback(new Error('请输入手机号'))
@@ -256,25 +211,74 @@ const phoneValidator = (rule: any, value: string, callback: any) => {
   }
 }
 
-// 密码表单验证规则
-const passwordRules = {
-  identifier: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
-  ]
+// 邮箱校验
+const emailValidator = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    callback(new Error('请输入邮箱'))
+  } else if (!/^[a-zA-Z0-9._-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value)) {
+    callback(new Error('请输入正确的邮箱地址'))
+  } else {
+    callback()
+  }
 }
 
-// 短信表单验证规则
-const smsRules = {
+// 密码校验
+const passwordValidator = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    callback(new Error('请输入密码'))
+  } else if (value.length < 8) {
+    callback(new Error('密码至少8个字符'))
+  } else if (!/^(?=.*[A-Za-z])(?=.*\d)[A-Za-z\d@$!%*#?&]{8,}$/.test(value)) {
+    callback(new Error('密码必须包含字母和数字'))
+  } else {
+    callback()
+  }
+}
+
+// 确认密码校验
+const confirmPasswordValidator = (rule: any, value: string, callback: any) => {
+  if (!value) {
+    callback(new Error('请再次输入密码'))
+  } else if (value !== registerForm.password) {
+    callback(new Error('两次输入的密码不一致'))
+  } else {
+    callback()
+  }
+}
+
+// 协议校验
+const agreementValidator = (rule: any, value: boolean, callback: any) => {
+  if (!value) {
+    callback(new Error('请阅读并同意用户协议和隐私政策'))
+  } else {
+    callback()
+  }
+}
+
+// 表单验证规则
+const registerRules = {
+  username: [
+    { required: true, message: '请输入用户名', trigger: 'blur' },
+    { min: 3, max: 20, message: '用户名长度为3-20个字符', trigger: 'blur' }
+  ],
   phone: [
     { required: true, validator: phoneValidator, trigger: 'blur' }
   ],
   smsCode: [
     { required: true, message: '请输入验证码', trigger: 'blur' },
     { len: 6, message: '验证码为6位数字', trigger: 'blur' }
+  ],
+  email: [
+    { required: true, validator: emailValidator, trigger: 'blur' }
+  ],
+  password: [
+    { required: true, validator: passwordValidator, trigger: 'blur' }
+  ],
+  confirmPassword: [
+    { required: true, validator: confirmPasswordValidator, trigger: 'blur' }
+  ],
+  agreement: [
+    { required: true, validator: agreementValidator, trigger: 'change' }
   ]
 }
 
@@ -285,32 +289,22 @@ const smsButtonText = computed(() => {
   return '获取验证码'
 })
 
-// 切换登录方式
-const switchLoginType = (type: 'password' | 'sms') => {
-  loginType.value = type
-  // 清空表单
-  passwordForm.identifier = ''
-  passwordForm.password = ''
-  smsForm.phone = ''
-  smsForm.smsCode = ''
-}
-
 // 发送短信验证码
 const handleSendSms = async () => {
   try {
     // 验证手机号
-    await smsFormRef.value.validateField('phone')
+    await registerFormRef.value.validateField('phone')
 
     sendingSms.value = true
-    console.log('📨 发送短信验证码...', smsForm.phone)
+    console.log('📨 发送短信验证码...', registerForm.phone)
 
     const response = await authApi.sendSms({
-      phone: smsForm.phone,
-      sms_type: 'login'
+      phone: registerForm.phone,
+      sms_type: 'register'
     })
-    console.log('📨 发送短信验证码结果:', response)
+
     if (response.success) {
-      ElMessage.success('验证码已发送')
+      ElMessage.success('验证码已发送，5分钟内有效')
       // 开始倒计时
       smsCountdown.value = 60
       const timer = setInterval(() => {
@@ -332,59 +326,52 @@ const handleSendSms = async () => {
   }
 }
 
-// 登录处理
-const handleLogin = async () => {
+// 注册处理
+const handleRegister = async () => {
   // 防止重复提交
-  if (loginLoading.value) {
-    console.log('⏭️ 登录请求进行中，跳过重复点击')
+  if (registerLoading.value) {
+    console.log('⏭️ 注册请求进行中，跳过重复点击')
     return
   }
 
   try {
     // 验证表单
-    const formRef = loginType.value === 'password' ? passwordFormRef.value : smsFormRef.value
-    await formRef.validate()
+    await registerFormRef.value.validate()
 
-    loginLoading.value = true
-    console.log('🔐 开始登录流程...', loginType.value)
+    registerLoading.value = true
+    console.log('📝 开始注册流程...')
 
-    // 构造登录请求数据
-    const loginData: LoginForm = loginType.value === 'password'
-      ? {
-          login_type: 'password',
-          identifier: passwordForm.identifier,
-          password: passwordForm.password,
-          remember_me: passwordForm.rememberMe
-        }
-      : {
-          login_type: 'sms',
-          identifier: smsForm.phone,
-          sms_code: smsForm.smsCode,
-          remember_me: smsForm.rememberMe
-        }
+    // 构造注册请求数据
+    const registerData: RegisterForm = {
+      username: registerForm.username,
+      phone: registerForm.phone,
+      sms_code: registerForm.smsCode,
+      email: registerForm.email,
+      password: registerForm.password
+    }
 
-    // 调用登录 API
-    const success = await authStore.login(loginData)
+    // 调用注册 API
+    const response = await authApi.register(registerData)
 
-    if (success) {
-      console.log('✅ 登录成功')
-      ElMessage.success('登录成功')
-
-      // 跳转到重定向路径或仪表板
-      const redirectPath = authStore.getAndClearRedirectPath()
-      console.log('🔄 重定向到:', redirectPath)
-      router.push(redirectPath)
+    if (response.success) {
+      console.log('✅ 注册成功')
+      ElMessage.success('注册成功，请登录')
+      
+      // 跳转到登录页
+      setTimeout(() => {
+        router.push('/login')
+      }, 1500)
     } else {
-      ElMessage.error(loginType.value === 'password' ? '用户名或密码错误' : '手机号或验证码错误')
+      ElMessage.error(response.message || '注册失败')
     }
   } catch (error: any) {
-    console.error('登录失败:', error)
+    console.error('注册失败:', error)
     // 只有在不是表单验证错误时才显示错误消息
     if (error.message && !error.message.includes('validate')) {
-      ElMessage.error('登录失败，请重试')
+      ElMessage.error(error.message || '注册失败，请重试')
     }
   } finally {
-    loginLoading.value = false
+    registerLoading.value = false
   }
 }
 
@@ -404,7 +391,7 @@ onMounted(() => {
 </script>
 
 <style scoped lang="scss">
-.login-page {
+.register-page {
   position: relative;
   min-height: 100vh;
   display: flex;
@@ -416,7 +403,7 @@ onMounted(() => {
 }
 
 // ========== 背景装饰 ==========
-.login-background {
+.register-background {
   position: fixed;
   top: 0;
   left: 0;
@@ -545,15 +532,15 @@ onMounted(() => {
 }
 
 // ========== 主容器 ==========
-.login-container {
+.register-container {
   position: relative;
   z-index: 10;
   width: 100%;
-  max-width: 420px;
+  max-width: 480px;
 }
 
 // ========== Logo 区 ==========
-.login-header {
+.register-header {
   text-align: center;
   margin-bottom: 2rem;
 
@@ -603,8 +590,8 @@ onMounted(() => {
   }
 }
 
-// ========== 登录卡片 ==========
-.login-card {
+// ========== 注册卡片 ==========
+.register-card {
   backdrop-filter: blur(20px);
   background: rgba(30, 41, 59, 0.6);
   border: 1px solid rgba(6, 182, 212, 0.2);
@@ -617,49 +604,8 @@ onMounted(() => {
   }
 }
 
-// ========== 登录方式切换 ==========
-.login-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  padding: 0.5rem;
-  background: rgba(15, 23, 42, 0.5);
-  border-radius: 12px;
-}
-
-.tab-item {
-  flex: 1;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 500;
-  font-size: 0.9rem;
-
-  .tab-icon {
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover {
-    color: rgba(255, 255, 255, 0.8);
-    background: rgba(6, 182, 212, 0.1);
-  }
-
-  &.active {
-    color: white;
-    background: linear-gradient(135deg, #059669 0%, #06b6d4 100%);
-    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
-  }
-}
-
 // ========== 表单样式 ==========
-.login-form {
+.register-form {
   :deep(.el-form-item__label) {
     color: rgba(255, 255, 255, 0.9);
     font-weight: 500;
@@ -692,13 +638,15 @@ onMounted(() => {
   :deep(.el-checkbox__label) {
     color: rgba(255, 255, 255, 0.7);
   }
-}
 
-.form-options {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  width: 100%;
+  :deep(.el-link) {
+    color: #06b6d4;
+    font-weight: 500;
+
+    &:hover {
+      color: #3b82f6;
+    }
+  }
 }
 
 // 短信验证码输入框
@@ -731,8 +679,8 @@ onMounted(() => {
   }
 }
 
-// 登录按钮
-.login-button {
+// 注册按钮
+.register-button {
   width: 100%;
   background: linear-gradient(135deg, #059669 0%, #06b6d4 100%);
   border: none;
@@ -752,7 +700,7 @@ onMounted(() => {
   }
 }
 
-.login-footer-tip {
+.register-footer-tip {
   text-align: center;
   margin-top: 1.5rem;
   padding-top: 1.5rem;
@@ -760,6 +708,16 @@ onMounted(() => {
 
   :deep(.el-text) {
     color: rgba(255, 255, 255, 0.5) !important;
+  }
+
+  a {
+    color: #06b6d4;
+    text-decoration: none;
+    font-weight: 500;
+
+    &:hover {
+      color: #3b82f6;
+    }
   }
 }
 
@@ -779,16 +737,16 @@ onMounted(() => {
 
 // ========== 响应式 ==========
 @media (max-width: 768px) {
-  .login-container {
+  .register-container {
     max-width: 100%;
     padding: 0 1rem;
   }
 
-  .login-card {
+  .register-card {
     padding: 1.5rem;
   }
 
-  .login-header .title {
+  .register-header .title {
     font-size: 2rem;
   }
 

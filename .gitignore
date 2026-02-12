@@ -1,2 +1,34 @@
+# 依赖锁文件
 yarn.lock
-node_modules/
+
+# 本地环境变量
+.env.local
+.env.*.local
+
+# 日志文件
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# 编辑器目录和文件
+.idea
+.vscode
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
+
+# 操作系统文件
+.DS_Store
+Thumbs.db
+
+# 构建产物
+dist
+dist-ssr
+*.local
+
+# 临时文件
+node_modules
+.cache

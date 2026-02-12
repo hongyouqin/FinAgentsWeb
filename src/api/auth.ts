@@ -6,20 +6,28 @@ import type {
   RefreshTokenResponse,
   User,
   UserPermissions,
-  ChangePasswordForm
+  ChangePasswordForm,
+  SendSmsRequest
 } from '@/types/auth'
 
 export const authApi = {
-  // 登录
+  // 登录（支持密码和短信验证码）
   login: (data: LoginForm) =>
     ApiClient.post<LoginResponse>('/api/auth/login', data, {
       skipAuth: true,  // 登录请求不需要认证
       skipAuthError: true  // 跳过 401 错误的自动处理
     }),
 
-  // 注册
+  // 发送短信验证码
+  sendSms: (data: SendSmsRequest) =>
+    ApiClient.post('/api/auth/send-sms', data, {
+      skipAuth: true,
+      skipAuthError: true
+    }),
+
+  // 注册（手机号+短信验证码）
   register: (data: RegisterForm) =>
-    ApiClient.post('/api/auth/register', data, {
+    ApiClient.post('/api/auth/register-by-phone', data, {
       skipAuth: true,  // 注册请求不需要认证
       skipAuthError: true  // 跳过 401 错误的自动处理
     }),

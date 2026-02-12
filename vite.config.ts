@@ -51,10 +51,11 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://localhost:8000',
+        target: 'http://47.108.29.105:8000',  // 后端 FastAPI 服务
         changeOrigin: true,
         secure: false,
-        ws: true  // 🔥 启用 WebSocket 代理支持
+        ws: true,  // 启用 WebSocket 代理支持
+        rewrite: (path) => path.replace(/^\/api/, '/api')  // 保持 /api 前缀
       }
     }
   },

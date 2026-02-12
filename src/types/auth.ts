@@ -50,21 +50,26 @@ export interface UserPreferences {
 
 // 登录表单
 export interface LoginForm {
-  username: string
-  password: string
+  login_type: 'password' | 'sms'
+  identifier: string  // 用户名或手机号
+  password?: string  // 密码登录时必填
+  sms_code?: string  // 短信验证码登录时必填
   remember_me?: boolean
-  captcha?: string
+}
+
+// 发送短信验证码请求
+export interface SendSmsRequest {
+  phone: string
+  sms_type: 'register' | 'reset_password' | 'login'
 }
 
 // 注册表单
 export interface RegisterForm {
   username: string
   email: string
+  phone: string
   password: string
-  confirm_password: string
-  agreement: boolean
-  captcha?: string
-  invitation_code?: string
+  sms_code: string
 }
 
 // 修改密码表单

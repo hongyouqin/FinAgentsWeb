@@ -8,7 +8,8 @@
     >
       <div class="sidebar-header">
         <div class="logo">
-          <img src="/logo.svg" alt="FinAgents" />
+          <Logo :size="32" />
+          
           <span v-show="!appStore.sidebarCollapsed" class="logo-text">
             FinAgents
           </span>
@@ -88,6 +89,7 @@ import UserProfile from '@/components/Layout/UserProfile.vue'
 import Breadcrumb from '@/components/Layout/Breadcrumb.vue'
 import HeaderActions from '@/components/Layout/HeaderActions.vue'
 import AppFooter from '@/components/Layout/AppFooter.vue'
+import Logo from '@/components/Logo.vue'
 import { Expand, Fold } from '@element-plus/icons-vue'
 
 const appStore = useAppStore()
@@ -167,11 +169,6 @@ watch(() => route.fullPath, () => {
       display: flex;
       align-items: center;
       gap: 12px;
-
-      img {
-        width: 32px;
-        height: 32px;
-      }
 
       .logo-text {
         font-size: 18px;

@@ -179,7 +179,7 @@ export const useAuthStore = defineStore('auth', {
       // 具体实现在api/request.ts中
     },
     
-    // 登录
+    // 登录（支持密码和短信验证码）
     async login(loginForm: LoginForm) {
       // 防止重复登录请求
       if (this.loginLoading) {
@@ -189,6 +189,10 @@ export const useAuthStore = defineStore('auth', {
 
       try {
         this.loginLoading = true
+        console.log('🔐 开始登录流程...', {
+          login_type: loginForm.login_type,
+          identifier: loginForm.identifier
+        })
 
         const response = await authApi.login(loginForm)
 

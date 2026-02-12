@@ -19,7 +19,14 @@ NProgress.configure({
 const routes: RouteRecordRaw[] = [
   {
     path: '/',
-    redirect: '/dashboard'
+    name: 'Landing',
+    component: () => import('@/views/Landing/index.vue'),
+    meta: {
+      title: 'FinAgents - AI 驱动的智能股票分析平台',
+      hideInMenu: true,
+      requiresAuth: false,
+      transition: 'fade'
+    }
   },
   // 兼容文档链接：将 /paper/<name>.md 重定向到学习中心文章路由
   {
@@ -349,6 +356,17 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/register',
+    name: 'Register',
+    component: () => import('@/views/Auth/Register.vue'),
+    meta: {
+      title: '注册',
+      hideInMenu: true,
+      transition: 'fade'
+    }
+  },
+
+  {
     path: '/about',
     name: 'About',
     component: () => import('@/views/About/index.vue'),
@@ -445,8 +463,8 @@ router.beforeEach(async (to, from, next) => {
 
 
 
-  // 如果已登录且访问登录页，重定向到仪表板
-  if (authStore.isAuthenticated && to.name === 'Login') {
+  // 如果已登录且访问登录页或首页，重定向到仪表板
+  if (authStore.isAuthenticated && (to.name === 'Login' || to.name === 'Landing')) {
     next('/dashboard')
     return
   }
