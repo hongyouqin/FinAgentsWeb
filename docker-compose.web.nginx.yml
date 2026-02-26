@@ -1,0 +1,39 @@
+version: '3.8'
+
+# FinAgentsWeb Docker Compose配置文件
+services:
+  # Vue 3前端服务
+  frontend:
+    build:
+      context: .
+      dockerfile: Dockerfile.frontend
+      args:
+        - VITE_API_BASE_URL=${VITE_API_BASE_URL:-/api}
+        - NODE_ENV=${NODE_ENV:-production}
+    image: tradingagents-web:latest
+    container_name: tradingagents-web
+    restart: unless-stopped
+    ports:
+      - "8080:80"  # 宿主机8080端口映射到容器80端口
+    environment:
+      TZ: "Asia/Shanghai"
+      # 运行时环境变量（通过构建参数传入，这里只是展示）
+      # 注意：这些环境变量在运行时不会影响构建好的静态文件
+    networks:
+      - tradingagents-network
+    healthcheck:
+      test: ["CMD", "wget", "--quiet", "--tries=1", "--spider", "http://localhost:80"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 10s
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+networks:
+  tradingagents-network:
+    driver: bridge
+    name: tradingagents-network  # 使用固定的网络名称，便于其他服务连接
