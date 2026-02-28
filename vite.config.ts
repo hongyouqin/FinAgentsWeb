@@ -51,7 +51,8 @@ export default defineConfig({
     },
     proxy: {
       '/api': {
-        target: 'http://47.108.29.105:8000',  // 后端 FastAPI 服务
+        target: 'http://127.0.0.1:8000',  // 后端 FastAPI 服务
+        // target: 'http://47.101.161.124',  // 后端 FastAPI 服务
         changeOrigin: true,
         secure: false,
         ws: true,  // 启用 WebSocket 代理支持

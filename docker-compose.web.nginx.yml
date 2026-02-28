@@ -35,5 +35,5 @@ services:
 
 networks:
   tradingagents-network:
-    driver: bridge
-    name: tradingagents-network  # 使用固定的网络名称，便于其他服务连接
+    external: true
+    name: tradingagents-network
