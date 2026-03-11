@@ -240,7 +240,7 @@
             />
             <div class="progress-step">
               <el-icon><Loading /></el-icon>
-              <span>{{ progressInfo.currentStep || '正在初始化...' }}</span>
+              <span>{{ progressInfo.currentStepDescription || '正在初始化...' }}</span>
             </div>
           </div>
         </div>
@@ -705,7 +705,7 @@ const startPollingTaskStatus = () => {
       if (data) {
         progressInfo.value = {
           progress: data.progress || 0,
-          currentStep: data.current_step || data.stage || '处理中...',
+          currentStep: data.current_step_name || data.stage || '处理中...',
           currentStepDescription: data.message || '',
           message: data.message || '',
           elapsedTime: data.elapsed_time || 0,
