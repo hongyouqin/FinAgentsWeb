@@ -653,8 +653,8 @@ const submitAnalysis = async () => {
         include_sentiment: analysisForm.includeSentiment,
         include_risk: analysisForm.includeRisk,
         language: analysisForm.language,
-        quick_analysis_model: 'qwen-turbo',
-        deep_analysis_model: 'qwen-max'
+        quick_analysis_model: 'deepseek-chat',
+        deep_analysis_model: 'deepseek-chat'
       }
     }
 
