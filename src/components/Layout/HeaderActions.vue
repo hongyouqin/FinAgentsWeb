@@ -1,14 +1,14 @@
 <template>
   <div class="header-actions">
     <!-- 主题切换 -->
-    <el-tooltip content="切换主题" placement="bottom">
+    <!-- <el-tooltip content="切换主题" placement="bottom">
       <el-button type="text" @click="toggleTheme" class="action-btn">
         <el-icon>
           <Sunny v-if="appStore.isDarkTheme" />
           <Moon v-else />
         </el-icon>
       </el-button>
-    </el-tooltip>
+    </el-tooltip> -->
 
     <!-- 全屏切换 -->
     <el-tooltip content="全屏" placement="bottom">
@@ -139,28 +139,110 @@ function showHelp() {
 .header-actions {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 
   .action-btn {
     width: 36px;
     height: 36px;
-    border-radius: 50%;
+    border-radius: 10px;
     display: flex;
     align-items: center;
     justify-content: center;
+    color: #64748b;
+    transition: all 0.2s ease;
+    padding: 0;
 
-    .el-icon { font-size: 18px; }
+    &:hover {
+      background: rgba(6, 182, 212, 0.09) !important;
+      color: #06b6d4;
+    }
+
+    &:focus {
+      background: transparent;
+    }
+
+    .el-icon {
+      font-size: 18px;
+    }
+  }
+
+  // 强制覆盖 el-badge 数字气泡配色
+  :deep(.el-badge__content) {
+    background: linear-gradient(135deg, #059669, #06b6d4);
+    border-color: white;
   }
 }
 
-/* 通知抽屉样式 */
-.notif-toolbar { display: flex; align-items: center; justify-content: space-between; margin-bottom: 8px; }
-.notif-list { display: flex; flex-direction: column; gap: 12px; }
-.notif-item { padding: 10px 8px; border-radius: 8px; border: 1px solid var(--el-border-color-lighter); }
-.notif-item.unread { background: var(--el-fill-color-light); }
-.notif-item .row { display: flex; align-items: center; justify-content: space-between; font-size: 12px; color: var(--el-text-color-secondary); margin-bottom: 4px; }
-.notif-item .title { font-weight: 600; cursor: pointer; margin-bottom: 4px; }
-.notif-item .title:hover { text-decoration: underline; }
-.notif-item .content { font-size: 12px; color: var(--el-text-color-regular); }
-.notif-item .ops { display: flex; gap: 8px; margin-top: 6px; }
+// ─── 通知抽屉 ─────────────────────────────────
+.notif-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 12px;
+  padding-bottom: 10px;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.notif-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.notif-item {
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  transition: all 0.2s ease;
+
+  &:hover {
+    border-color: #a5f3fc;
+    box-shadow: 0 2px 10px rgba(6, 182, 212, 0.08);
+  }
+
+  &.unread {
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.04), rgba(6, 182, 212, 0.06));
+    border-color: #cffafe;
+  }
+
+  .row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+
+    .time {
+      font-size: 11px;
+      color: #94a3b8;
+    }
+  }
+
+  .title {
+    font-size: 13px;
+    font-weight: 600;
+    color: #1e293b;
+    cursor: pointer;
+    margin-bottom: 4px;
+    line-height: 1.4;
+    transition: color 0.15s;
+
+    &:hover {
+      color: #06b6d4;
+    }
+  }
+
+  .content {
+    font-size: 12px;
+    color: #64748b;
+    margin-bottom: 6px;
+    line-height: 1.4;
+  }
+
+  .ops {
+    display: flex;
+    gap: 6px;
+    margin-top: 8px;
+  }
+}
 </style>

@@ -178,12 +178,18 @@
         <div class="login-footer-tip">
           <el-text type="info" size="small">
             <template v-if="loginType === 'password'">
-              没有账号？
-              <router-link to="/register">立即注册</router-link>
+               <div class="register-link">没有账号？
+                <el-link href="/register" type="primary" target="_blank">立即注册</el-link>
+              </div>
+              <!-- 没有账号？
+              <router-link to="/register">立即注册</router-link> -->
             </template>
             <template v-else>
-              没有账号？
-              <router-link to="/register">立即注册</router-link>
+              <div class="register-link">没有账号？
+                <el-link href="/register" type="primary" target="_blank">立即注册</el-link>
+              </div>
+              <!-- 没有账号？
+              <router-link to="/register">立即注册</router-link> -->
             </template>
           </el-text>
         </div>
@@ -798,5 +804,12 @@ onMounted(() => {
       font-size: 0.875rem;
     }
   }
+}
+.register-link {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 0.2rem;
+  font-size: 0.875rem;
 }
 </style>

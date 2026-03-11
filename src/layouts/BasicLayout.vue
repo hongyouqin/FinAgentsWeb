@@ -233,7 +233,7 @@ watch(() => route.fullPath, () => {
 
 .main-content {
   flex: 1;
-  padding: 24px;
+  // padding: 24px;
   min-height: calc(100vh - 60px - 60px); // 减去header和footer高度
 
   .content-wrapper {
@@ -243,7 +243,7 @@ watch(() => route.fullPath, () => {
 }
 
 .footer {
-  height: 60px;
+  // height: 60px;
   background-color: var(--el-bg-color);
   border-top: 1px solid var(--el-border-color-light);
   display: flex;
@@ -266,7 +266,7 @@ watch(() => route.fullPath, () => {
   }
 
   .main-content {
-    padding: 16px;
+    padding: 0px;
   }
 
   .header {

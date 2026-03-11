@@ -1,19 +1,35 @@
 <template>
   <div class="settings">
-    <!-- 页面标题 -->
-    <div class="page-header">
-      <h1 class="page-title">
-        <el-icon><Setting /></el-icon>
-        {{ pageTitle }}
-      </h1>
-      <p class="page-description">
-        {{ pageDescription }}
-      </p>
+    <!-- Hero Section -->
+    <div class="hero-section">
+      <div class="hero-bg">
+        <div class="particles-container">
+          <div
+            v-for="(p, i) in particles"
+            :key="i"
+            class="particle"
+            :style="{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.size}px`, height: `${p.size}px`, opacity: p.opacity }"
+          />
+        </div>
+        <div class="grid-overlay" />
+        <div class="scan-line" />
+        <div class="glow-effect glow-1" />
+        <div class="glow-effect glow-2" />
+      </div>
+      <div class="hero-content">
+        <div class="hero-badge">
+          <el-icon><Setting /></el-icon>
+          <span>系统设置</span>
+        </div>
+        <h1 class="hero-title">{{ pageTitle }}</h1>
+        <p class="hero-subtitle">{{ pageDescription }}</p>
+      </div>
     </div>
 
+    <div class="settings-main">
     <el-row :gutter="24">
       <!-- 左侧：设置菜单 -->
-      <el-col :span="6">
+      <el-col :xs="24" :md="6">
         <el-card class="settings-menu" shadow="never">
           <el-menu
             :default-active="activeTab"
@@ -26,10 +42,10 @@
                 <el-icon><User /></el-icon>
                 <span>通用设置</span>
               </el-menu-item>
-              <el-menu-item index="appearance">
+              <!-- <el-menu-item index="appearance">
                 <el-icon><Brush /></el-icon>
                 <span>外观设置</span>
-              </el-menu-item>
+              </el-menu-item> -->
               <el-menu-item index="analysis">
                 <el-icon><TrendCharts /></el-icon>
                 <span>分析偏好</span>
@@ -80,7 +96,7 @@
       </el-col>
 
       <!-- 右侧：设置内容 -->
-      <el-col :span="18">
+      <el-col :xs="24" :md="18">
         <!-- 通用设置 -->
         <el-card v-show="activeTab === 'general'" class="settings-content" shadow="never">
           <template #header>
@@ -182,7 +198,7 @@
                 <el-checkbox label="市场分析师">市场分析师</el-checkbox>
                 <el-checkbox label="基本面分析师">基本面分析师</el-checkbox>
                 <el-checkbox label="新闻分析师">新闻分析师</el-checkbox>
-                <el-checkbox label="社媒分析师">社媒分析师</el-checkbox>
+                <!-- <el-checkbox label="社媒分析师">社媒分析师</el-checkbox> -->
               </el-checkbox-group>
             </el-form-item>
 
@@ -380,6 +396,7 @@
 
       </el-col>
     </el-row>
+    </div><!-- /settings-main -->
 
     <!-- 修改密码对话框 -->
     <el-dialog
@@ -487,6 +504,17 @@ const pageDescription = computed(() => {
       return '个性化配置和系统管理'
   }
 })
+
+// 粒子背景
+const particles = ref<Array<{ x: number; y: number; size: number; opacity: number }>>([])
+const initParticles = () => {
+  particles.value = Array.from({ length: 22 }, () => ({
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 3 + 1,
+    opacity: Math.random() * 0.5 + 0.15
+  }))
+}
 
 // 响应式数据
 const activeTab = ref('general')
@@ -781,7 +809,8 @@ const handleChangePassword = async () => {
 
 // 生命周期
 onMounted(() => {
-  // 从store加载设置
+  initParticles()
+  // 从 store 加载设置
   appearanceSettings.value.theme = appStore.theme
   appearanceSettings.value.sidebarWidth = appStore.sidebarWidth
   
@@ -793,64 +822,297 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+@keyframes grid-move {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+@keyframes scan-move {
+  0% { top: -2px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
 .settings {
-  .page-header {
-    margin-bottom: 24px;
+  min-height: 100vh;
+  background: #f0f9ff;
+  padding-bottom: 48px;
+}
 
-    .page-title {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      font-size: 24px;
-      font-weight: 600;
-      color: var(--el-text-color-primary);
-      margin: 0 0 8px 0;
+// Hero Section
+.hero-section {
+  position: relative;
+  padding: 40px 24px 64px;
+  background: radial-gradient(ellipse at top, #164e63 0%, #0f172a 55%, #020617 100%);
+  overflow: hidden;
+
+  &::after {
+    content: '';
+    position: absolute;
+    bottom: -1px;
+    left: 0;
+    right: 0;
+    height: 48px;
+    background: #f0f9ff;
+    clip-path: ellipse(55% 100% at 50% 100%);
+    z-index: 3;
+  }
+}
+
+.hero-bg {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+}
+
+.particles-container {
+  position: absolute;
+  inset: 0;
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.grid-overlay {
+  position: absolute;
+  inset: -50px;
+  background-image:
+    linear-gradient(rgba(6, 182, 212, 0.08) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(6, 182, 212, 0.08) 1px, transparent 1px);
+  background-size: 50px 50px;
+  animation: grid-move 20s linear infinite;
+}
+
+.scan-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.6), transparent);
+  animation: scan-move 8s ease-in-out infinite;
+  z-index: 1;
+}
+
+.glow-effect {
+  position: absolute;
+  border-radius: 50%;
+  filter: blur(60px);
+  animation: glow-pulse 4s ease-in-out infinite;
+  pointer-events: none;
+
+  &.glow-1 {
+    width: 400px;
+    height: 400px;
+    background: rgba(6, 182, 212, 0.15);
+    top: -100px;
+    left: -100px;
+    animation-delay: 0s;
+  }
+
+  &.glow-2 {
+    width: 350px;
+    height: 350px;
+    background: rgba(59, 130, 246, 0.12);
+    bottom: -80px;
+    right: -80px;
+    animation-delay: 2s;
+  }
+}
+
+.hero-content {
+  position: relative;
+  z-index: 2;
+  text-align: center;
+}
+
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 18px;
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(10px);
+  border-radius: 50px;
+  color: white;
+  font-size: 14px;
+  font-weight: 500;
+  margin-bottom: 16px;
+  border: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-title {
+  font-size: 34px;
+  font-weight: 700;
+  color: white;
+  margin: 0 0 10px;
+  line-height: 1.2;
+}
+
+.hero-subtitle {
+  font-size: 15px;
+  color: rgba(255, 255, 255, 0.75);
+  margin: 0;
+}
+
+// 设置主体
+.settings-main {
+  max-width: 1280px;
+  margin: 0 auto;
+  padding: 32px 24px 0;
+}
+
+// 左侧菜单卡片
+.settings-menu {
+  border-radius: 16px !important;
+  border: 1px solid #e0f2fe !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06) !important;
+  margin-bottom: 24px;
+
+  :deep(.el-card__body) {
+    padding: 10px;
+  }
+
+  .settings-nav {
+    border: none;
+
+    :deep(.el-menu-item) {
+      border-radius: 10px;
+      margin-bottom: 2px;
+      height: 44px;
+      line-height: 44px;
+      font-size: 14px;
+      color: #475569;
+      transition: all 0.2s ease;
+      position: relative;
+
+      &:hover {
+        background: #f0f9ff;
+        color: #06b6d4;
+      }
+
+      &.is-active {
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.08), rgba(6, 182, 212, 0.10));
+        color: #059669;
+        font-weight: 600;
+
+        &::before {
+          content: '';
+          position: absolute;
+          left: 0;
+          top: 50%;
+          transform: translateY(-50%);
+          width: 3px;
+          height: 55%;
+          background: linear-gradient(180deg, #059669, #06b6d4);
+          border-radius: 0 2px 2px 0;
+        }
+      }
     }
+  }
+}
 
-    .page-description {
-      color: var(--el-text-color-regular);
+// 右侧内容卡片
+.settings-content {
+  border-radius: 16px !important;
+  border: 1px solid #e0f2fe !important;
+  box-shadow: 0 2px 16px rgba(0, 0, 0, 0.06) !important;
+  min-height: 500px;
+  margin-bottom: 24px;
+
+  :deep(.el-card__header) {
+    border-bottom: 1px solid #f1f5f9;
+    padding: 16px 20px;
+    background: linear-gradient(135deg, rgba(5, 150, 105, 0.04), rgba(6, 182, 212, 0.04));
+    border-radius: 16px 16px 0 0;
+
+    h3 {
       margin: 0;
+      font-size: 16px;
+      font-weight: 600;
+      color: #1e293b;
     }
   }
 
+  :deep(.el-card__body) {
+    padding: 24px;
+  }
+
+  .setting-description {
+    margin-left: 8px;
+    font-size: 12px;
+    color: var(--el-text-color-placeholder);
+  }
+}
+
+// 响应式
+@media (max-width: 768px) {
+  .hero-section {
+    padding: 28px 16px 52px;
+  }
+
+  .hero-title {
+    font-size: 26px;
+  }
+
+  .hero-subtitle {
+    font-size: 14px;
+  }
+
+  .settings-main {
+    padding: 16px 12px 0;
+  }
+
   .settings-menu {
+    margin-bottom: 16px;
+
+    :deep(.el-card__body) {
+      padding: 6px;
+    }
+
     .settings-nav {
-      border: none;
+      :deep(.el-menu-item) {
+        height: 40px;
+        line-height: 40px;
+        font-size: 13px;
+      }
     }
   }
 
   .settings-content {
-    min-height: 500px;
+    :deep(.el-card__body) {
+      padding: 16px;
+    }
+  }
+}
 
-    .setting-description {
-      margin-left: 8px;
-      font-size: 12px;
-      color: var(--el-text-color-placeholder);
+@media (max-width: 480px) {
+  .hero-title {
+    font-size: 22px;
+  }
+
+  .settings-content {
+    :deep(.el-form-item) {
+      flex-wrap: wrap;
     }
 
-    .about-content {
-      .system-info,
-      .system-status,
-      .links {
-        margin-bottom: 32px;
+    :deep(.el-form-item__label) {
+      width: auto !important;
+      padding-bottom: 4px;
+    }
 
-        h4 {
-          margin: 0 0 16px 0;
-          color: var(--el-text-color-primary);
-        }
-
-        p {
-          margin: 8px 0;
-          color: var(--el-text-color-regular);
-        }
-      }
-
-      .links {
-        .el-link {
-          margin-right: 16px;
-          margin-bottom: 8px;
-        }
-      }
+    :deep(.el-form-item__content) {
+      margin-left: 0 !important;
     }
   }
 }

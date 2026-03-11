@@ -439,8 +439,8 @@ export const useAuthStore = defineStore('auth', {
     
     // 获取并清除重定向路径
     getAndClearRedirectPath(): string {
-      const path = this.redirectPath || '/dashboard'
-      this.redirectPath = '/dashboard'
+      const path = this.redirectPath || '/analysis/single'
+      this.redirectPath = '/analysis/single'
       return path
     },
     

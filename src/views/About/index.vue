@@ -2,6 +2,21 @@
   <div class="about">
     <!-- Hero Section -->
     <div class="hero-section">
+      <!-- 暗色科技感背景层 -->
+      <div class="hero-bg">
+        <div class="particles-container">
+          <div
+            v-for="(p, i) in particles"
+            :key="i"
+            class="particle"
+            :style="{ left: `${p.x}%`, top: `${p.y}%`, width: `${p.size}px`, height: `${p.size}px`, opacity: p.opacity }"
+          />
+        </div>
+        <div class="grid-overlay" />
+        <div class="scan-line" />
+        <div class="glow-effect glow-1" />
+        <div class="glow-effect glow-2" />
+      </div>
       <div class="hero-content">
         <div class="hero-text">
           <h1 class="hero-title">
@@ -430,7 +445,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import {
   TrendCharts,
@@ -450,6 +465,21 @@ import {
 const router = useRouter()
 const buildTime = ref(new Date().toLocaleString('zh-CN'))
 
+// 粒子背景
+const particles = ref<Array<{ x: number; y: number; size: number; opacity: number }>>([])
+const initParticles = () => {
+  particles.value = Array.from({ length: 25 }, () => ({
+    x: Math.random() * 100,
+    y: Math.random() * 100,
+    size: Math.random() * 3 + 1,
+    opacity: Math.random() * 0.5 + 0.15
+  }))
+}
+
+onMounted(() => {
+  initParticles()
+})
+
 const goToAnalysis = () => {
   router.push('/analysis/single')
 }
@@ -460,6 +490,23 @@ const viewDocumentation = () => {
 </script>
 
 <style lang="scss" scoped>
+@keyframes grid-move {
+  0% { transform: translate(0, 0); }
+  100% { transform: translate(50px, 50px); }
+}
+
+@keyframes scan-move {
+  0% { top: -2px; opacity: 0; }
+  10% { opacity: 1; }
+  90% { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+@keyframes glow-pulse {
+  0%, 100% { opacity: 0.6; transform: scale(1); }
+  50% { opacity: 1; transform: scale(1.15); }
+}
+
 .about {
   max-width: 1200px;
   margin: 0 auto;
@@ -467,23 +514,77 @@ const viewDocumentation = () => {
 
   // Hero Section
   .hero-section {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-    border-radius: 16px;
+    background: radial-gradient(ellipse at top, #164e63 0%, #0f172a 55%, #020617 100%);
+    border-radius: 20px;
     padding: 60px 40px;
     margin-bottom: 48px;
     color: white;
     position: relative;
     overflow: hidden;
 
-    &::before {
-      content: '';
+    .hero-bg {
       position: absolute;
-      top: 0;
+      inset: 0;
+      z-index: 0;
+      overflow: hidden;
+    }
+
+    .particles-container {
+      position: absolute;
+      inset: 0;
+    }
+
+    .particle {
+      position: absolute;
+      border-radius: 50%;
+      background: radial-gradient(circle, #06b6d4 0%, transparent 70%);
+      pointer-events: none;
+    }
+
+    .grid-overlay {
+      position: absolute;
+      inset: -50px;
+      background-image:
+        linear-gradient(rgba(6, 182, 212, 0.08) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(6, 182, 212, 0.08) 1px, transparent 1px);
+      background-size: 50px 50px;
+      animation: grid-move 20s linear infinite;
+    }
+
+    .scan-line {
+      position: absolute;
       left: 0;
       right: 0;
-      bottom: 0;
-      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="25" cy="25" r="1" fill="white" opacity="0.1"/><circle cx="75" cy="75" r="1" fill="white" opacity="0.1"/><circle cx="50" cy="10" r="0.5" fill="white" opacity="0.1"/><circle cx="10" cy="60" r="0.5" fill="white" opacity="0.1"/><circle cx="90" cy="40" r="0.5" fill="white" opacity="0.1"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>');
+      height: 2px;
+      background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.6), transparent);
+      animation: scan-move 8s ease-in-out infinite;
+      z-index: 1;
+    }
+
+    .glow-effect {
+      position: absolute;
+      border-radius: 50%;
+      filter: blur(60px);
+      animation: glow-pulse 4s ease-in-out infinite;
       pointer-events: none;
+
+      &.glow-1 {
+        width: 400px;
+        height: 400px;
+        background: rgba(6, 182, 212, 0.15);
+        top: -100px;
+        left: -100px;
+        animation-delay: 0s;
+      }
+
+      &.glow-2 {
+        width: 350px;
+        height: 350px;
+        background: rgba(59, 130, 246, 0.12);
+        bottom: -80px;
+        right: -80px;
+        animation-delay: 2s;
+      }
     }
 
     .hero-content {
@@ -491,7 +592,7 @@ const viewDocumentation = () => {
       align-items: center;
       gap: 60px;
       position: relative;
-      z-index: 1;
+      z-index: 2;
     }
 
     .hero-text {
@@ -573,7 +674,7 @@ const viewDocumentation = () => {
 
           &.el-button--primary {
             background: white;
-            color: #667eea;
+            color: #06b6d4;
             border: none;
 
             &:hover {
@@ -701,7 +802,7 @@ const viewDocumentation = () => {
             color: white;
 
             &.primary {
-              background: linear-gradient(135deg, var(--el-color-primary), #667eea);
+              background: linear-gradient(135deg, #059669, #06b6d4);
             }
 
             &.success {
@@ -774,7 +875,7 @@ const viewDocumentation = () => {
           left: 0;
           right: 0;
           height: 4px;
-          background: linear-gradient(90deg, #667eea, #764ba2);
+          background: linear-gradient(90deg, #059669, #06b6d4);
         }
 
         .origin-header {
@@ -789,7 +890,7 @@ const viewDocumentation = () => {
             width: 64px;
             height: 64px;
             border-radius: 16px;
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #059669, #06b6d4);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -823,7 +924,7 @@ const viewDocumentation = () => {
               }
 
               &:hover {
-                color: #667eea;
+                color: #06b6d4;
                 text-decoration: underline;
               }
             }
@@ -877,9 +978,9 @@ const viewDocumentation = () => {
             gap: 8px;
             margin-top: 32px;
             padding: 20px;
-            background: linear-gradient(135deg, rgba(102, 126, 234, 0.1), rgba(118, 75, 162, 0.1));
+            background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(59, 130, 246, 0.08));
             border-radius: 12px;
-            border-left: 4px solid #667eea;
+            border-left: 4px solid #06b6d4;
             font-size: 15px;
             color: var(--el-text-color-regular);
 
@@ -995,7 +1096,7 @@ const viewDocumentation = () => {
       gap: 32px;
 
       .version-card {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: linear-gradient(135deg, #059669 0%, #06b6d4 100%);
         border-radius: 16px;
         padding: 32px;
         color: white;
@@ -1151,7 +1252,7 @@ const viewDocumentation = () => {
           }
 
           &.docs {
-            background: linear-gradient(135deg, #667eea, #764ba2);
+            background: linear-gradient(135deg, #059669, #06b6d4);
           }
         }
 

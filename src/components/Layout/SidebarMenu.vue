@@ -6,33 +6,46 @@
     router
     class="sidebar-menu"
   >
-    <el-menu-item index="/dashboard">
+    <el-menu-item index="/analysis/single">
+      <el-icon><Odometer /></el-icon>
+      <template #title>首页</template>
+    </el-menu-item>
+    <!-- <el-menu-item index="/dashboard">
       <el-icon><Odometer /></el-icon>
       <template #title>仪表板</template>
-    </el-menu-item>
-
-    <el-menu-item index="/learning">
-      <el-icon><Reading /></el-icon>
-      <template #title>学习中心</template>
-    </el-menu-item>
-
-    <el-sub-menu index="/analysis">
-      <template #title>
-        <el-icon><TrendCharts /></el-icon>
-        <span>股票分析</span>
-      </template>
-      <el-menu-item index="/analysis/single">单股分析</el-menu-item>
-      <el-menu-item index="/analysis/batch">批量分析</el-menu-item>
-      <!-- 新增：将分析报告作为股票分析的子菜单 -->
-      <el-menu-item index="/reports">分析报告</el-menu-item>
-    </el-sub-menu>
-
+    </el-menu-item> -->
     <el-menu-item index="/tasks">
       <el-icon><List /></el-icon>
       <template #title>任务中心</template>
     </el-menu-item>
+    <el-menu-item index="/reports">
+      <el-icon><TrendCharts /></el-icon>
+      <template #title>分析记录</template>
+    </el-menu-item>
+    <el-menu-item index="/recharge">
+      <el-icon><Coin /></el-icon>
+      <template #title>积分充值</template>
+    </el-menu-item>
+    <!-- <el-menu-item index="/learning">
+      <el-icon><Reading /></el-icon>
+      <template #title>学习中心</template>
+    </el-menu-item> -->
+    
 
-    <el-menu-item index="/screening">
+    <!-- <el-sub-menu index="/analysis">
+      <template #title>
+        <el-icon><TrendCharts /></el-icon>
+        <span>分析记录</span>
+      </template> -->
+      <!-- <el-menu-item index="/analysis/single">单股分析</el-menu-item> -->
+      <!-- <el-menu-item index="/analysis/batch">批量分析</el-menu-item> -->
+      <!-- 新增：将分析报告作为股票分析的子菜单 -->
+      <!-- <el-menu-item index="/reports">分析报告</el-menu-item>
+    </el-sub-menu> -->
+
+    
+
+    <!-- <el-menu-item index="/screening">
       <el-icon><Search /></el-icon>
       <template #title>股票筛选</template>
     </el-menu-item>
@@ -45,7 +58,7 @@
     <el-menu-item index="/paper">
       <el-icon><CreditCard /></el-icon>
       <template #title>模拟交易</template>
-    </el-menu-item>
+    </el-menu-item> -->
 
 
     <!-- 分析报告已移至“股票分析”子菜单，保留注释便于追踪 -->
@@ -66,21 +79,21 @@
       <el-sub-menu index="/settings-personal">
         <template #title>个人设置</template>
         <el-menu-item index="/settings">通用设置</el-menu-item>
-        <el-menu-item index="/settings?tab=appearance">外观设置</el-menu-item>
+        <!-- <el-menu-item index="/settings?tab=appearance">外观设置</el-menu-item>
         <el-menu-item index="/settings?tab=analysis">分析偏好</el-menu-item>
         <el-menu-item index="/settings?tab=notifications">通知设置</el-menu-item>
-        <el-menu-item index="/settings?tab=security">安全设置</el-menu-item>
+        <el-menu-item index="/settings?tab=security">安全设置</el-menu-item> -->
       </el-sub-menu>
 
       <!-- 系统配置 -->
-      <el-sub-menu index="/settings-config">
+      <!-- <el-sub-menu index="/settings-config">
         <template #title>系统配置</template>
         <el-menu-item index="/settings/config">配置管理</el-menu-item>
         <el-menu-item index="/settings/cache">缓存管理</el-menu-item>
-      </el-sub-menu>
+      </el-sub-menu> -->
 
       <!-- 系统管理 -->
-      <el-sub-menu index="/settings-admin">
+      <!-- <el-sub-menu index="/settings-admin">
         <template #title>系统管理</template>
         <el-menu-item index="/settings/database">数据库管理</el-menu-item>
         <el-menu-item index="/settings/logs">操作日志</el-menu-item>
@@ -88,7 +101,7 @@
         <el-menu-item index="/settings/sync">多数据源同步</el-menu-item>
         <el-menu-item index="/settings/scheduler">定时任务</el-menu-item>
         <el-menu-item index="/settings/usage">使用统计</el-menu-item>
-      </el-sub-menu>
+      </el-sub-menu> -->
     </el-sub-menu>
 
     <el-menu-item index="/about">
@@ -112,7 +125,8 @@ import {
   /* Document 移除：不再使用顶级分析报告菜单图标 */
   Setting,
   InfoFilled,
-  CreditCard
+  CreditCard,
+  Coin
 } from '@element-plus/icons-vue'
 
 const route = useRoute()
@@ -132,9 +146,45 @@ const activeMenu = computed(() => route.path)
     line-height: 48px;
   }
 
+  // Hover 配色
+  :deep(.el-menu-item:not(.is-active):hover),
+  :deep(.el-sub-menu__title:hover) {
+    background: rgba(6, 182, 212, 0.07) !important;
+    color: #0891b2;
+  }
+
+  // 激活状态配色
   :deep(.el-menu-item.is-active) {
-    background-color: var(--el-color-primary-light-9);
-    color: var(--el-color-primary);
+    background: linear-gradient(90deg, rgba(5, 150, 105, 0.09) 0%, rgba(6, 182, 212, 0.10) 100%) !important;
+    color: #059669 !important;
+    font-weight: 600;
+    position: relative;
+
+    // 左侧青绿指示条
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 20%;
+      height: 60%;
+      width: 3px;
+      background: linear-gradient(180deg, #059669, #06b6d4);
+      border-radius: 0 3px 3px 0;
+    }
+
+    .el-icon {
+      color: #059669 !important;
+    }
+  }
+
+  // 激活子菜单标题配色
+  :deep(.el-sub-menu.is-active > .el-sub-menu__title) {
+    color: #059669 !important;
+    font-weight: 600;
+
+    .el-icon {
+      color: #059669 !important;
+    }
   }
 }
 </style>

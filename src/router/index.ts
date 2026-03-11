@@ -66,6 +66,7 @@ const routes: RouteRecordRaw[] = [
       {
         path: 'single',
         name: 'SingleAnalysis',
+        meta: { title: '首页' },
         component: () => import('@/views/Analysis/SingleAnalysis.vue')
       },
       {
@@ -378,6 +379,28 @@ const routes: RouteRecordRaw[] = [
     }
   },
   {
+    path: '/recharge',
+    name: 'Recharge',
+    component: () => import('@/layouts/BasicLayout.vue'),
+    meta: {
+      title: '积分充值',
+      icon: 'Coin',
+      requiresAuth: true,
+      transition: 'fade'
+    },
+    children: [
+      {
+        path: '',
+        name: 'RechargeHome',
+        component: () => import('@/views/Recharge/index.vue'),
+        meta: {
+          title: '积分充值',
+          requiresAuth: true
+        }
+      }
+    ]
+  },
+  {
     path: '/paper',
     name: 'PaperTrading',
     component: () => import('@/layouts/BasicLayout.vue'),
@@ -465,7 +488,7 @@ router.beforeEach(async (to, from, next) => {
 
   // 如果已登录且访问登录页或首页，重定向到仪表板
   if (authStore.isAuthenticated && (to.name === 'Login' || to.name === 'Landing')) {
-    next('/dashboard')
+    next('/analysis/single')
     return
   }
 

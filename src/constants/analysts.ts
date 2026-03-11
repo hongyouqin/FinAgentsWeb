@@ -29,12 +29,12 @@ export const ANALYSTS: Analyst[] = [
     description: '分析相关新闻、公告和市场事件的影响',
     icon: 'Document'
   },
-  {
-    id: 'social',
-    name: '社媒分析师',
-    description: '分析社交媒体情绪、投资者心理和舆论导向',
-    icon: 'ChatDotRound'
-  }
+  // {
+  //   id: 'social',
+  //   name: '社媒分析师',
+  //   description: '分析社交媒体情绪、投资者心理和舆论导向',
+  //   icon: 'ChatDotRound'
+  // }
 ]
 
 // 分析师名称列表（用于表单选项）
