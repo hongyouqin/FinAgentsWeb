@@ -706,13 +706,13 @@ const startPollingTaskStatus = () => {
         progressInfo.value = {
           progress: data.progress || 0,
           currentStep: data.current_step_name || data.stage || '处理中...',
-          currentStepDescription: data.message || '',
+          currentStepDescription: data.current_step_description || '',
           message: data.message || '',
           elapsedTime: data.elapsed_time || 0,
           remainingTime: data.estimated_remaining || 0,
           totalTime: (data.elapsed_time || 0) + (data.estimated_remaining || 0)
         }
-
+ 
         if (data.status === 'completed') {
           analysisStatus.value = 'completed'
           showResults.value = true
