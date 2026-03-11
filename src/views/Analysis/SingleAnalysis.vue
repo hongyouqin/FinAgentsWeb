@@ -248,7 +248,7 @@
 
       <!-- 信息卡片区域 - 仅在未显示结果时展示 -->
       <transition name="fade">
-        <div v-if="!showResults && analysisStatus === 'idle'" class="info-section">
+        <div class="info-section">
           <div class="info-grid">
             <!-- 最近分析 -->
             <div class="info-card recent-analyses">
