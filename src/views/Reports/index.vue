@@ -146,19 +146,23 @@
               </template>
             </el-table-column>
 
-            <el-table-column label="操作" width="180" fixed="right">
+            <el-table-column label="操作" width="240" fixed="right">
               <template #default="{ row }">
                 <div class="action-cell">
-                  <el-button type="primary" size="small" text @click="viewReport(row)">
+                  <el-button type="primary" size="small" text @click="viewAnalysisReport(row)">
                     <el-icon><View /></el-icon>
                     查看
+                  </el-button>
+                  <el-button type="primary" size="small" text @click="viewReport(row)"  style="margin-left: 0px;">
+                    <el-icon><el-icon-tickets /></el-icon>
+                    报告
                   </el-button>
                   <el-dropdown
                     v-if="row.status === 'completed'"
                     trigger="click"
                     @command="(format) => downloadReport(row, format)"
                   >
-                    <el-button type="primary" size="small" text>
+                    <el-button type="primary" size="small" text  style="margin-left: 0px;">
                       <el-icon><Download /></el-icon>
                       下载
                     </el-button>
@@ -206,10 +210,15 @@
               {{ formatTime(row.created_at) }}
             </div>
             <div class="card-footer">
-              <el-button type="primary" size="small" @click="viewReport(row)">
+              <el-button type="primary" size="small" @click="viewAnalysisReport(row)">
                 <el-icon><View /></el-icon>
                 查看
               </el-button>
+              <el-button type="primary" size="small"  @click="viewReport(row)" style="margin-left: 0px;">
+                <el-icon><el-icon-tickets /></el-icon>
+                报告
+              </el-button>
+              
               <el-dropdown
                 v-if="row.status === 'completed'"
                 trigger="click"
@@ -348,6 +357,19 @@ const refreshReports = () => fetchReports()
 
 const viewReport = (report: any) => {
   router.push(`/reports/view/${report.id}`)
+}
+
+const viewAnalysisReport = (report: any) => {
+  const id = report?.task_id || report?.analysis_id || report?.id
+  if (!id) return ElMessage.warning('未找到报告ID')
+  router.push({
+    name: 'AnalysisReport',
+    params: { id },
+    query: {
+      symbol: report.stock_code || '',
+      date: report.created_at ? report.created_at.slice(0, 10) : (report.analysis_date || '')
+    }
+  })
 }
 
 const downloadReport = async (report: any, format: string = 'markdown') => {

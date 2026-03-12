@@ -74,6 +74,16 @@ const routes: RouteRecordRaw[] = [
         name: 'BatchAnalysis',
         component: () => import('@/views/Analysis/BatchAnalysis.vue')
       },
+      {
+        path: 'report/:id',
+        name: 'AnalysisReport',
+        component: () => import('@/views/Analysis/AnalysisReport.vue'),
+        meta: {
+          title: '分析报告',
+          requiresAuth: true,
+          hideInMenu: true
+        }
+      },
 
     ]
   },

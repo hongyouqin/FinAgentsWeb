@@ -114,7 +114,7 @@
         <div class="metrics-content">
           <el-row :gutter="24">
             <!-- 分析参考 -->
-            <el-col :span="8">
+            <el-col :xs="24" :sm="8">
               <div class="metric-item">
                 <div class="metric-label">
                   <el-icon><TrendCharts /></el-icon>
@@ -129,7 +129,7 @@
             </el-col>
 
             <!-- 风险评估 -->
-            <el-col :span="8">
+            <el-col :xs="24" :sm="8">
               <div class="metric-item risk-item">
                 <div class="metric-label">
                   <el-icon><Warning /></el-icon>
@@ -157,7 +157,7 @@
             </el-col>
 
             <!-- 模型置信度 -->
-            <el-col :span="8">
+            <el-col :xs="24" :sm="8">
               <div class="metric-item confidence-item">
                 <div class="metric-label">
                   <el-icon><DataAnalysis /></el-icon>
@@ -1258,6 +1258,126 @@ onMounted(() => {
 
   .error-container {
     padding: 48px 24px;
+  }
+}
+
+// ========== 移动端适配 ==========
+@media (max-width: 768px) {
+  .report-detail {
+    .report-content {
+      // 报告头部
+      .report-header {
+        :deep(.el-card__body) { padding: 16px; }
+
+        .header-content {
+          flex-direction: column;
+          gap: 16px;
+
+          .title-section {
+            .report-title {
+              font-size: 18px;
+              flex-wrap: wrap;
+            }
+            .report-meta {
+              gap: 8px;
+              font-size: 12px;
+            }
+          }
+
+          .action-section {
+            width: 100%;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+            .el-button { flex: 1; min-width: 80px; }
+          }
+        }
+      }
+
+      // 风险提示
+      .risk-disclaimer {
+        :deep(.el-alert) {
+          padding: 12px 14px;
+        }
+        .disclaimer-content {
+          font-size: 13px;
+        }
+        :deep(ul) {
+          padding-left: 14px;
+          font-size: 12px;
+          line-height: 1.6;
+        }
+      }
+
+      // 关键指标
+      .metrics-card {
+        :deep(.el-card__body) { padding: 16px; }
+
+        .metrics-content {
+          .metric-item {
+            padding: 16px 12px;
+            margin-bottom: 8px;
+          }
+          .confidence-item .confidence-display {
+            :deep(.el-progress) {
+              width: 100px !important;
+              height: 100px !important;
+            }
+          }
+          .key-points ul li {
+            padding: 10px;
+            font-size: 13px;
+          }
+        }
+      }
+
+      // 摘要 & 模块
+      .summary-card,
+      .modules-card {
+        :deep(.el-card__body) { padding: 16px; }
+      }
+
+      .modules-card {
+        :deep(.el-tabs__item) {
+          font-size: 12px;
+          padding: 0 10px;
+        }
+
+        .module-content {
+          .markdown-content {
+            font-size: 14px;
+            overflow-x: auto;
+            :deep(table) {
+              display: block;
+              overflow-x: auto;
+              font-size: 12px;
+            }
+            :deep(pre) {
+              overflow-x: auto;
+              font-size: 12px;
+            }
+            :deep(img) { max-width: 100%; }
+          }
+          .json-content pre {
+            font-size: 12px;
+            overflow-x: auto;
+          }
+        }
+      }
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .report-detail {
+    .report-content {
+      .report-header .header-content .title-section .report-title {
+        font-size: 16px;
+      }
+      .report-header :deep(.el-card__body) { padding: 12px; }
+      .metrics-card :deep(.el-card__body) { padding: 12px; }
+      .summary-card :deep(.el-card__body),
+      .modules-card :deep(.el-card__body) { padding: 12px; }
+    }
   }
 }
 </style>

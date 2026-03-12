@@ -210,6 +210,13 @@ export const analysisApi = {
     return request.post(`/api/analysis/tasks/${taskId}/mark-failed`, {})
   },
 
+  // 获取简化HTML报告
+  getSimplifiedHtml(analysisId: string): Promise<string> {
+    return request.get(`/api/analysis/${analysisId}/simplified/html`, {
+      responseType: 'text'
+    })
+  },
+
   // 删除任务
   deleteTask(taskId: string): Promise<{ success: boolean; message: string }> {
     return request.delete(`/api/analysis/tasks/${taskId}`)

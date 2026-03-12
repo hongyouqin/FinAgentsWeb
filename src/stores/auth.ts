@@ -21,6 +21,14 @@ export interface AuthState {
   
   // 重定向路径
   redirectPath: string
+
+  // 积分余额
+  points: number          // 等同于 balance（可用余额）
+  frozen: number          // 冻结余额
+  available: number       // 可用余额
+  totalRecharged: number  // 累计充值
+  totalConsumed: number   // 累计消耗
+  balanceSymbol: string   // 单位符号
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -62,7 +70,14 @@ export const useAuthStore = defineStore('auth', {
       roles: [],
 
       loginLoading: false,
-      redirectPath: '/'
+      redirectPath: '/',
+
+      points: 0,
+      frozen: 0,
+      available: 0,
+      totalRecharged: 0,
+      totalConsumed: 0,
+      balanceSymbol: '⚡'
     }
   },
 
@@ -208,6 +223,9 @@ export const useAuthStore = defineStore('auth', {
 
           // 同步用户偏好设置到 appStore
           this.syncUserPreferencesToAppStore()
+
+          // 获取积分余额
+          this.fetchUserBalance()
 
           // 启动 token 自动刷新定时器
           const { setupTokenRefreshTimer } = await import('@/utils/auth')
@@ -432,6 +450,27 @@ export const useAuthStore = defineStore('auth', {
       }
     },
     
+    // 获取积分余额
+    async fetchUserBalance() {
+      try {
+        const res = await fetch('/api/payment/balance', {
+          headers: { 'Authorization': `Bearer ${this.token}` }
+        })
+        if (!res.ok) throw new Error(`HTTP ${res.status}`)
+        const result = await res.json()
+        // 兼容 { data: { balance/points/power } } 或直接 { balance/points/power }
+        const d = result.data ?? result
+        this.points        = d.balance       ?? 0
+        this.frozen        = d.frozen         ?? 0
+        this.available     = d.available      ?? 0
+        this.totalRecharged = d.total_recharged ?? 0
+        this.totalConsumed  = d.total_consumed  ?? 0
+        this.balanceSymbol  = d.symbol          ?? '⚡'
+      } catch (e) {
+        console.error('❌ 获取积分余额失败:', e)
+      }
+    },
+
     // 设置重定向路径
     setRedirectPath(path: string) {
       this.redirectPath = path
@@ -454,6 +493,7 @@ export const useAuthStore = defineStore('auth', {
           if (valid) {
             this.isAuthenticated = true
             await this.fetchUserPermissions()
+            this.fetchUserBalance()
             console.log('✅ 认证状态验证成功')
           } else {
             // Token无效，尝试刷新

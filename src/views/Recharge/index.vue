@@ -31,19 +31,19 @@
           </div>
           <div class="balance-stats">
             <div class="stat-item">
-              <span class="stat-num">{{ totalRecharged }}</span>
-              <span class="stat-label">累计充值(元)</span>
+              <span class="stat-num">{{ authStore.totalRecharged.toLocaleString() }}</span>
+              <span class="stat-label">累计充值(⚡)</span>
             </div>
             <div class="stat-divider"></div>
             <div class="stat-item">
-              <span class="stat-num">{{ totalPointsEarned.toLocaleString() }}</span>
-              <span class="stat-label">累计获得积分</span>
+              <span class="stat-num">{{ authStore.totalConsumed.toLocaleString() }}</span>
+              <span class="stat-label">累计消耗(⚡)</span>
             </div>
             <div class="stat-divider"></div>
-            <div class="stat-item">
+            <!-- <div class="stat-item">
               <span class="stat-num">{{ rechargeCount }}</span>
               <span class="stat-label">充值次数</span>
-            </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -62,41 +62,28 @@
           <span class="section-tip">积分可用于 AI 分析任务消耗</span>
         </div>
 
-        <div class="packages-grid">
+        <div v-loading="packagesLoading" class="packages-grid">
           <div
             v-for="pkg in packages"
             :key="pkg.id"
             class="package-card"
-            :class="{ active: selectedPackage === pkg.id, popular: pkg.popular, best: pkg.best }"
-            @click="selectedPackage = pkg.id; customAmount = ''"
+            :class="{ active: selectedPackage === pkg.id, popular: pkg.popular }"
+            @click="selectedPackage = pkg.id"
           >
             <div v-if="pkg.popular" class="pkg-badge popular-badge">热门</div>
             <div v-if="pkg.best" class="pkg-badge best-badge">超值</div>
+            <div class="pkg-name">{{ pkg.name }}</div>
             <div class="pkg-price">
               <span class="price-symbol">¥</span>
               <span class="price-num">{{ pkg.price }}</span>
             </div>
             <div class="pkg-points">
               <el-icon><Coin /></el-icon>
-              {{ pkg.points.toLocaleString() }} 积分
+              {{ pkg.total_power }} ⚡
             </div>
             <div v-if="pkg.bonus > 0" class="pkg-bonus">+{{ pkg.bonus }} 赠送</div>
-            <div class="pkg-unit">≈ {{ pkg.analysisCount }} 次分析</div>
+            <div class="pkg-unit">¥{{ pkg.unit_price }}/⚡</div>
           </div>
-        </div>
-
-        <!-- 自定义金额 -->
-        <div class="custom-section">
-          <span class="custom-label">自定义金额</span>
-          <el-input
-            v-model="customAmount"
-            placeholder="输入金额（元）"
-            class="custom-input"
-            @input="selectedPackage = null"
-          >
-            <template #prefix><span class="input-prefix">¥</span></template>
-          </el-input>
-          <span class="custom-tip">每 1 元 = 20 积分</span>
         </div>
 
         <!-- 支付方式 -->
@@ -121,7 +108,7 @@
           <div class="confirm-amount">
             <span class="amount-label">应付金额：</span>
             <span class="amount-value">¥ {{ confirmAmount }}</span>
-            <span class="amount-points">获得 <em>{{ confirmPoints.toLocaleString() }}</em> 积分</span>
+            <span class="amount-points">获得 <em>{{ confirmPoints }}</em> ⚡</span>
           </div>
           <el-button
             type="primary"
@@ -256,7 +243,7 @@
         </div>
         <div class="pay-info">
           <span class="pay-label">获得积分：</span>
-          <span class="pay-val pay-points">{{ confirmPoints.toLocaleString() }} 积分</span>
+          <span class="pay-val pay-points">{{ confirmPoints }} ⚡</span>
         </div>
         <div class="qr-placeholder">
           <div class="qr-icon">
@@ -298,25 +285,65 @@ const initParticles = () => {
   }))
 }
 
-// 用户积分（实际项目中从后端获取）
-const userPoints = ref(authStore.user ? 1280 : 0)
-const totalRecharged = ref(104)
-const totalPointsEarned = ref(2200)
-const rechargeCount = ref(3)
+// 用户积分（从后端获取）
+const userPoints = computed(() => authStore.points)
 
 // 充值套餐
-const packages = [
-  { id: 1, price: 6, points: 100, bonus: 0, analysisCount: 5, popular: false, best: false },
-  { id: 2, price: 30, points: 600, bonus: 0, analysisCount: 30, popular: false, best: false },
-  { id: 3, price: 68, points: 1400, bonus: 100, analysisCount: 75, popular: true, best: false },
-  { id: 4, price: 168, points: 3500, bonus: 300, analysisCount: 190, popular: false, best: false },
-  { id: 5, price: 328, points: 7000, bonus: 600, analysisCount: 380, popular: false, best: true },
-  { id: 6, price: 588, points: 13000, bonus: 1200, analysisCount: 710, popular: false, best: false },
-]
+interface RechargePackage {
+  id: string
+  name: string
+  price: number
+  power: number
+  bonus: number
+  total_power: number
+  popular: boolean
+  description: string
+  unit_price: number
+}
 
-const selectedPackage = ref<number | null>(3)
-const customAmount = ref('')
+const packagesLoading = ref(false)
+const packages = ref<RechargePackage[]>([])
+const fetchPackages = async () => {
+  packagesLoading.value = true
+  try {
+    const res = await fetch('/api/payment/recharge/packages', {
+      headers: { 'Authorization': `Bearer ${authStore.token}` }
+    })
+    if (!res.ok) throw new Error(`HTTP ${res.status}`)
+    const result = await res.json()
+    const list = result.data || result.packages || result || []
+    packages.value = (Array.isArray(list) ? list : []).map((item: any): RechargePackage => ({
+      id: String(item.id),
+      name: item.name ?? '',
+      price: item.price,
+      power: item.power,
+      bonus: item.bonus ?? 0,
+      total_power: item.total_power ?? item.power,
+      popular: item.popular ?? false,
+      description: item.description ?? '',
+      unit_price: item.unit_price ?? 0
+    }))
+    // 默认选中第一个热门套餐，否则选第一个
+    if (packages.value.length > 0) {
+      const popular = packages.value.find(p => p.popular)
+      selectedPackage.value = popular ? popular.id : packages.value[0].id
+    }
+  } catch (e: any) {
+    ElMessage.error('获取套餐列表失败，使用默认套餐')
+    packages.value = [
+      { id: 'PACK_001', name: '体验包', price: 9.9, power: 10, bonus: 0, total_power: 10, popular: false, description: '9.9元充值10⚡', unit_price: 0.99 },
+      { id: 'PACK_002', name: '标准包', price: 19.8, power: 20, bonus: 0, total_power: 20, popular: true, description: '19.8元充值20⚡', unit_price: 0.99 },
+      { id: 'PACK_003', name: '畅享包', price: 49, power: 50, bonus: 2, total_power: 52, popular: false, description: '49元充值50⚡+赠送2⚡', unit_price: 0.94 },
+      { id: 'PACK_004', name: '尊享包', price: 98, power: 100, bonus: 5, total_power: 105, popular: true, description: '98元充值100⚡+赠送5⚡', unit_price: 0.93 },
+      { id: 'PACK_005', name: '企业包', price: 198, power: 200, bonus: 15, total_power: 215, popular: false, description: '198元充值200⚡+赠倁15⚡', unit_price: 0.92 },
+    ]
+    selectedPackage.value = 'PACK_002'
+  } finally {
+    packagesLoading.value = false
+  }
+}
 
+const selectedPackage = ref<string | null>(null)
 // 支付方式
 const paymentMethods = [
   { id: 'wechat', label: '微信支付', icon: 'ChatRound' },
@@ -326,23 +353,17 @@ const selectedPayment = ref('wechat')
 
 // 计算确认金额
 const confirmAmount = computed(() => {
-  if (customAmount.value && Number(customAmount.value) > 0) {
-    return Number(customAmount.value).toFixed(2)
-  }
   if (selectedPackage.value) {
-    const pkg = packages.find(p => p.id === selectedPackage.value)
+    const pkg = packages.value.find((p: RechargePackage) => p.id === selectedPackage.value)
     return pkg ? pkg.price.toFixed(2) : '0.00'
   }
   return '0.00'
 })
 
 const confirmPoints = computed(() => {
-  if (customAmount.value && Number(customAmount.value) > 0) {
-    return Math.floor(Number(customAmount.value) * 20)
-  }
   if (selectedPackage.value) {
-    const pkg = packages.find(p => p.id === selectedPackage.value)
-    return pkg ? pkg.points + pkg.bonus : 0
+    const pkg = packages.value.find((p: RechargePackage) => p.id === selectedPackage.value)
+    return pkg ? pkg.total_power : 0
   }
   return 0
 })
@@ -352,9 +373,8 @@ const canRecharge = computed(() => {
 })
 
 const pendingPackageName = computed(() => {
-  if (customAmount.value) return `自定义 ¥${customAmount.value}`
-  const pkg = packages.find(p => p.id === selectedPackage.value)
-  return pkg ? `${pkg.points + pkg.bonus} 积分套餐` : ''
+  const pkg = packages.value.find((p: RechargePackage) => p.id === selectedPackage.value)
+  return pkg ? pkg.name : ''
 })
 
 // 充值对话框
@@ -369,11 +389,9 @@ const handleRecharge = () => {
 
 const mockPaySuccess = () => {
   showPayDialog.value = false
-  userPoints.value += confirmPoints.value
-  totalRecharged.value += Number(confirmAmount.value)
-  totalPointsEarned.value += confirmPoints.value
-  rechargeCount.value += 1
-  ElMessage.success(`充值成功！获得 ${confirmPoints.value} 积分`)
+  authStore.points += confirmPoints.value
+  authStore.totalRecharged += confirmPoints.value
+  ElMessage.success(`充值成功！获得 ${confirmPoints.value} ⚡`)
   // 添加一条记录
   historyList.value.unshift({
     id: Date.now(),
@@ -454,6 +472,8 @@ const getStatusText = (status: string) => {
 
 onMounted(() => {
   initParticles()
+  authStore.fetchUserBalance()
+  fetchPackages()
   loadHistory()
 })
 </script>
@@ -691,6 +711,12 @@ onMounted(() => {
   &.best-badge { background: linear-gradient(135deg, #ef4444, #f97316); color: white; }
 }
 
+.pkg-name {
+  font-size: 13px;
+  font-weight: 600;
+  color: #334155;
+  margin-bottom: 8px;
+}
 .pkg-price {
   margin-bottom: 8px;
   .price-symbol { font-size: 14px; color: #64748b; vertical-align: top; margin-top: 4px; display: inline-block; }
@@ -709,23 +735,6 @@ onMounted(() => {
 }
 .pkg-bonus { font-size: 11px; color: #f59e0b; font-weight: 500; margin-bottom: 4px; }
 .pkg-unit { font-size: 11px; color: #94a3b8; }
-
-// ─── 自定义金额 ───────────────────────────────────────
-.custom-section {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-  margin-bottom: 20px;
-  padding: 16px;
-  background: #f8fafc;
-  border-radius: 12px;
-  border: 1px solid #e2e8f0;
-  flex-wrap: wrap;
-}
-.custom-label { font-size: 14px; color: #64748b; font-weight: 500; flex-shrink: 0; }
-.custom-input { width: 160px; }
-.input-prefix { color: #64748b; font-size: 14px; }
-.custom-tip { font-size: 12px; color: #94a3b8; }
 
 // ─── 支付方式 ─────────────────────────────────────────
 .payment-section {

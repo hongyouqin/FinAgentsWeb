@@ -81,7 +81,7 @@ const userAvatar = computed(() => authStore.user?.avatar || undefined)
 const userDisplayName = computed(() => authStore.user?.username || '未登录')
 
 // 积分（实际项目中从后端/store获取）
-const userPoints = ref(authStore.user ? 1280 : 0)
+const userPoints = ref(authStore.points || 0)
 
 // 折叠态积分简写：超过1000显示 1.2k 等
 const shortPoints = computed(() => {

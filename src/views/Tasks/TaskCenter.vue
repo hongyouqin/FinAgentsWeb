@@ -80,9 +80,9 @@
           >
             <el-icon><component :is="tab.icon" /></el-icon>
             <span>{{ tab.label }}</span>
-            <el-tag v-if="tab.count > 0" size="small" :type="tab.type" class="tab-badge">
+            <!-- <el-tag v-if="tab.count > 0" size="small" :type="tab.type" class="tab-badge">
               {{ tab.count }}
-            </el-tag>
+            </el-tag> -->
           </div>
         </div>
 
@@ -648,17 +648,30 @@ const currentResult = ref<any>(null)
 const currentRow = ref<any>(null)
 const reportSections = ref<Array<{ key?: string; title: string; content: any }>>([])
 
-const openResult = async (row: any) => {
-  currentRow.value = row
-  try {
-    const res = await analysisApi.getTaskResult(row.task_id)
-    const body = (res as any)?.data?.data || {}
-    currentResult.value = body
-    resultVisible.value = true
-  } catch (e: any) {
-    ElMessage.error('获取结果失败')
-  }
+const openResult = (row: any) => {
+  const id = row?.task_id || row?.analysis_id || row?.id
+  if (!id) return ElMessage.warning('未找到任务ID')
+  router.push({
+    name: 'AnalysisReport',
+    params: { id },
+    query: {
+      symbol: row.stock_code || row.stock_symbol || '',
+      date: row.created_at ? row.created_at.slice(0, 10) : (row.start_time ? row.start_time.slice(0, 10) : '')
+    }
+  })
 }
+
+// const openResult1 = async (row: any) => {
+//   currentRow.value = row
+//   try {
+//     const res = await analysisApi.getTaskResult(row.task_id)
+//     const body = (res as any)?.data?.data || {}
+//     currentResult.value = body
+//     resultVisible.value = true
+//   } catch (e: any) {
+//     ElMessage.error('获取结果失败')
+//   }
+// }
 
 const openReport = (row: any) => {
   const id = row?.task_id || row?.analysis_id || row?.id

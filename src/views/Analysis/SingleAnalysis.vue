@@ -862,11 +862,26 @@ const syncMarketNews = async () => {
 // 查看分析详情
 const viewAnalysis = (analysis: AnalysisTask) => {
   if (analysis.status === 'completed') {
-    router.push({ name: 'ReportDetail', params: { id: analysis.task_id } })
+    router.push({
+      name: 'AnalysisReport',
+      params: { id: analysis.task_id },
+      query: {
+        symbol: analysis.stock_code || analysis.symbol || '',
+        date: analysis.created_at ? analysis.created_at.slice(0, 10) : ''
+      }
+    })
   } else {
     router.push('/tasks?tab=running')
   }
 }
+
+// const viewAnalysis1 = (analysis: AnalysisTask) => {
+//   if (analysis.status === 'completed') {
+//     router.push({ name: 'ReportDetail', params: { id: analysis.task_id } })
+//   } else {
+//     router.push('/tasks?tab=running')
+//   }
+// }
 
 // 跳转到历史记录
 const goToHistory = () => {
