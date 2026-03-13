@@ -147,6 +147,10 @@ export const analysisApi = {
     return request.post(`/api/analysis/${analysisId}/stop`, {})
   },
 
+  getConsumePrice(): Promise<any> {
+    return request.get('/api/payment/consume/price')
+  },
+
   // 获取分析历史（用户维度）
   getHistory(params?: {
     page?: number

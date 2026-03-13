@@ -93,6 +93,7 @@ declare module 'vue' {
     SyncRecommendations: typeof import('./src/components/Sync/SyncRecommendations.vue')['default']
     TaskReportDialog: typeof import('./src/components/Global/TaskReportDialog.vue')['default']
     TaskResultDialog: typeof import('./src/components/Global/TaskResultDialog.vue')['default']
+    TxDialog: typeof import('./src/components/TxDialog.vue')['default']
     UserProfile: typeof import('./src/components/Layout/UserProfile.vue')['default']
   }
   export interface GlobalDirectives {

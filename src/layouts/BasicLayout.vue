@@ -78,6 +78,9 @@
 
     <!-- 回到顶部 -->
     <el-backtop :right="40" :bottom="40" />
+
+    <!-- 算力记录弹框（全局挂载，UserProfile 和 Recharge 页面均可调用） -->
+    <TxDialog />
   </div>
 </template>
 
@@ -90,6 +93,7 @@ import Breadcrumb from '@/components/Layout/Breadcrumb.vue'
 import HeaderActions from '@/components/Layout/HeaderActions.vue'
 import AppFooter from '@/components/Layout/AppFooter.vue'
 import Logo from '@/components/Logo.vue'
+import TxDialog from '@/components/TxDialog.vue'
 import { Expand, Fold } from '@element-plus/icons-vue'
 
 const appStore = useAppStore()

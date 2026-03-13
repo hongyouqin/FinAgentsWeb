@@ -42,14 +42,18 @@
               <div class="dropdown-name">{{ userDisplayName }}</div>
               <div class="dropdown-points">
                 <el-icon><Coin /></el-icon>
-                {{ userPoints.toLocaleString() }} 积分
+                {{ userPoints }} 算力
               </div>
             </div>
           </div>
           <el-divider style="margin: 6px 0" />
           <el-dropdown-item command="recharge">
             <el-icon><Wallet /></el-icon>
-            积分充值
+            算力充值
+          </el-dropdown-item>
+          <el-dropdown-item command="tx">
+            <el-icon><List /></el-icon>
+            算力记录
           </el-dropdown-item>
           <el-dropdown-item command="settings">
             <el-icon><Setting /></el-icon>
@@ -71,17 +75,19 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
-import { User, Setting, SwitchButton, Coin, Wallet, ArrowRight } from '@element-plus/icons-vue'
+import { User, Setting, SwitchButton, Coin, Wallet, ArrowRight, List } from '@element-plus/icons-vue'
+import { useTxDialog } from '@/composables/useTxDialog'
 
 const router = useRouter()
 const appStore = useAppStore()
 const authStore = useAuthStore()
+const { openTxDialog } = useTxDialog()
 
 const userAvatar = computed(() => authStore.user?.avatar || undefined)
 const userDisplayName = computed(() => authStore.user?.username || '未登录')
 
 // 积分（实际项目中从后端/store获取）
-const userPoints = ref(authStore.points || 0)
+const userPoints = computed(() => authStore.points || 0) 
 
 // 折叠态积分简写：超过1000显示 1.2k 等
 const shortPoints = computed(() => {
@@ -95,6 +101,9 @@ const handleCommand = async (command: string) => {
   switch (command) {
     case 'recharge':
       router.push('/recharge')
+      break
+    case 'tx':
+      openTxDialog()
       break
     case 'settings':
       router.push('/settings')

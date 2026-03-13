@@ -95,7 +95,7 @@
           >
             <el-table-column type="selection" width="50" />
 
-            <el-table-column label="报告标题" min-width="220">
+            <el-table-column label="报告标题" width="220">
               <template #default="{ row }">
                 <div class="report-title-cell">
                   <div class="report-name" @click="viewReport(row)">{{ row.title }}</div>
@@ -104,7 +104,7 @@
               </template>
             </el-table-column>
 
-            <el-table-column label="类型" width="110">
+            <el-table-column label="类型" width="100">
               <template #default="{ row }">
                 <el-tag :type="getTypeColor(row.type)" effect="light" size="small">
                   {{ getTypeText(row.type) }}
@@ -123,12 +123,11 @@
               </template>
             </el-table-column>
 
-            <el-table-column label="分析模型" width="160">
+            <el-table-column label="分析模型" width="220">
               <template #default="{ row }">
                 <el-tag
                   v-if="row.model_info && row.model_info !== 'Unknown'"
                   type="info"
-                  size="small"
                   effect="plain"
                 >
                   {{ row.model_info }}
@@ -137,7 +136,7 @@
               </template>
             </el-table-column>
 
-            <el-table-column label="创建时间" width="170">
+            <el-table-column label="创建时间" width="180">
               <template #default="{ row }">
                 <div class="time-cell">
                   <el-icon><Clock /></el-icon>

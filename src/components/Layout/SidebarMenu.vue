@@ -24,7 +24,7 @@
     </el-menu-item>
     <el-menu-item index="/recharge">
       <el-icon><Coin /></el-icon>
-      <template #title>积分充值</template>
+      <template #title>算力充值</template>
     </el-menu-item>
     <!-- <el-menu-item index="/learning">
       <el-icon><Reading /></el-icon>

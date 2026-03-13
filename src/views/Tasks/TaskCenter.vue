@@ -184,7 +184,7 @@
             row-key="task_id"
           >
             <el-table-column type="selection" width="50" reserve-selection />
-            <el-table-column prop="task_id" label="任务ID" width="200">
+            <el-table-column prop="task_id" label="任务ID" width="150">
               <template #default="{ row }">
                 <div class="task-id">
                   <el-icon class="task-icon"><Document /></el-icon>
@@ -194,7 +194,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="stock_code" label="股票" width="180">
+            <el-table-column prop="stock_code" label="股票" width="90">
               <template #default="{ row }">
                 <div class="stock-info">
                   <div class="stock-code">{{ row.stock_code || row.stock_symbol }}</div>
@@ -214,7 +214,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="进度" width="160">
+            <el-table-column label="进度" width="180">
               <template #default="{ row }">
                 <div class="progress-cell">
                   <el-progress
@@ -227,7 +227,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="start_time" label="开始时间" width="160">
+            <el-table-column prop="start_time" label="开始时间" width="200">
               <template #default="{ row }">
                 <div class="time-cell">
                   <el-icon><Clock /></el-icon>

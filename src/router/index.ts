@@ -393,7 +393,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Recharge',
     component: () => import('@/layouts/BasicLayout.vue'),
     meta: {
-      title: '积分充值',
+      title: '算力充值',
       icon: 'Coin',
       requiresAuth: true,
       transition: 'fade'
@@ -404,7 +404,7 @@ const routes: RouteRecordRaw[] = [
         name: 'RechargeHome',
         component: () => import('@/views/Recharge/index.vue'),
         meta: {
-          title: '积分充值',
+          title: '算力充值',
           requiresAuth: true
         }
       }
@@ -469,7 +469,7 @@ router.beforeEach(async (to, from, next) => {
   // 设置页面标题
   const title = to.meta.title as string
   if (title) {
-    document.title = `${title} - TradingAgents-CN`
+    document.title = `${title} - AI智能体投研`
   }
 
   console.log('🚦 路由守卫检查:', {

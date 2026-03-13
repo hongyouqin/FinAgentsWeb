@@ -17,17 +17,30 @@
         <div class="glow-effect glow-2" />
       </div>
       <div class="hero-content">
-        <!-- 积分余额卡片 -->
+        
+
+      <!-- 算力余额卡片 -->
         <div class="balance-card">
-          <div class="balance-main">
+          <div class="balance-main" style="position: relative;">
             <div class="balance-icon-wrap">
               <el-icon><Coin /></el-icon>
             </div>
             <div class="balance-info">
-              <div class="balance-label">当前积分余额</div>
+              <div class="balance-label">当前算力余额</div>
               <div class="balance-value">{{ userPoints.toLocaleString() }}</div>
-              <div class="balance-unit">积分 · 立即可用</div>
+              <div class="balance-unit">算力 · 立即可用</div>
             </div>
+            <!-- 算力记录按钮 -->
+            <div class="tx-btn-row" style="position: absolute; right: 0; top: 0;">
+            <el-button
+              class="tx-btn"
+              size="small"
+              @click="openTxDialog"
+            >
+              <el-icon><List /></el-icon>
+              算力记录
+            </el-button>
+          </div>
           </div>
           <div class="balance-stats">
             <div class="stat-item">
@@ -59,7 +72,7 @@
             <el-icon><Wallet /></el-icon>
             <span>选择充值套餐</span>
           </div>
-          <span class="section-tip">积分可用于 AI 分析任务消耗</span>
+          <span class="section-tip">算力可用于 AI 分析任务消耗</span>
         </div>
 
         <div v-loading="packagesLoading" class="packages-grid">
@@ -155,7 +168,7 @@
               <span class="amount-cell">¥{{ row.amount }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="获得积分" width="120" align="right">
+          <el-table-column label="获得算力" width="120" align="right">
             <template #default="{ row }">
               <span class="points-cell">+{{ row.points.toLocaleString() }}</span>
             </template>
@@ -190,7 +203,7 @@
             </div>
             <div class="history-item-mid">
               <span class="history-amount">¥{{ record.amount }}</span>
-              <span class="history-points">+{{ record.points.toLocaleString() }} 积分</span>
+              <span class="history-points">+{{ record.points.toLocaleString() }} 算力</span>
             </div>
             <div class="history-item-bot">
               <span class="history-time">{{ record.created_at }}</span>
@@ -224,50 +237,104 @@
       </div>
     </div>
 
+    <!-- 算力记录弹框已移至全局 TxDialog.vue，由 useTxDialog 控制 -->
+
     <!-- 支付对话框 -->
     <el-dialog
       v-model="showPayDialog"
-      title="扫码完成支付"
-      width="360px"
+      title="微信扫码支付"
+      width="400px"
       align-center
       :close-on-click-modal="false"
+      @close="stopPolling"
     >
       <div class="pay-dialog">
-        <div class="pay-info">
-          <span class="pay-label">套餐：</span>
-          <span class="pay-val">{{ pendingPackageName }}</span>
-        </div>
-        <div class="pay-info">
-          <span class="pay-label">金额：</span>
-          <span class="pay-val pay-price">¥ {{ confirmAmount }}</span>
-        </div>
-        <div class="pay-info">
-          <span class="pay-label">获得积分：</span>
-          <span class="pay-val pay-points">{{ confirmPoints }} ⚡</span>
-        </div>
-        <div class="qr-placeholder">
-          <div class="qr-icon">
-            <el-icon size="64"><CreditCard /></el-icon>
+        <!-- 订单信息 -->
+        <div class="pay-info-list">
+          <div class="pay-info">
+            <span class="pay-label">套餐：</span>
+            <span class="pay-val">{{ pendingPackageName }}</span>
           </div>
-          <p class="qr-tip">支付功能即将上线</p>
-          <p class="qr-sub">请联系管理员进行充值</p>
+          <div class="pay-info">
+            <span class="pay-label">金额：</span>
+            <span class="pay-val pay-price">¥ {{ confirmAmount }}</span>
+          </div>
+          <div class="pay-info">
+            <span class="pay-label">获得算力：</span>
+            <span class="pay-val pay-points">{{ confirmPoints }} ⚡</span>
+          </div>
+        </div>
+
+        <!-- 加载中 -->
+        <div v-if="payLoading" class="qr-area qr-loading">
+          <el-icon class="qr-spin"><Refresh /></el-icon>
+          <p>正在发起支付...</p>
+        </div>
+
+        <!-- PC: 二维码显示 -->
+        <div v-else-if="payScene === 'NATIVE' && qrDataUrl && payStatus === 'pending'" class="qr-area">
+          <div class="qr-wrap">
+            <img :src="qrDataUrl" alt="支付二维码" class="qr-img" />
+          </div>
+          <p class="qr-tip">
+            <el-icon><component :is="'ChatRound'" /></el-icon>
+            请使用微信扫描二维码完成支付
+          </p>
+          <div v-if="currentOrderNo" class="qr-order">订单号：{{ currentOrderNo }}</div>
+          <div v-if="countdownSec > 0" class="qr-countdown" :class="{ 'urgent': countdownSec <= 60 }">
+            二维码有效期：{{ countdownDisplay }}
+          </div>
+        </div>
+
+        <!-- 手机端（MWEB/JSAPI）: 支付链接跳转 -->
+        <div v-else-if="(payScene === 'MWEB' || payScene === 'JSAPI') && payStatus === 'pending'" class="qr-area qr-mweb">
+          <el-icon size="48"><Promotion /></el-icon>
+          <p class="mweb-tip">请点击下方按钮前往支付</p>
+          <el-button
+            type="primary"
+            size="large"
+            class="mweb-pay-btn"
+            @click="openMwebPay"
+          >前往支付</el-button>
+          <p class="mweb-sub">支付完成后点击「我已完成支付」确认</p>
+          <div v-if="countdownSec > 0" class="qr-countdown" :class="{ 'urgent': countdownSec <= 60 }">
+            有效期：{{ countdownDisplay }}
+          </div>
+        </div>
+
+        <!-- 过期提示 -->
+        <div v-else-if="payStatus === 'expired'" class="qr-area qr-expired">
+          <el-icon size="48"><CreditCard /></el-icon>
+          <p>支付已过期</p>
+          <el-button type="primary" size="small" @click="refreshQrCode">重新发起</el-button>
+        </div>
+
+        <!-- 失败提示 -->
+        <div v-else-if="payStatus === 'failed'" class="qr-area qr-failed">
+          <el-icon size="48"><CreditCard /></el-icon>
+          <p>支付失败，请重试</p>
+          <el-button type="primary" size="small" @click="refreshQrCode">重新支付</el-button>
         </div>
       </div>
+
       <template #footer>
-        <el-button @click="showPayDialog = false">关闭</el-button>
-        <el-button type="primary" @click="mockPaySuccess">模拟支付成功</el-button>
+        <el-button @click="showPayDialog = false; stopPolling()">取消</el-button>
+        <el-button type="primary" :disabled="!currentOrderNo" @click="handlePaidManually">我已完成支付</el-button>
       </template>
     </el-dialog>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, computed, onMounted, onUnmounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import { useWindowSize } from '@vueuse/core'
 import { useAuthStore } from '@/stores/auth'
+import paymentApi from '@/api/payment'
+import QRCode from 'qrcode'
+import { useTxDialog } from '@/composables/useTxDialog'
 import {
-  Coin, Wallet, CreditCard, Document, Refresh
+  Coin, Wallet, CreditCard, Document, Refresh, Promotion, List
 } from '@element-plus/icons-vue'
 
 const authStore = useAuthStore()
@@ -285,7 +352,7 @@ const initParticles = () => {
   }))
 }
 
-// 用户积分（从后端获取）
+// 算力余额（从后端获取）
 const userPoints = computed(() => authStore.points)
 
 // 充值套餐
@@ -297,6 +364,7 @@ interface RechargePackage {
   bonus: number
   total_power: number
   popular: boolean
+  best?: boolean
   description: string
   unit_price: number
 }
@@ -347,7 +415,7 @@ const selectedPackage = ref<string | null>(null)
 // 支付方式
 const paymentMethods = [
   { id: 'wechat', label: '微信支付', icon: 'ChatRound' },
-  { id: 'alipay', label: '支付宝', icon: 'Wallet' },
+  // { id: 'alipay', label: '支付宝', icon: 'Wallet' },
 ]
 const selectedPayment = ref('wechat')
 
@@ -377,95 +445,250 @@ const pendingPackageName = computed(() => {
   return pkg ? pkg.name : ''
 })
 
-// 充值对话框
+// ─── 支付对话框 ─────────────────────────────────────────
 const showPayDialog = ref(false)
-const handleRecharge = () => {
-  if (!canRecharge.value) {
-    ElMessage.warning('请选择充值套餐或输入自定义金额')
-    return
-  }
-  showPayDialog.value = true
+const payLoading = ref(false)          // 下单中
+const payScene = ref<'NATIVE' | 'JSAPI' | 'MWEB'>('NATIVE')  // 支付场景
+const qrDataUrl = ref('')              // 二维码图片 base64
+const mwebPayUrl = ref('')             // MWEB 支付跳转链接
+const currentOrderNo = ref('')         // 当前订单号
+const payStatus = ref<'pending' | 'paid' | 'failed' | 'expired'>('pending')
+const countdownSec = ref(0)            // 倒计时秒数
+let pollTimer: ReturnType<typeof setInterval> | null = null
+let countdownTimer: ReturnType<typeof setInterval> | null = null
+
+// ─── 支付环境检测 & 场景判断 ─────────────────────
+const getPayEnv = (): 'wechat' | 'mobile' | 'pc' => {
+  const ua = navigator.userAgent.toLowerCase()
+  if (ua.includes('micromessenger')) return 'wechat'
+  if (/android|iphone|ipad|ipod|mobile/.test(ua)) return 'mobile'
+  return 'pc'
 }
 
-const mockPaySuccess = () => {
+const getPaymentScene = (): 'NATIVE' | 'JSAPI' | 'MWEB' => {
+  const env = getPayEnv()
+  if (env === 'wechat') return 'JSAPI'
+  if (env === 'mobile') return 'MWEB'
+  return 'NATIVE'
+}
+
+/** 解析 prepare 返回中的支付 URL，兆容多种字段名 */
+const resolveQrUrl = (data: any): string => {
+  return data?.code_url || data?.qr_code_url || data?.url || data?.qrcode_url || ''
+}
+
+/** 启动订单状态轮询 */
+const startPolling = (orderNo: string) => {
+  stopPolling()
+  pollTimer = setInterval(async () => {
+    try {
+      const res = await paymentApi.queryStatus(orderNo)
+      const d = res?.data ?? res
+      const status = d?.status ?? d?.pay_status ?? ''
+      if (status === 'paid' || status === 'success') {
+        stopPolling()
+        payStatus.value = 'paid'
+        showPayDialog.value = false
+        ElMessage.success('支付成功！算力已到账 🎉')
+        authStore.fetchUserBalance()
+        loadHistory()
+      } else if (status === 'failed' || status === 'expired') {
+        stopPolling()
+        payStatus.value = status as 'failed' | 'expired'
+        ElMessage.error(status === 'expired' ? '二维码已过期，请重新发起支付' : '支付失败，请重试')
+      }
+    } catch {
+      // 轮询失败不中断，继续等待
+    }
+  }, 3000)
+}
+
+/** 停止轮询 & 倒计时 */
+const stopPolling = () => {
+  if (pollTimer) { clearInterval(pollTimer); pollTimer = null }
+  if (countdownTimer) { clearInterval(countdownTimer); countdownTimer = null }
+}
+
+/** 启动倒计时 */
+const startCountdown = (seconds: number) => {
+  countdownSec.value = seconds
+  if (countdownTimer) clearInterval(countdownTimer)
+  countdownTimer = setInterval(() => {
+    countdownSec.value -= 1
+    if (countdownSec.value <= 0) {
+      clearInterval(countdownTimer!)
+      countdownTimer = null
+      if (payStatus.value === 'pending') {
+        payStatus.value = 'expired'
+        stopPolling()
+      }
+    }
+  }, 1000)
+}
+
+const countdownDisplay = computed(() => {
+  const m = Math.floor(countdownSec.value / 60).toString().padStart(2, '0')
+  const s = (countdownSec.value % 60).toString().padStart(2, '0')
+  return `${m}:${s}`
+})
+
+/** 点击「立即充值」- 下单 + 准备支付 */
+const handleRecharge = async () => {
+  if (!canRecharge.value) {
+    ElMessage.warning('请选择充值套餐')
+    return
+  }
+  const scene = getPaymentScene()
+  payScene.value = scene
+  payLoading.value = true
+  qrDataUrl.value = ''
+  currentOrderNo.value = ''
+  payStatus.value = 'pending'
+  showPayDialog.value = true
+
+  try {
+    // Step 1: 创建订单
+    const createRes = await paymentApi.createOrder({
+      package_id: selectedPackage.value!,
+      payment_scene: scene
+    })
+    const createData = createRes?.data ?? createRes
+    const orderNo = createData?.order_no
+    if (!orderNo) throw new Error('未获取到订单号')
+    currentOrderNo.value = orderNo
+
+    // Step 2: 准备支付
+    const prepareRes = await paymentApi.prepareOrder(orderNo)
+    const prepareData = prepareRes?.data ?? prepareRes
+    const expireSec = prepareData?.expire_seconds ?? 300
+
+    if (scene === 'NATIVE') {
+      // PC: 生成二维码
+      const qrUrl = resolveQrUrl(prepareData)
+      if (!qrUrl) throw new Error('未获取到支付二维码链接')
+      qrDataUrl.value = await QRCode.toDataURL(qrUrl, {
+        width: 220, margin: 2,
+        color: { dark: '#0f172a', light: '#ffffff' }
+      })
+      startCountdown(expireSec)
+      startPolling(orderNo)
+
+    } else if (scene === 'MWEB') {
+      // 手机浏览器: 获取支付链接，展示跳转按钮
+      const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
+      if (!payUrl) throw new Error('未获取到支付链接')
+      mwebPayUrl.value = payUrl
+      startCountdown(expireSec)
+      startPolling(orderNo)
+      // 页面重新可见时（用户从支付页返回）继续轮询
+      const handleVisibility = () => {
+        if (!document.hidden && payStatus.value === 'pending') {
+          startPolling(orderNo)
+        }
+      }
+      document.addEventListener('visibilitychange', handleVisibility, { once: true })
+
+    } else if (scene === 'JSAPI') {
+      // 微信内浏览器: 同样用链接跳转方式，无需调起 wx.chooseWXPay
+      const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
+      if (!payUrl) throw new Error('未获取到支付链接')
+      mwebPayUrl.value = payUrl
+      startCountdown(expireSec)
+      startPolling(orderNo)
+      const handleVisibility = () => {
+        if (!document.hidden && payStatus.value === 'pending') {
+          startPolling(orderNo)
+        }
+      }
+      document.addEventListener('visibilitychange', handleVisibility, { once: true })
+    }
+  } catch (e: any) {
+    showPayDialog.value = false
+    ElMessage.error(e?.message || '发起支付失败，请重试')
+  } finally {
+    payLoading.value = false
+  }
+}
+
+/** 重新获取二维码 */
+const refreshQrCode = () => {
+  stopPolling()
+  mwebPayUrl.value = ''
+  handleRecharge()
+}
+
+/** MWEB: 跳转到支付页面 */
+const openMwebPay = () => {
+  if (mwebPayUrl.value) {
+    window.open(mwebPayUrl.value, '_blank')
+  }
+}
+
+/** 用户手动确认已支付 */
+const handlePaidManually = async () => {
+  stopPolling()
   showPayDialog.value = false
-  authStore.points += confirmPoints.value
-  authStore.totalRecharged += confirmPoints.value
-  ElMessage.success(`充值成功！获得 ${confirmPoints.value} ⚡`)
-  // 添加一条记录
-  historyList.value.unshift({
-    id: Date.now(),
-    created_at: new Date().toLocaleString('zh-CN'),
-    package_name: pendingPackageName.value,
-    amount: Number(confirmAmount.value),
-    points: confirmPoints.value,
-    payment_method: selectedPayment.value === 'wechat' ? '微信支付' : '支付宝',
-    status: 'success',
-    order_no: 'ORD' + Date.now()
-  })
-  historyTotal.value += 1
+  ElMessage.info('正在查询支付结果...')
+  await authStore.fetchUserBalance()
+  await loadHistory()
 }
 
 // 充值记录
 const historyLoading = ref(false)
 const historyPage = ref(1)
-const historyPageSize = ref(10)
-const historyTotal = ref(3)
-const historyList = ref([
-  {
-    id: 1,
-    created_at: '2025-03-08 14:32:00',
-    package_name: '1500 积分套餐',
-    amount: 68,
-    points: 1500,
-    payment_method: '微信支付',
-    status: 'success',
-    order_no: 'ORD20250308143200001'
-  },
-  {
-    id: 2,
-    created_at: '2025-02-15 09:18:00',
-    package_name: '600 积分套餐',
-    amount: 30,
-    points: 600,
-    payment_method: '支付宝',
-    status: 'success',
-    order_no: 'ORD20250215091800002'
-  },
-  {
-    id: 3,
-    created_at: '2025-01-20 20:05:00',
-    package_name: '100 积分套餐',
-    amount: 6,
-    points: 100,
-    payment_method: '微信支付',
-    status: 'success',
-    order_no: 'ORD20250120200500003'
-  }
-])
+const historyPageSize = ref(20)
+const historyTotal = ref(0)
+const historyList = ref<any[]>([])
 
 const loadHistory = async () => {
   historyLoading.value = true
-  await new Promise(r => setTimeout(r, 600))
-  historyLoading.value = false
+  try {
+    const skip = (historyPage.value - 1) * historyPageSize.value
+    const res = await paymentApi.getHistory({ skip, limit: historyPageSize.value })
+    const d = res?.data ?? res
+    // 兑容多种返回结构
+    const list = d?.orders ?? d?.items ?? d?.list ?? (Array.isArray(d) ? d : [])
+    const total = d?.total ?? d?.count ?? list.length
+    historyList.value = list.map((item: any) => ({
+      id: item.id ?? item.order_no,
+      created_at: item.created_timestamp
+        ? new Date(item.created_timestamp).toLocaleString('zh-CN', { hour12: false })
+        : (item.created_at ?? item.pay_time ?? ''),
+      package_name: item.package_name ?? item.pkg_name ?? item.name ?? '',
+      amount: item.price ?? item.amount ?? item.pay_amount ?? 0,
+      points: item.total_power ?? item.points ?? item.power_amount ?? item.credits ?? 0,
+      payment_method: item.payment_method ?? item.pay_method ?? '微信支付',
+      status: (item.status ?? 'SUCCESS').toUpperCase(),
+      order_no: item.order_no ?? item.order_id ?? item.id ?? ''
+    }))
+    historyTotal.value = total
+  } catch {
+    ElMessage.error('获取充值记录失败')
+  } finally {
+    historyLoading.value = false
+  }
 }
 
 const getStatusType = (status: string): 'success' | 'info' | 'warning' | 'danger' => {
   const map: Record<string, 'success' | 'info' | 'warning' | 'danger'> = {
-    success: 'success',
-    pending: 'warning',
-    failed: 'danger',
-    refunded: 'info'
+    SUCCESS: 'success', success: 'success',
+    PENDING: 'warning', pending: 'warning',
+    FAILED: 'danger',   failed: 'danger',
+    EXPIRED: 'info',    expired: 'info',
+    REFUNDED: 'info',   refunded: 'info',
+    PAID: 'success'
   }
   return map[status] || 'info'
 }
 
 const getStatusText = (status: string) => {
   const map: Record<string, string> = {
-    success: '已到账',
-    pending: '处理中',
-    failed: '失败',
-    refunded: '已退款'
+    SUCCESS: '已到账', success: '已到账',
+    PENDING: '处理中', pending: '处理中',
+    FAILED:  '失败',   failed:  '失败',
+    EXPIRED: '已过期', expired: '已过期',
+    REFUNDED:'已退款', refunded:'已退款',
+    PAID: '已支付'
   }
   return map[status] || status
 }
@@ -476,6 +699,13 @@ onMounted(() => {
   fetchPackages()
   loadHistory()
 })
+
+onUnmounted(() => {
+  stopPolling()
+})
+
+// ─── 算力流水记录（逻辑已提取至 useTxDialog composable）─────
+const { openTxDialog } = useTxDialog()
 </script>
 
 <style lang="scss" scoped>
@@ -844,8 +1074,31 @@ onMounted(() => {
   margin-top: 20px;
 }
 
+// ─── 算力记录按钮（弹框样式在 TxDialog.vue）──────────────
+.tx-btn-row {
+  display: flex;
+  justify-content: flex-end;
+  width: 100%;
+  max-width: 680px;
+  margin-bottom: 12px;
+}
+.tx-btn {
+  background: rgba(255, 255, 255, 0.12);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  color: rgba(255, 255, 255, 0.85);
+  border-radius: 20px;
+  padding: 6px 16px;
+  backdrop-filter: blur(8px);
+  transition: all 0.2s;
+  &:hover { background: rgba(6, 182, 212, 0.2); border-color: #06b6d4; color: #a5f3fc; }
+  .el-icon { font-size: 14px; margin-right: 4px; }
+}
+
 // ─── 支付对话框 ───────────────────────────────────────
 .pay-dialog {
+  .pay-info-list {
+    margin-bottom: 16px;
+  }
   .pay-info {
     display: flex;
     align-items: center;
@@ -858,19 +1111,90 @@ onMounted(() => {
     .pay-price { font-size: 22px; font-weight: 700; color: #ef4444; }
     .pay-points { font-size: 16px; font-weight: 700; color: #059669; }
   }
-  .qr-placeholder {
+
+  .qr-area {
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding: 28px;
-    margin-top: 16px;
+    padding: 20px 16px;
     background: #f8fafc;
     border-radius: 16px;
     border: 2px dashed #e2e8f0;
-    .qr-icon { color: #06b6d4; margin-bottom: 12px; }
-    .qr-tip { font-size: 15px; font-weight: 600; color: #1e293b; margin: 0 0 4px; }
-    .qr-sub { font-size: 13px; color: #94a3b8; margin: 0; }
+    gap: 10px;
+    min-height: 180px;
+    justify-content: center;
+    p { margin: 0; font-size: 14px; color: #475569; text-align: center; }
   }
+
+  .qr-loading {
+    .qr-spin {
+      font-size: 36px;
+      color: #06b6d4;
+      animation: spin 1s linear infinite;
+    }
+    p { color: #64748b; font-size: 13px; }
+  }
+
+  .qr-wrap {
+    padding: 8px;
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    .qr-img { display: block; width: 200px; height: 200px; }
+  }
+
+  .qr-tip {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #1a7a3c;
+    font-weight: 500;
+    .el-icon { color: #09b43a; }
+  }
+
+  .qr-order {
+    font-size: 11px;
+    color: #94a3b8;
+    font-family: monospace;
+    word-break: break-all;
+    text-align: center;
+  }
+
+  .qr-countdown {
+    font-size: 13px;
+    color: #059669;
+    font-weight: 600;
+    padding: 4px 12px;
+    border-radius: 20px;
+    background: rgba(5, 150, 105, 0.08);
+    &.urgent { color: #ef4444; background: rgba(239, 68, 68, 0.08); }
+  }
+
+  .qr-mweb, .qr-jsapi {
+    .el-icon { color: #07c160; margin-bottom: 4px; }
+    .mweb-tip { font-size: 15px; font-weight: 600; color: #1e293b; margin: 0; }
+    .mweb-sub { font-size: 12px; color: #94a3b8; margin: 0; text-align: center; }
+    .mweb-pay-btn {
+      width: 160px;
+      border-radius: 24px;
+      font-size: 15px;
+      font-weight: 600;
+      background: linear-gradient(135deg, #07c160, #06b6d4);
+      border: none;
+      box-shadow: 0 4px 14px rgba(7, 193, 96, 0.35);
+    }
+  }
+
+  .qr-expired, .qr-failed {
+    .el-icon { color: #94a3b8; }
+    p { color: #64748b; }
+  }
+}
+
+@keyframes spin {
+  from { transform: rotate(0deg); }
+  to { transform: rotate(360deg); }
 }
 
 // ─── 响应式 ──────────────────────────────────────────

@@ -114,23 +114,6 @@
           <!-- 快速配置栏 -->
           <div class="quick-config">
             <div class="config-item">
-              <span class="config-label">分析深度</span>
-              <el-select v-model="analysisForm.researchDepth" size="default" class="depth-select">
-                <el-option
-                  v-for="(depth, index) in depthOptions"
-                  :key="index"
-                  :label="depth.name"
-                  :value="index + 1"
-                >
-                  <div class="depth-option-content">
-                    <span>{{ depth.icon }} {{ depth.name }}</span>
-                    <span class="depth-time">{{ depth.time }}</span>
-                  </div>
-                </el-option>
-              </el-select>
-            </div>
-
-            <div class="config-item">
               <span class="config-label">分析师</span>
               <el-dropdown trigger="click" @command="handleAnalystCommand">
                 <el-button type="default" size="default" class="analyst-btn">
@@ -212,6 +195,19 @@
               </div>
             </div>
           </el-collapse-transition>
+
+          <!-- 费用与余额提示 -->
+          <div v-if="analysisPrice.price > 0" class="cost-bar" :class="{ 'cost-insufficient': authStore.points < analysisPrice.price }">
+            <div class="cost-left">
+              <el-icon><Coin /></el-icon>
+              <span>本次分析消耗 <em>{{ analysisPrice.price }}</em> ⚡</span>
+              <span v-if="analysisPrice.desc" class="cost-desc">· {{ analysisPrice.desc }}</span>
+            </div>
+            <div class="cost-right">
+              <span class="balance-text">余额 {{ authStore.points }} ⚡</span>
+              <el-tag v-if="authStore.points < analysisPrice.price" type="danger" size="small" effect="light">算力不足</el-tag>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -391,8 +387,8 @@
                 <el-tab-pane 
                   v-for="(report, key) in analysisResults.reports || analysisResults.state?.reports" 
                   :key="key" 
-                  :label="getReportLabel(key)"
-                  :name="key"
+                  :label="getReportLabel(String(key))"
+                  :name="String(key)"
                 >
                   <div class="report-content" v-html="renderMarkdown(report)"></div>
                 </el-tab-pane>
@@ -412,6 +408,7 @@ import { ElMessage } from 'element-plus'
 import {
   TrendCharts,
   Search,
+  Coin,
   CircleClose,
   InfoFilled,
   Check,
@@ -494,7 +491,7 @@ const analysisForm = reactive<AnalysisForm>({
   symbol: '',
   market: 'A股',
   analysisDate: new Date(),
-  researchDepth: 3,
+  researchDepth: 4,
   selectedAnalysts: ['市场分析师', '基本面分析师'],
   includeSentiment: true,
   includeRisk: true,
@@ -537,6 +534,25 @@ const recentAnalyses = ref<AnalysisTask[]>([])
 // 市场快讯数据
 const marketNews = ref<any[]>([])
 const syncingNews = ref(false)
+
+// 分析费用
+const analysisPrice = ref({ price: 0, unit: '⚡', desc: '' })
+const fetchAnalysisPrice = async () => {
+  try {
+    const res = await analysisApi.getConsumePrice()
+    
+  
+    const d = res.data ?? res
+    console.log('获取分析费用结果:', d)
+    analysisPrice.value = {
+      price: d.price ?? 0,
+      unit: d.unit || '⚡',
+      desc: d.desc ?? ''
+    }
+  } catch (e) {
+    console.error('获取分析费用失败:', e)
+  }
+}
 
 // 禁用日期
 const disabledDate = (time: Date) => {
@@ -632,6 +648,13 @@ const submitAnalysis = async () => {
 
   if (analysisForm.selectedAnalysts.length === 0) {
     ElMessage.warning('请至少选择一个分析师')
+    return
+  }
+
+  // 检查积分是否足够
+  if (analysisPrice.value.price > 0 && authStore.points < analysisPrice.value.price) {
+    ElMessage.error(`算力不足！本次分析需要 ${analysisPrice.value.price} ⚡，当前余额 ${authStore.points} ⚡，请先前往充値`)
+    router.push('/recharge')
     return
   }
 
@@ -933,6 +956,7 @@ onMounted(() => {
   }
   // 初始化粒子
   initParticles()
+  fetchAnalysisPrice()
   // 加载最近分析和市场快讯
   loadRecentAnalyses()
   loadMarketNews()
@@ -1450,6 +1474,44 @@ onUnmounted(() => {
   
   .date-picker {
     width: 150px;
+  }
+}
+
+// 费用余额提示栏
+.cost-bar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-top: 16px;
+  padding: 10px 16px;
+  background: linear-gradient(135deg, rgba(5,150,105,0.06), rgba(6,182,212,0.08));
+  border: 1px solid #cffafe;
+  border-radius: 12px;
+  flex-wrap: wrap;
+  gap: 8px;
+  transition: all 0.3s;
+
+  &.cost-insufficient {
+    background: rgba(239,68,68,0.06);
+    border-color: #fca5a5;
+  }
+
+  .cost-left {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 13px;
+    color: #475569;
+    .el-icon { color: #059669; font-size: 15px; }
+    em { color: #059669; font-style: normal; font-weight: 700; font-size: 15px; }
+    .cost-desc { color: #94a3b8; }
+  }
+
+  .cost-right {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    .balance-text { font-size: 13px; color: #64748b; font-weight: 500; }
   }
 }
 
