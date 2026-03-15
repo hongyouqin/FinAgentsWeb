@@ -96,7 +96,7 @@
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { computed, onMounted } from 'vue'
 import { useAppStore } from '@/stores/app'
 import SidebarMenu from '@/components/Layout/SidebarMenu.vue'
 import UserProfile from '@/components/Layout/UserProfile.vue'
@@ -139,6 +139,13 @@ const handleNavClick = () => {
     }, 50)
   }
 }
+
+// 挂载时：移动端默认收起侧边栏
+onMounted(() => {
+  if (isMobile.value) {
+    appStore.setSidebarCollapsed(true)
+  }
+})
 
 // 监听窗口大小变化：在小屏幕上自动折叠侧边栏
 watch(width, (newWidth) => {

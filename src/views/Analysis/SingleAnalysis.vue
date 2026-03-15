@@ -1794,12 +1794,12 @@ onUnmounted(() => {
 }
 
 .info-grid {
-  display: grid;
-  grid-template-columns: 1fr 1fr;
+  display: flex;
   gap: 24px;
   
   @media (max-width: 768px) {
-    grid-template-columns: 1fr;
+    gap: 10px;
+    flex-direction: column;
   }
 }
 
@@ -1809,6 +1809,7 @@ onUnmounted(() => {
   padding: 24px;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   transition: all 0.3s ease;
+  flex: 1;
   
   &:hover {
     box-shadow: 0 8px 30px rgba(0, 0, 0, 0.1);
@@ -2072,6 +2073,25 @@ onUnmounted(() => {
   .advanced-row {
     flex-direction: column;
     gap: 16px;
+  }
+
+  .cost-bar {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    padding: 10px 12px;
+
+    .cost-left {
+      font-size: 12px;
+      flex-wrap: wrap;
+      em { font-size: 14px; }
+    }
+
+    .cost-right {
+      width: 100%;
+      justify-content: space-between;
+      .balance-text { font-size: 12px; }
+    }
   }
   
   .results-card {

@@ -789,6 +789,10 @@ onMounted(() => {
     max-width: 100%;
     padding: 0 1rem;
   }
+  .tab-icon {
+    width: 14px !important;
+    height: 14px !important;
+  }
 
   .login-card {
     padding: 1.2rem;
@@ -810,8 +814,10 @@ onMounted(() => {
 
   .sms-input-wrapper {
     .sms-button {
-      min-width: 90px;
-      font-size: 0.875rem;
+      width: 70px;
+      min-width: 70px;
+      font-size: 0.675rem;
+      padding: 4px 6px;
     }
   }
   .tab-item {
