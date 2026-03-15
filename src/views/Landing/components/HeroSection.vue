@@ -1048,15 +1048,38 @@ onMounted(() => {
 
 @media (max-width: 768px) {
   .hero-nav {
-    padding: 1rem 1.5rem;
+    padding: 0.75rem 1rem;
+  }
+
+  .nav-content {
+    gap: 0.5rem;
+  }
+
+  .nav-logo {
+    gap: 0.5rem;
+  }
+
+  .logo-text {
+    font-size: 1.1rem;
+  }
+
+  .logo-badge {
+    display: none;
+  }
+
+  .login-btn {
+    padding: 0.5rem 1rem;
+    font-size: 0.875rem;
+    gap: 0.375rem;
+
+    .btn-icon {
+      width: 16px;
+      height: 16px;
+    }
   }
 
   .hero-content {
     padding: 2rem 1.5rem 8rem;
-  }
-
-  .logo-text {
-    font-size: 1.25rem;
   }
 
   .hero-title {
@@ -1100,6 +1123,27 @@ onMounted(() => {
 
 .cta-label{
     margin-left: 0.5rem;
+}
+
+@media (max-width: 480px) {
+  .login-btn {
+    padding: 0.5rem 0.75rem;
+    min-width: unset;
+
+    .cta-label {
+      display: none;
+    }
+
+    .btn-icon {
+      width: 18px;
+      height: 18px;
+      margin: 0;
+    }
+  }
+
+  .logo-glow::before {
+    display: none;
+  }
 }
 
 // ========== 深色主题适配 ==========

@@ -791,18 +791,32 @@ onMounted(() => {
   }
 
   .login-card {
-    padding: 1.5rem;
+    padding: 1.2rem;
   }
 
   .login-header .title {
-    font-size: 2rem;
+    font-size: 1.6rem;
   }
+  .login-form{
+    :deep(.el-form-item__label) {
+      font-size: 0.75rem !important;
+    }
+    :deep(.el-input__inner) {
+      font-size: 0.75rem !important;
+    }
+
+
+  } 
 
   .sms-input-wrapper {
     .sms-button {
       min-width: 90px;
       font-size: 0.875rem;
     }
+  }
+  .tab-item {
+    font-size: 0.65rem;
+    padding: 0.75rem 0.4rem;
   }
 }
 .register-link {

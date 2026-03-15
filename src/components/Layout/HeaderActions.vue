@@ -10,9 +10,9 @@
       </el-button>
     </el-tooltip> -->
 
-    <!-- 全屏切换 -->
+    <!-- 全屏切换（移动端隐藏） -->
     <el-tooltip content="全屏" placement="bottom">
-      <el-button type="text" @click="toggleFullscreen" class="action-btn">
+      <el-button type="text" @click="toggleFullscreen" class="action-btn fullscreen-btn">
         <el-icon><FullScreen /></el-icon>
       </el-button>
     </el-tooltip>
@@ -27,11 +27,11 @@
     </el-tooltip>
 
     <!-- 帮助 -->
-    <el-tooltip content="帮助" placement="bottom">
+    <!-- <el-tooltip content="帮助" placement="bottom">
       <el-button type="text" @click="showHelp" class="action-btn">
         <el-icon><QuestionFilled /></el-icon>
       </el-button>
-    </el-tooltip>
+    </el-tooltip> -->
 
     <!-- 通知抽屉（方案B） -->
     <el-drawer v-model="drawerVisible" direction="rtl" size="360px" :with-header="true" title="消息中心">
@@ -170,6 +170,12 @@ function showHelp() {
   :deep(.el-badge__content) {
     background: linear-gradient(135deg, #059669, #06b6d4);
     border-color: white;
+  }
+}
+
+@media (max-width: 768px) {
+  .fullscreen-btn {
+    display: none !important;
   }
 }
 

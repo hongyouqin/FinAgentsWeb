@@ -113,7 +113,7 @@
 
           <!-- 快速配置栏 -->
           <div class="quick-config">
-            <div class="config-item">
+            <!-- <div class="config-item">
               <span class="config-label">分析师</span>
               <el-dropdown trigger="click" @command="handleAnalystCommand">
                 <el-button type="default" size="default" class="analyst-btn">
@@ -139,10 +139,10 @@
                   </el-dropdown-menu>
                 </template>
               </el-dropdown>
-            </div>
+            </div> -->
 
             <!-- 高级配置开关 -->
-            <div class="config-item advanced-toggle">
+            <!-- <div class="config-item advanced-toggle">
               <el-button 
                 type="default" 
                 size="default" 
@@ -154,7 +154,7 @@
                 <span>高级配置</span>
                 <el-icon class="toggle-icon" :class="{ 'is-open': showAdvanced }"><ArrowDown /></el-icon>
               </el-button>
-            </div>
+            </div> -->
           </div>
 
           <!-- 高级配置面板（可折叠） -->
@@ -402,7 +402,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, reactive, onMounted, onUnmounted, computed } from 'vue'
+import { ref, reactive, onMounted, onUnmounted, onActivated, computed, watch } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -464,6 +464,9 @@ const authStore = useAuthStore()
 const router = useRouter()
 const route = useRoute()
 
+// 声明组件名，供 keep-alive 按名缓存
+defineOptions({ name: 'SingleAnalysis' })
+
 const submitting = ref(false)
 const showAdvanced = ref(false)
 
@@ -492,7 +495,7 @@ const analysisForm = reactive<AnalysisForm>({
   market: 'A股',
   analysisDate: new Date(),
   researchDepth: 4,
-  selectedAnalysts: ['市场分析师', '基本面分析师'],
+  selectedAnalysts: ['市场分析师', '基本面分析师', '新闻分析师'],
   includeSentiment: true,
   includeRisk: true,
   language: 'zh-CN'
@@ -527,6 +530,61 @@ const progressInfo = ref({
   totalTime: 0
 })
 const pollingTimer = ref<any>(null)
+
+// ─── sessionStorage 持久化：记录进行中的任务 ────────────────────
+const SA_TASK_KEY = 'sa_current_task_id'
+
+// taskId 变化时同步到 sessionStorage
+watch(currentTaskId, (id: string) => {
+  if (id) {
+    sessionStorage.setItem(SA_TASK_KEY, id)
+  } else {
+    sessionStorage.removeItem(SA_TASK_KEY)
+  }
+})
+
+// 恢复进行中/已完成的任务状态
+const tryRestoreTask = async () => {
+  const savedId = sessionStorage.getItem(SA_TASK_KEY)
+  if (!savedId) return
+
+  try {
+    const response = await analysisApi.getTaskStatus(savedId)
+    const data = response.data
+    if (!data) {
+      sessionStorage.removeItem(SA_TASK_KEY)
+      return
+    }
+
+    currentTaskId.value = savedId
+
+    if (data.status === 'running' || data.status === 'processing' || data.status === 'pending') {
+      // 任务还在跑，恢复进度并继续轮询
+      analysisStatus.value = 'running'
+      progressInfo.value = {
+        progress: data.progress || 0,
+        currentStep: data.current_step_name || data.stage || '处理中...',
+        currentStepDescription: data.current_step_description || '',
+        message: data.message || '',
+        elapsedTime: data.elapsed_time || 0,
+        remainingTime: data.estimated_remaining || 0,
+        totalTime: (data.elapsed_time || 0) + (data.estimated_remaining || 0)
+      }
+      startPollingTaskStatus()
+    } else if (data.status === 'completed') {
+      // 任务已完成，直接展示结果
+      analysisStatus.value = 'completed'
+      showResults.value = true
+      analysisResults.value = data.result
+      sessionStorage.removeItem(SA_TASK_KEY)
+    } else {
+      // failed / cancelled，清除记录
+      sessionStorage.removeItem(SA_TASK_KEY)
+    }
+  } catch {
+    sessionStorage.removeItem(SA_TASK_KEY)
+  }
+}
 
 // 最近分析数据
 const recentAnalyses = ref<AnalysisTask[]>([])
@@ -741,11 +799,16 @@ const startPollingTaskStatus = () => {
           showResults.value = true
           analysisResults.value = data.result
           clearInterval(pollingTimer.value)
+          sessionStorage.removeItem(SA_TASK_KEY)
           ElMessage.success('分析完成')
+          // 刷新最近分析列表，确保数据最新
+          loadRecentAnalyses()
         } else if (data.status === 'failed') {
           analysisStatus.value = 'failed'
           clearInterval(pollingTimer.value)
+          sessionStorage.removeItem(SA_TASK_KEY)
           ElMessage.error(data.error || '分析失败')
+          loadRecentAnalyses()
         }
       }
     } catch (error) {
@@ -960,6 +1023,14 @@ onMounted(() => {
   // 加载最近分析和市场快讯
   loadRecentAnalyses()
   loadMarketNews()
+  // 尝试从 sessionStorage 恢复上次未完成/已完成的任务
+  tryRestoreTask()
+})
+
+// keep-alive 激活时（从其他页面切回来）
+onActivated(() => {
+  // 刷新最近分析列表，确保数据最新
+  loadRecentAnalyses()
 })
 
 // 组件卸载

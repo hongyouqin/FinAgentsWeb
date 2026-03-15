@@ -14,9 +14,20 @@
             FinAgents
           </span>
         </div>
+
+        <!-- 移动端关闭按钮 -->
+        <button
+          v-if="isMobile && !appStore.sidebarCollapsed"
+          class="sidebar-close-btn"
+          @click="appStore.setSidebarCollapsed(true)"
+        >
+          <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M18 6L6 18M6 6l12 12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </button>
       </div>
       
-      <nav class="sidebar-nav">
+      <nav class="sidebar-nav" @click="handleNavClick">
         <SidebarMenu />
       </nav>
       
@@ -103,6 +114,7 @@ const { width } = useWindowSize()
 // 需要缓存的组件
 const keepAliveComponents = computed(() => [
   'Dashboard',
+  'SingleAnalysis',
   'StockScreening',
   'AnalysisHistory',
   'QueueManagement'
@@ -115,6 +127,16 @@ const isMobile = computed(() => width.value < 768)
 const handleMainClick = () => {
   if (isMobile.value && !appStore.sidebarCollapsed) {
     appStore.setSidebarCollapsed(true)
+  }
+}
+
+// 移动端点击导航菜单后收起侧边栏
+const handleNavClick = () => {
+  if (isMobile.value) {
+    // 延迟一帧，确保路由跳转先触发
+    setTimeout(() => {
+      appStore.setSidebarCollapsed(true)
+    }, 50)
   }
 }
 
@@ -166,6 +188,7 @@ watch(() => route.fullPath, () => {
     height: 60px;
     display: flex;
     align-items: center;
+    justify-content: space-between;
     padding: 0 16px;
     border-bottom: 1px solid var(--el-border-color-lighter);
 
@@ -179,6 +202,35 @@ watch(() => route.fullPath, () => {
         font-weight: 600;
         color: var(--el-text-color-primary);
         white-space: nowrap;
+      }
+    }
+
+    .sidebar-close-btn {
+      display: none;
+      width: 32px;
+      height: 32px;
+      border-radius: 50%;
+      border: none;
+      background: rgba(100, 116, 139, 0.1);
+      color: #64748b;
+      cursor: pointer;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      transition: all 0.2s ease;
+
+      svg {
+        width: 16px;
+        height: 16px;
+      }
+
+      &:hover {
+        background: rgba(6, 182, 212, 0.12);
+        color: #06b6d4;
+      }
+
+      &:active {
+        transform: scale(0.92);
       }
     }
   }
@@ -263,6 +315,10 @@ watch(() => route.fullPath, () => {
     &:not(.collapsed) {
       transform: translateX(0);
     }
+  }
+
+  .sidebar-close-btn {
+    display: flex !important;
   }
 
   .main-container {

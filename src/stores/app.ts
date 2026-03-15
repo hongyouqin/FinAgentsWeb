@@ -40,7 +40,7 @@ export const useAppStore = defineStore('app', {
   state: (): AppState => ({
     loading: false,
     loadingProgress: 0,
-    theme: (useStorage('app-theme', 'auto').value || 'auto') as 'light' | 'dark' | 'auto',
+    theme: (useStorage('app-theme', 'light').value || 'light') as 'light' | 'dark' | 'auto',
     language: (useStorage('app-language', 'zh-CN').value || 'zh-CN') as 'zh-CN' | 'en-US',
 
     isOnline: navigator.onLine,
