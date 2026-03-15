@@ -2,8 +2,8 @@
   <div class="app-footer">
     <div class="footer-content">
       <div class="copyright">
-        <span>© 2025 TradingAgents-CN v1.0.0-preview</span>
-        <span class="rights">All rights reserved.</span>
+        <span>© 2026 FinAgents rights reserved.</span>
+        <!-- <span class="rights">All rights reserved.</span> -->
       </div>
       <div class="disclaimer-text">
         FinAgents 是一款由人工智能驱动的多智能体股票分析辅助工具，不具备证券投资咨询资质。平台内提供的所有分析结果、评分及参考意见，均由 AI 基于公开历史数据自动生成，仅供学习、研究及技术交流使用，不构成任何形式的投资建议或决策依据。
