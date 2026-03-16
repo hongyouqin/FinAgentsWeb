@@ -46,10 +46,10 @@
                 <el-icon><Brush /></el-icon>
                 <span>外观设置</span>
               </el-menu-item> -->
-              <el-menu-item index="analysis">
+              <!-- <el-menu-item index="analysis">
                 <el-icon><TrendCharts /></el-icon>
                 <span>分析偏好</span>
-              </el-menu-item>
+              </el-menu-item> -->
               <el-menu-item index="notifications">
                 <el-icon><Bell /></el-icon>
                 <span>通知设置</span>
@@ -58,6 +58,7 @@
                 <el-icon><Lock /></el-icon>
                 <span>安全设置</span>
               </el-menu-item>
+             
             </template>
 
             <!-- 系统配置菜单 -->
@@ -169,7 +170,7 @@
         </el-card>
 
         <!-- 分析偏好 -->
-        <el-card v-show="activeTab === 'analysis'" class="settings-content" shadow="never">
+        <!-- <el-card v-show="activeTab === 'analysis'" class="settings-content" shadow="never">
           <template #header>
             <h3>分析偏好</h3>
           </template>
@@ -198,7 +199,6 @@
                 <el-checkbox label="市场分析师">市场分析师</el-checkbox>
                 <el-checkbox label="基本面分析师">基本面分析师</el-checkbox>
                 <el-checkbox label="新闻分析师">新闻分析师</el-checkbox>
-                <!-- <el-checkbox label="社媒分析师">社媒分析师</el-checkbox> -->
               </el-checkbox-group>
             </el-form-item>
 
@@ -226,7 +226,7 @@
               </el-button>
             </el-form-item>
           </el-form>
-        </el-card>
+        </el-card> -->
 
         <!-- 通知设置 -->
         <el-card v-show="activeTab === 'notifications'" class="settings-content" shadow="never">
@@ -402,7 +402,8 @@
     <el-dialog
       v-model="changePasswordDialogVisible"
       title="修改密码"
-      width="500px"
+      top="50%"
+      :width="dialogWidth"
       :close-on-click-modal="false"
     >
       <el-form
@@ -474,6 +475,10 @@ const router = useRouter()
 const route = useRoute()
 const appStore = useAppStore()
 const authStore = useAuthStore()
+const { width } = useWindowSize()
+
+// 对话框响应式宽度
+const dialogWidth = computed(() => width.value <= 480 ? '92%' : '500px')
 
 // 当前分组：personal（个人设置）、config（系统配置）、admin（系统管理）
 const currentSection = ref('personal')
@@ -1112,6 +1117,25 @@ onMounted(() => {
     }
 
     :deep(.el-form-item__content) {
+      margin-left: 0 !important;
+    }
+  }
+
+  // 修改密码对话框移动端适配
+  :deep(.el-dialog) {
+    
+    border-radius: 12px;
+
+    .el-form-item {
+      flex-wrap: wrap;
+    }
+
+    .el-form-item__label {
+      width: auto !important;
+      padding-bottom: 4px;
+    }
+
+    .el-form-item__content {
       margin-left: 0 !important;
     }
   }

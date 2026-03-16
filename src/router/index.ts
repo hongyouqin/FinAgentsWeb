@@ -81,7 +81,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '分析报告',
           requiresAuth: true,
-          hideInMenu: true
+          hideInMenu: true,
+          hideFooter: true
         }
       },
 

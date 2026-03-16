@@ -957,7 +957,7 @@ const viewAnalysis = (analysis: AnalysisTask) => {
       }
     })
   } else {
-    router.push('/tasks?tab=running')
+    router.push('/tasks?tab=failed')
   }
 }
 

@@ -27,7 +27,7 @@
         </button>
       </div>
       
-      <nav class="sidebar-nav" @click="handleNavClick">
+      <nav class="sidebar-nav">
         <SidebarMenu />
       </nav>
       
@@ -82,7 +82,7 @@
       </main>
 
       <!-- 页脚 -->
-      <footer class="footer">
+      <footer v-if="!route.meta.hideFooter" class="footer">
         <AppFooter />
       </footer>
     </div>
@@ -127,16 +127,6 @@ const isMobile = computed(() => width.value < 768)
 const handleMainClick = () => {
   if (isMobile.value && !appStore.sidebarCollapsed) {
     appStore.setSidebarCollapsed(true)
-  }
-}
-
-// 移动端点击导航菜单后收起侧边栏
-const handleNavClick = () => {
-  if (isMobile.value) {
-    // 延迟一帧，确保路由跳转先触发
-    setTimeout(() => {
-      appStore.setSidebarCollapsed(true)
-    }, 50)
   }
 }
 

@@ -235,7 +235,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="280" fixed="right">
+            <el-table-column label="操作" width="180" fixed="right">
               <template #default="{ row }">
                 <div class="action-cell">
                   <el-button
@@ -253,6 +253,7 @@
                     type="primary"
                     size="small"
                     text
+                    style="margin: 0;"
                     @click="openReport(row)"
                   >
                     <el-icon><Document /></el-icon>
@@ -273,6 +274,7 @@
                     type="primary"
                     size="small"
                     text
+                     style="margin: 0;"
                     @click="retryTask(row)"
                   >
                     <el-icon><Refresh /></el-icon>
