@@ -6,6 +6,7 @@
     router
     class="sidebar-menu"
   >
+
     <el-menu-item index="/analysis/single">
       <el-icon><Odometer /></el-icon>
       <template #title>首页</template>
@@ -108,11 +109,36 @@
       <el-icon><InfoFilled /></el-icon>
       <template #title>关于</template>
     </el-menu-item>
+
+    <!-- 交流与客服：点击弹框，不跳转页面 -->
+    <el-menu-item @click="showContactDialog = true">
+      <el-icon><Service /></el-icon>
+      <template #title>交流与客服</template>
+    </el-menu-item>
   </el-menu>
+
+  <!-- 客服弹框：Teleport 到 body，避免侧边栏 transform 影响定位 -->
+  <Teleport to="body">
+    <el-dialog
+      v-model="showContactDialog"
+      title="交流与客服"
+      width="320px"
+      align-center
+      :close-on-click-modal="true"
+    >
+      <div class="contact-content">
+        <div class="contact-row title-row">企业微信客服</div>
+        <div class="contact-row desc-row">扫码添加企业微信客服，获取咨询与对接支持。</div>
+        <div  class="qr-wrapper">
+          <img :src="qhyQrCode" alt="企业微信客服二维码" class="qr-image" />
+        </div>
+      </div>
+    </el-dialog>
+  </Teleport>
 </template>
 
 <script setup lang="ts">
-import { computed } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute } from 'vue-router'
 import { useAppStore } from '@/stores/app'
 import {
@@ -126,13 +152,17 @@ import {
   Setting,
   InfoFilled,
   CreditCard,
-  Coin
+  Coin,
+  Service
 } from '@element-plus/icons-vue'
+import qhyQrCode from '../../../assets/qhy.png'
 
 const route = useRoute()
 const appStore = useAppStore()
 
 const activeMenu = computed(() => route.path)
+
+const showContactDialog = ref(false)
 </script>
 
 <style lang="scss" scoped>
@@ -184,6 +214,71 @@ const activeMenu = computed(() => route.path)
 
     .el-icon {
       color: #059669 !important;
+    }
+  }
+}
+
+// 客服弹框内容（Teleport 到 body 后 scoped 不生效，需用 :global）
+.contact-content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 8px 0 16px;
+
+  .contact-row {
+    width: 100%;
+    text-align: center;
+  }
+
+  .title-row {
+    font-size: 18px;
+    font-weight: 700;
+    color: #1e293b;
+    margin-bottom: 8px;
+  }
+
+  .desc-row {
+    font-size: 13px;
+    color: #64748b;
+    line-height: 1.6;
+    margin-bottom: 20px;
+  }
+
+  .qr-wrapper {
+    width: 200px;
+    height: 200px;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    overflow: hidden;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    .qr-image {
+      width: 100%;
+      height: 100%;
+      object-fit: contain;
+    }
+  }
+}
+
+@media (max-width: 480px) {
+  .contact-content {
+    padding: 4px 0 12px;
+
+    .title-row {
+      font-size: 16px;
+    }
+
+    .desc-row {
+      font-size: 12px;
+      margin-bottom: 16px;
+      padding: 0 8px;
+    }
+
+    .qr-wrapper {
+      width: 160px;
+      height: 160px;
     }
   }
 }

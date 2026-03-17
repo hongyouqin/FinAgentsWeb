@@ -109,6 +109,23 @@
               <el-icon><InfoFilled /></el-icon>
               {{ stockCodeHelp }}
             </div>
+
+            <!-- 股票信息展示 -->
+            <div v-if="fetchingStock" class="stock-info-bar loading">
+              <el-icon class="rotating"><Loading /></el-icon>
+              <span>查询股票信息中...</span>
+            </div>
+            <div v-else-if="stockInfo" class="stock-info-bar">
+              <span class="stock-name">{{ stockInfo.name }}</span>
+              <span class="stock-market">{{ stockInfo.market }}</span>
+              <span class="stock-price">¥{{ stockInfo.price }}</span>
+              <span
+                class="stock-change"
+                :class="stockInfo.change_percent >= 0 ? 'up' : 'down'"
+              >
+                {{ stockInfo.change_percent >= 0 ? '+' : '' }}{{ stockInfo.change_percent.toFixed(2) }}%
+              </span>
+            </div>
           </div>
 
           <!-- 快速配置栏 -->
@@ -427,6 +444,7 @@ import {
   Document
 } from '@element-plus/icons-vue'
 import { analysisApi, type SingleAnalysisRequest } from '@/api/analysis'
+import { stocksApi } from '@/api/stocks'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { ANALYSTS, convertAnalystNamesToIds } from '@/constants/analysts'
@@ -504,6 +522,10 @@ const analysisForm = reactive<AnalysisForm>({
 // 股票代码验证相关
 const stockCodeError = ref<string>('')
 const stockCodeHelp = ref<string>('')
+
+// 股票信息（验证通过后查询）
+const stockInfo = ref<{ name: string; price: number; change_percent: number; market: string } | null>(null)
+const fetchingStock = ref(false)
 
 // 深度选项
 const depthOptions = [
@@ -617,10 +639,23 @@ const disabledDate = (time: Date) => {
   return time.getTime() > Date.now()
 }
 
+// 防抖定时器
+const debounceTimer = ref<any>(null)
+
 // 股票代码输入时的处理
 const onStockCodeInput = () => {
   stockCodeError.value = ''
-  stockCodeHelp.value = getStockCodeFormatHelp(analysisForm.market)
+  stockCodeHelp.value = ''
+  stockInfo.value = null
+  fetchingStock.value = false
+
+  if (debounceTimer.value) clearTimeout(debounceTimer.value)
+
+  if (analysisForm.stockCode.trim()) {
+    debounceTimer.value = setTimeout(() => {
+      validateStockCodeInput()
+    }, 500)
+  }
 }
 
 // 市场类型变更时的处理
@@ -639,6 +674,7 @@ const validateStockCodeInput = () => {
   if (!code) {
     stockCodeError.value = ''
     stockCodeHelp.value = ''
+    stockInfo.value = null
     return
   }
 
@@ -647,6 +683,7 @@ const validateStockCodeInput = () => {
   if (!validation.valid) {
     stockCodeError.value = validation.message || '股票代码格式不正确'
     stockCodeHelp.value = ''
+    stockInfo.value = null
   } else {
     stockCodeError.value = ''
     stockCodeHelp.value = `✓ ${validation.market}代码格式正确`
@@ -659,6 +696,37 @@ const validateStockCodeInput = () => {
     if (validation.normalizedCode) {
       analysisForm.stockCode = validation.normalizedCode
     }
+
+    // 格式正确，查询股票信息
+    fetchStockInfo(validation.normalizedCode || code)
+  }
+}
+
+// 查询股票行情（用于显示股票名称）
+const fetchStockInfo = async (code: string) => {
+  fetchingStock.value = true
+  stockInfo.value = null
+  try {
+    const res = await stocksApi.getQuote(code)
+    const d = (res as any)?.data
+    if (d && d.name) {
+      stockInfo.value = {
+        name: d.name,
+        price: d.price ?? d.close ?? 0,
+        change_percent: d.change_percent ?? d.pct_chg ?? 0,
+        market: d.market || ''
+      }
+    }
+  } catch (err: any) {
+    // 404 表示股票不存在
+    const status = err?.response?.status ?? err?.status
+    if (status === 404) {
+      stockCodeError.value = '该股票不存在'
+      stockCodeHelp.value = ''
+    }
+    // 其他错误静默忽略，不影响主流程
+  } finally {
+    fetchingStock.value = false
   }
 }
 
@@ -1038,6 +1106,9 @@ onUnmounted(() => {
   if (pollingTimer.value) {
     clearInterval(pollingTimer.value)
   }
+  if (debounceTimer.value) {
+    clearTimeout(debounceTimer.value)
+  }
 })
 </script>
 
@@ -1414,6 +1485,53 @@ onUnmounted(() => {
   
   .el-icon {
     font-size: 14px;
+  }
+}
+
+// 股票信息展示栏
+.stock-info-bar {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-top: 10px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, rgba(5,150,105,0.05), rgba(6,182,212,0.07));
+  border: 1px solid #cffafe;
+  border-radius: 10px;
+  font-size: 13px;
+  flex-wrap: wrap;
+
+  &.loading {
+    color: #64748b;
+    .el-icon { color: #06b6d4; font-size: 14px; }
+  }
+
+  .stock-name {
+    font-weight: 700;
+    font-size: 14px;
+    color: #1e293b;
+  }
+
+  .stock-market {
+    padding: 1px 7px;
+    background: rgba(6,182,212,0.1);
+    border-radius: 20px;
+    color: #0891b2;
+    font-size: 12px;
+  }
+
+  .stock-price {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 14px;
+    margin-left: auto;
+  }
+
+  .stock-change {
+    font-weight: 600;
+    font-size: 13px;
+    &.up { color: #ef4444; }
+    &.down { color: #10b981; }
   }
 }
 
