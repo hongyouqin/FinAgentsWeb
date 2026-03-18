@@ -555,7 +555,9 @@ const progressInfo = ref({
   message: '',
   elapsedTime: 0,
   remainingTime: 0,
-  totalTime: 0
+  totalTime: 0,
+  stockCode: '',
+  stockName: ''
 })
 const pollingTimer = ref<any>(null)
 
@@ -852,7 +854,9 @@ const submitAnalysis = async () => {
       message: '分析任务已提交',
       elapsedTime: 0,
       remainingTime: 0,
-      totalTime: 0
+      totalTime: 0,
+      stockCode: '',
+      stockName: ''
     }
 
     startPollingTaskStatus()
@@ -870,8 +874,13 @@ const startPollingTaskStatus = () => {
     clearInterval(pollingTimer.value)
   }
 
+   
+
   pollingTimer.value = setInterval(async () => {
     if (!currentTaskId.value) return
+
+    // 刷新最近分析列表，确保数据最新
+  loadRecentAnalyses()
 
     try {
       const response = await analysisApi.getTaskStatus(currentTaskId.value)
