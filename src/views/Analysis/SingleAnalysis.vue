@@ -75,7 +75,7 @@
                     v-if="analysisForm.stockCode"
                     type="primary"
                     :loading="submitting"
-                    :disabled="!analysisForm.stockCode.trim() || analysisStatus === 'running'"
+                    :disabled="!analysisForm.stockCode.trim() || !allowNewAnalysis"
                     @click="submitAnalysis"
                     class="analyze-btn"
                   >
@@ -235,7 +235,8 @@
             <div class="progress-header">
               <div class="progress-title">
                 <el-icon class="rotating"><Loading /></el-icon>
-                <span>正在分析 {{ analysisForm.stockCode }}</span>
+                <span>正在分析 {{ progressInfo.stockCode }}</span>
+                <span style="font-size: 14px;color: #999;"> {{ progressInfo.stockName }}</span>
               </div>
               <div class="progress-stats">
                 <span class="stat-item">
@@ -254,6 +255,11 @@
             <div class="progress-step">
               <el-icon><Loading /></el-icon>
               <span>{{ progressInfo.currentStepDescription || '正在初始化...' }}</span>
+            </div>
+            <!-- 超过 10 分钟提示可开始新分析 -->
+            <div v-if="progressInfo.elapsedTime >= 600" class="progress-overtime-hint">
+              <el-icon><InfoFilled /></el-icon>
+              <span>当前分析已超过 10 分钟，您可以输入新的股票代码开始新的分析</span>
             </div>
           </div>
         </div>
@@ -512,7 +518,7 @@ const analysisForm = reactive<AnalysisForm>({
   symbol: '',
   market: 'A股',
   analysisDate: new Date(),
-  researchDepth: 4,
+  researchDepth: 3,
   selectedAnalysts: ['市场分析师', '基本面分析师', '新闻分析师'],
   includeSentiment: true,
   includeRisk: true,
@@ -552,6 +558,11 @@ const progressInfo = ref({
   totalTime: 0
 })
 const pollingTimer = ref<any>(null)
+
+// 是否允许开始新分析：非运行中，或运行已超 10 分钟
+const allowNewAnalysis = computed(() =>
+  analysisStatus.value !== 'running' || progressInfo.value.elapsedTime >= 600
+)
 
 // ─── sessionStorage 持久化：记录进行中的任务 ────────────────────
 const SA_TASK_KEY = 'sa_current_task_id'
@@ -784,6 +795,21 @@ const submitAnalysis = async () => {
     return
   }
 
+  // 如果当前有运行中的分析（超 10 分钟后允许新建），放弃旧任务的前端追踪
+  // 旧任务会在后端继续运行，用户可在任务中心查看
+  if (analysisStatus.value === 'running') {
+    if (pollingTimer.value) {
+      clearInterval(pollingTimer.value)
+      pollingTimer.value = null
+    }
+    sessionStorage.removeItem(SA_TASK_KEY)
+    currentTaskId.value = ''
+    analysisStatus.value = 'idle'
+    showResults.value = false
+    analysisResults.value = null
+    ElMessage.info('旧分析任务已移至后台，可在任务中心查看')
+  }
+
   submitting.value = true
 
   try {
@@ -859,7 +885,9 @@ const startPollingTaskStatus = () => {
           message: data.message || '',
           elapsedTime: data.elapsed_time || 0,
           remainingTime: data.estimated_remaining || 0,
-          totalTime: (data.elapsed_time || 0) + (data.estimated_remaining || 0)
+          totalTime: (data.elapsed_time || 0) + (data.estimated_remaining || 0),
+          stockCode: data.stock_code || '',
+          stockName: data.stock_name || ''  
         }
  
         if (data.status === 'completed') {
@@ -1765,6 +1793,26 @@ onUnmounted(() => {
   .el-icon {
     color: #06b6d4;
     animation: rotating 2s linear infinite;
+  }
+}
+
+// 超时可新建提示
+.progress-overtime-hint {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin-top: 12px;
+  padding: 8px 12px;
+  background: rgba(245, 158, 11, 0.08);
+  border: 1px solid rgba(245, 158, 11, 0.3);
+  border-radius: 8px;
+  font-size: 13px;
+  color: #92400e;
+
+  .el-icon {
+    color: #f59e0b;
+    font-size: 14px;
+    flex-shrink: 0;
   }
 }
 
