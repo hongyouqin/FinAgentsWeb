@@ -329,7 +329,7 @@
                   >
                     <div class="news-dot"></div>
                     <div class="news-content">
-                      <div class="news-title">{{ news.title }}</div>
+                      <div class="news-title" v-html="news.title"></div>
                       <div class="news-meta">
                         <span class="news-source">{{ news.source }}</span>
                         <span class="news-time">{{ formatTime1(news.time) }}</span>
@@ -2105,6 +2105,12 @@ onUnmounted(() => {
         -webkit-line-clamp: 2;
         -webkit-box-orient: vertical;
         overflow: hidden;
+
+        :deep(em) {
+          color: #f59e0b;
+          font-style: normal;
+          font-weight: 600;
+        }
       }
       
       .news-meta {
