@@ -1061,7 +1061,10 @@ const viewAnalysis = (analysis: AnalysisTask) => {
         date: analysis.created_at ? analysis.created_at.slice(0, 10) : ''
       }
     })
-  } else {
+  } else if (analysis.status === 'running') {
+    router.push('/tasks?tab=running')
+  }
+   else {
     router.push('/tasks?tab=failed')
   }
 }
