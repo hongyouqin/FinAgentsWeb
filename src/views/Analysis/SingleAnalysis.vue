@@ -50,9 +50,9 @@
     </div>
 
     <!-- 主分析区域 -->
-    <div class="analysis-wrapper">
+    <div class="analysis-wrapper" >
       <!-- 核心输入区域 -->
-      <div class="core-input-section">
+      <div class="core-input-section" >
         <div class="input-card">
           <!-- 股票代码输入 -->
           <div class="stock-input-wrapper">
@@ -110,6 +110,8 @@
               {{ stockCodeHelp }}
             </div>
 
+           
+
             <!-- 股票信息展示 -->
             <div v-if="fetchingStock" class="stock-info-bar loading">
               <el-icon class="rotating"><Loading /></el-icon>
@@ -126,7 +128,67 @@
                 {{ stockInfo.change_percent >= 0 ? '+' : '' }}{{ stockInfo.change_percent.toFixed(2) }}%
               </span>
             </div>
+
+              <!-- 费用与余额提示 -->
+            <div v-if="analysisPrice.price > 0" class="cost-bar" :class="{ 'cost-insufficient': authStore.points < analysisPrice.price }">
+              <div class="cost-left">
+                <el-icon><Coin /></el-icon>
+                <span>本次分析消耗 <em>{{ analysisPrice.price }}</em> ⚡</span>
+                <span v-if="analysisPrice.desc" class="cost-desc">· {{ analysisPrice.desc }}</span>
+              </div>
+              <div class="cost-right">
+                <span class="balance-text">余额 {{ authStore.points }} ⚡</span>
+                <el-tag v-if="authStore.points < analysisPrice.price" type="danger" size="small" effect="light">算力不足</el-tag>
+              </div>
+            </div>
           </div>
+
+          
+
+           <!-- 每日上榜横幅 -->
+            <div class="daily-pitch-banner">
+              <div class="banner-label">
+                <el-icon><Trophy /></el-icon>
+                <span class="banner-title">每日上榜</span>
+                <el-tooltip content="基于 Trend – Emotion – Timing 策略" placement="top">
+                  <el-icon class="info-icon"><QuestionFilled /></el-icon>
+                </el-tooltip>
+              </div>
+              <div class="banner-track">
+                <div v-if="loadingPitch" class="banner-loading">
+                  <el-icon class="rotating"><Loading /></el-icon>
+                  <span>加载中...</span>
+                </div>
+                <div v-else-if="dailyPitchList.length === 0" class="banner-empty">
+                  <span>暂无推荐</span>
+                </div>
+                <div v-else class="banner-scroll" :class="{ 'paused': scrollPaused }">
+                  <div 
+                    v-for="(item, index) in [...dailyPitchList, ...dailyPitchList]" 
+                    :key="`${item.stock_code}-${index}`"
+                    class="banner-item"
+                    @click.stop.prevent="fillStockCode(item.stock_code)"
+                    @mouseenter="scrollPaused = true"
+                    @mouseleave="scrollPaused = false"
+                  >
+                    <span class="item-rank" :class="{ 'top': index % dailyPitchList.length < 3 }">{{ (index % dailyPitchList.length) + 1 }}</span>
+                    <div class="item-main">
+                      <div class="item-row-1">
+                        <span class="item-code">{{ item.stock_code }}</span>
+                        <span class="item-name">{{ item.stock_name }}</span>
+                      </div>
+                      <div class="item-row-2">
+                        <span v-if="item.industry" class="item-industry">{{ item.industry }}</span>
+                        <span v-if="item.score" class="item-score">{{ item.score.toFixed(0) }}分</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <el-button type="text" size="small" @click="loadDailyPitch" :loading="loadingPitch" class="banner-refresh">
+                <el-icon><Refresh /></el-icon>
+              </el-button>
+            </div>
 
           <!-- 快速配置栏 -->
           <div class="quick-config">
@@ -213,18 +275,7 @@
             </div>
           </el-collapse-transition>
 
-          <!-- 费用与余额提示 -->
-          <div v-if="analysisPrice.price > 0" class="cost-bar" :class="{ 'cost-insufficient': authStore.points < analysisPrice.price }">
-            <div class="cost-left">
-              <el-icon><Coin /></el-icon>
-              <span>本次分析消耗 <em>{{ analysisPrice.price }}</em> ⚡</span>
-              <span v-if="analysisPrice.desc" class="cost-desc">· {{ analysisPrice.desc }}</span>
-            </div>
-            <div class="cost-right">
-              <span class="balance-text">余额 {{ authStore.points }} ⚡</span>
-              <el-tag v-if="authStore.points < analysisPrice.price" type="danger" size="small" effect="light">算力不足</el-tag>
-            </div>
-          </div>
+          
         </div>
       </div>
 
@@ -257,9 +308,9 @@
               <span>{{ progressInfo.currentStepDescription || '正在初始化...' }}</span>
             </div>
             <!-- 超过 10 分钟提示可开始新分析 -->
-            <div v-if="progressInfo.elapsedTime >= 600" class="progress-overtime-hint">
+            <div v-if="progressInfo.elapsedTime >= 300" class="progress-overtime-hint">
               <el-icon><InfoFilled /></el-icon>
-              <span>当前分析已超过 10 分钟，您可以输入新的股票代码开始新的分析</span>
+              <span>当前分析已超过 5 分钟，您可以输入新的股票代码开始新的分析</span>
             </div>
           </div>
         </div>
@@ -447,7 +498,9 @@ import {
   Clock,
   ArrowRight,
   Bell,
-  Document
+  Document,
+  Trophy,
+  QuestionFilled
 } from '@element-plus/icons-vue'
 import { analysisApi, type SingleAnalysisRequest } from '@/api/analysis'
 import { stocksApi } from '@/api/stocks'
@@ -627,6 +680,11 @@ const recentAnalyses = ref<AnalysisTask[]>([])
 // 市场快讯数据
 const marketNews = ref<any[]>([])
 const syncingNews = ref(false)
+
+// 每日上榜数据
+const dailyPitchList = ref<Array<{ stock_code: string; stock_name: string; industry?: string; score?: number }>>([])
+const loadingPitch = ref(false)
+const scrollPaused = ref(false)
 
 // 分析费用
 const analysisPrice = ref({ price: 0, unit: '⚡', desc: '' })
@@ -1033,6 +1091,41 @@ const loadMarketNews = async () => {
   }
 }
 
+// 加载每日上榜
+const loadDailyPitch = async () => {
+  loadingPitch.value = true
+  try {
+    const res = await analysisApi.getLatestPitch()
+    console.log(res)
+    const data = res.recommendations
+    if (data && data.data) {
+      dailyPitchList.value = data.data.map((item: any) => ({
+        stock_code: String(item.stock_code || item.symbol || ''),
+        stock_name: String(item.stock_name || item.name || ''),
+        industry: String(item.industry || ''),
+        score: item.score ?? item.total_score ?? null
+      }))
+    } else if (Array.isArray(data)) {
+      dailyPitchList.value = data.map((item: any) => ({
+        stock_code: String(item.stock_code || item.symbol || ''),
+        stock_name: String(item.stock_name || item.name || ''),
+        industry: String(item.industry || ''),
+        score: item.score ?? item.total_score ?? null
+      }))
+    }
+  } catch (error) {
+    console.error('加载每日上榜失败:', error)
+  } finally {
+    loadingPitch.value = false
+  }
+}
+
+// 点击推荐股票填入输入框
+const fillStockCode = (code: string | number) => {
+  analysisForm.stockCode = String(code || '')
+  validateStockCodeInput()
+}
+
 // 同步市场新闻
 const syncMarketNews = async () => {
   try {
@@ -1128,9 +1221,10 @@ onMounted(() => {
   // 初始化粒子
   initParticles()
   fetchAnalysisPrice()
-  // 加载最近分析和市场快讯
+  // 加载最近分析、市场快讯和每日上榜
   loadRecentAnalyses()
   loadMarketNews()
+  loadDailyPitch()
   // 尝试从 sessionStorage 恢复上次未完成/已完成的任务
   tryRestoreTask()
 })
@@ -1401,6 +1495,8 @@ onUnmounted(() => {
 
 .stock-input-wrapper {
   margin-bottom: 24px;
+  border-bottom: 1px solid #e2e8f0;
+  padding-bottom: 24px;
 }
 
 .input-group {
@@ -1507,6 +1603,225 @@ onUnmounted(() => {
   }
 }
 
+// 每日上榜横幅
+@keyframes banner-scroll {
+  0% { transform: translateX(0); }
+  100% { transform: translateX(-50%); }
+}
+
+.daily-pitch-banner {
+  margin-top: 16px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 14px;
+  background: linear-gradient(90deg, #0f172a 0%, #1e293b 50%, #0f172a 100%);
+  border-radius: 10px;
+  position: relative;
+  overflow: hidden;
+
+  // 科技感扫描线
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(6, 182, 212, 0.08), transparent);
+    animation: scan-banner 4s linear infinite;
+  }
+
+  @keyframes scan-banner {
+    0% { left: -50%; }
+    100% { left: 100%; }
+  }
+
+  .banner-label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    padding-right: 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.15);
+    flex-shrink: 0;
+    z-index: 1;
+
+    .el-icon {
+      color: #fbbf24;
+      font-size: 16px;
+    }
+
+    span {
+      font-size: 13px;
+      font-weight: 600;
+      color: #e2e8f0;
+      white-space: nowrap;
+    }
+
+    .info-icon {
+      font-size: 12px;
+      color: #64748b;
+      cursor: help;
+      margin-left: 2px;
+    }
+  }
+
+  .banner-track {
+    flex: 1;
+    overflow: hidden;
+    mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
+    -webkit-mask-image: linear-gradient(90deg, transparent, black 5%, black 95%, transparent);
+  }
+
+  .banner-loading, .banner-empty {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
+    padding: 4px 0;
+    .el-icon { color: #06b6d4; }
+  }
+
+  .banner-scroll {
+    display: flex;
+    width: max-content;
+    animation: banner-scroll 25s linear infinite;
+
+    &.paused {
+      animation-play-state: paused;
+    }
+  }
+
+  .banner-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 12px;
+    margin-right: 8px;
+    cursor: pointer;
+    transition: all 0.2s;
+    background: rgba(255, 255, 255, 0.03);
+    border-radius: 8px;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+
+    &:hover {
+      background: rgba(6, 182, 212, 0.1);
+      border-color: rgba(6, 182, 212, 0.3);
+      .item-code { color: #06b6d4; }
+    }
+
+    .item-rank {
+      font-size: 12px;
+      font-weight: 700;
+      color: #64748b;
+      min-width: 16px;
+      height: 16px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+
+      &.top {
+        color: #fbbf24;
+        text-shadow: 0 0 8px rgba(251, 191, 36, 0.5);
+      }
+    }
+
+    .item-main {
+      display: flex;
+      flex-direction: column;
+      gap: 2px;
+    }
+
+    .item-row-1 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .item-row-2 {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+    }
+
+    .item-code {
+      font-size: 13px;
+      font-weight: 600;
+      color: #06b6d4;
+      font-family: 'SF Mono', 'Monaco', 'Menlo', monospace;
+      transition: color 0.2s;
+    }
+
+    .item-name {
+      font-size: 12px;
+      color: #bcc7d6;
+      white-space: nowrap;
+    }
+
+    .item-industry {
+      font-size: 10px;
+      color: #c0cddf;
+      padding: 1px 5px;
+      background: rgba(100, 116, 139, 0.2);
+      border-radius: 3px;
+      white-space: nowrap;
+    }
+
+    .item-score {
+      font-size: 11px;
+      font-weight: 600;
+      color: #10b981;
+      white-space: nowrap;
+    }
+  }
+
+  .banner-refresh {
+    padding: 4px 6px;
+    color: #64748b;
+    flex-shrink: 0;
+    z-index: 1;
+    transition: all 0.2s;
+
+    &:hover {
+      color: #06b6d4;
+    }
+
+    .el-icon {
+      font-size: 14px;
+    }
+  }
+}
+
+// 移动端横幅适配
+@media (max-width: 480px) {
+  .daily-pitch-banner {
+    padding: 8px 10px;
+    gap: 8px;
+
+    .banner-label {
+      padding-right: 8px;
+      gap: 4px;
+      .banner-title { display: none; }
+
+      .el-icon { font-size: 14px; }
+      span { font-size: 12px; }
+      .info-icon { display: none; }
+    }
+
+    .banner-item {
+      padding: 4px 8px;
+      gap: 6px;
+
+      .item-code { font-size: 12px; }
+      .item-name { font-size: 10px; }
+      .item-industry { font-size: 9px; padding: 0 4px; }
+      .item-score { font-size: 10px; }
+    }
+  }
+}
+
 // 输入消息提示
 .input-message {
   display: flex;
@@ -1581,8 +1896,9 @@ onUnmounted(() => {
   align-items: center;
   gap: 24px;
   flex-wrap: wrap;
-  padding-top: 20px;
-  border-top: 1px solid #e2e8f0;
+  padding-top: 0px;
+  margin-top: 10px;
+
 }
 
 .config-item {
@@ -1711,7 +2027,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  margin-top: 16px;
+  margin-top: 10px;
   padding: 10px 16px;
   background: linear-gradient(135deg, rgba(5,150,105,0.06), rgba(6,182,212,0.08));
   border: 1px solid #cffafe;
@@ -2110,7 +2426,6 @@ onUnmounted(() => {
         overflow: hidden;
 
         :deep(em) {
-          color: #f59e0b;
           font-style: normal;
           font-weight: 600;
         }

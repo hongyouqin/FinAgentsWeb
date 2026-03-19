@@ -151,6 +151,10 @@ export const analysisApi = {
     return request.get('/api/payment/consume/price')
   },
 
+  getLatestPitch(): Promise<any> {
+    return request.get('/api/stock_pitch/latest-pitch?limit=10&include_stats=true')
+  },
+
   // 获取分析历史（用户维度）
   getHistory(params?: {
     page?: number
