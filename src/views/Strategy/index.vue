@@ -94,8 +94,21 @@
             :disabled-date="disabledDate"
             :clearable="false"
             class="date-picker"
+            popper-class="strategy-date-popper"
             @change="onDateChange"
-          />
+          >
+            <template #default="cell">
+              <div class="date-cell" :class="{ 'has-data': isDateAvailable(cell.date) }">
+                <span class="date-text">{{ cell.text }}</span>
+                <span v-if="isDateAvailable(cell.date)" class="date-dot"></span>
+              </div>
+            </template>
+          </el-date-picker>
+          <span class="date-legend">
+            <el-icon class="legend-icon"><Warning /></el-icon>
+            <i class="legend-dot"></i>
+            <span>绿点表示当日有推荐数据</span>
+          </span>
         </div>
         <div class="filter-right">
           <el-button type="primary" :loading="loading" @click="loadStockList">
@@ -347,6 +360,9 @@ const selectedDate = ref<string>(formatDate(new Date()))
 const loading = ref(false)
 const showGuide = ref(true)
 
+// 有数据的日期集合
+const availableDatesSet = ref<Set<string>>(new Set())
+
 // 股票列表
 const stockList = ref<Array<{
   stock_code: string
@@ -379,6 +395,27 @@ function formatDate(date: Date): string {
 // 禁用未来日期
 const disabledDate = (time: Date) => {
   return time.getTime() > Date.now()
+}
+
+// 加载有数据的日期列表
+const loadAvailableDates = async () => {
+  try {
+    const res: any = await strategyApi.getAvailableDates()
+    const data = res.data || res
+    const dates = data.dates || []
+    availableDatesSet.value = new Set(dates.map((d: any) => d.date))
+  } catch (error) {
+    console.error('加载可用日期失败:', error)
+  }
+}
+
+// 判断日期是否有数据
+const isDateAvailable = (date: Date): boolean => {
+  const year = date.getFullYear()
+  const month = String(date.getMonth() + 1).padStart(2, '0')
+  const day = String(date.getDate()).padStart(2, '0')
+  const dateStr = `${year}-${month}-${day}`
+  return availableDatesSet.value.has(dateStr)
 }
 
 // 日期变更
@@ -518,6 +555,7 @@ const openStockPage = (stockCode: string) => {
 
 onMounted(() => {
   initParticles()
+  loadAvailableDates()
   loadStockList()
 })
 </script>
@@ -867,6 +905,60 @@ onMounted(() => {
       border-radius: 10px;
       box-shadow: 0 0 0 1px #e2e8f0;
       &:hover { box-shadow: 0 0 0 1px #06b6d4; }
+    }
+  }
+
+  .date-legend {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 12px;
+    color: #64748b;
+    margin-left: 8px;
+    padding: 4px 10px;
+    background: rgba(245, 158, 11, 0.08);
+    border-radius: 6px;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+
+    .legend-icon {
+      color: #f59e0b;
+      font-size: 14px;
+    }
+
+    .legend-dot {
+      width: 6px;
+      height: 6px;
+      border-radius: 50%;
+      background: #10b981;
+    }
+  }
+}
+
+// 日期单元格样式
+</style>
+
+<style lang="scss">
+// 日期选择器弹框样式（全局，因为 popper 挂载到 body）
+.strategy-date-popper {
+  .date-cell {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100%;
+    position: relative;
+
+    .date-text {
+      line-height: 1;
+    }
+
+    .date-dot {
+      position: absolute;
+      bottom: 0;
+      width: 4px;
+      height: 4px;
+      border-radius: 50%;
+      background: #10b981;
     }
   }
 }
@@ -1270,6 +1362,11 @@ onMounted(() => {
       .date-picker {
         width: 100%;
       }
+    }
+
+    .date-legend {
+      margin-left: 0;
+      margin-top: 4px;
     }
 
     .filter-right {

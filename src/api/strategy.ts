@@ -19,6 +19,16 @@ export interface StockPitch {
   emotim_index: number          // 情绪指数
 }
 
+export interface AvailableDatesResponse {
+  total_dates: number
+  earliest_date: string
+  latest_date: string
+  dates: Array<{
+    date: string
+    recommendation_count: number
+  }>
+}
+
 export const strategyApi = {
   /**
    * 获取每日推荐股票
@@ -26,5 +36,12 @@ export const strategyApi = {
    */
   getDailyPitch(params: DailyPitchParams): Promise<any> {
     return request.get('/api/stock_pitch/daily-pitch', { params })
+  },
+
+  /**
+   * 获取有数据的日期列表
+   */
+  getAvailableDates(): Promise<AvailableDatesResponse> {
+    return request.get('/api/stock_pitch/available-dates')
   }
 }
