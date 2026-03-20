@@ -412,6 +412,28 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/strategy',
+    name: 'Strategy',
+    component: () => import('@/layouts/BasicLayout.vue'),
+    meta: {
+      title: '策略',
+      icon: 'Cpu',
+      requiresAuth: true,
+      transition: 'fade'
+    },
+    children: [
+      {
+        path: '',
+        name: 'StrategyHome',
+        component: () => import('@/views/Strategy/index.vue'),
+        meta: {
+          title: '策略',
+          requiresAuth: true
+        }
+      }
+    ]
+  },
+  {
     path: '/paper',
     name: 'PaperTrading',
     component: () => import('@/layouts/BasicLayout.vue'),

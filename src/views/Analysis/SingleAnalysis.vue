@@ -185,8 +185,12 @@
                   </div>
                 </div>
               </div>
-              <el-button type="text" size="small" @click="loadDailyPitch" :loading="loadingPitch" class="banner-refresh">
+              <!-- <el-button type="text" size="small" @click="loadDailyPitch" :loading="loadingPitch" class="banner-refresh">
                 <el-icon><Refresh /></el-icon>
+              </el-button> -->
+              <el-button type="text" size="small" class="banner-more" @click="goToStrategy">
+                <span>更多</span>
+                <el-icon><ArrowRight /></el-icon>
               </el-button>
             </div>
 
@@ -500,7 +504,8 @@ import {
   Bell,
   Document,
   Trophy,
-  QuestionFilled
+  QuestionFilled,
+  MagicStick
 } from '@element-plus/icons-vue'
 import { analysisApi, type SingleAnalysisRequest } from '@/api/analysis'
 import { stocksApi } from '@/api/stocks'
@@ -1175,6 +1180,11 @@ const goToHistory = () => {
   router.push('/tasks?tab=completed')
 }
 
+// 跳转到策略页面
+const goToStrategy = () => {
+  router.push('/strategy')
+}
+
 // 获取状态类型
 const getStatusType = (status: string): 'success' | 'info' | 'warning' | 'danger' => {
   const statusMap: Record<string, 'success' | 'info' | 'warning' | 'danger'> = {
@@ -1790,6 +1800,30 @@ onUnmounted(() => {
 
     .el-icon {
       font-size: 14px;
+    }
+  }
+
+  .banner-more {
+    display: flex;
+    align-items: center;
+    gap: 2px;
+    padding: 4px 0px;
+    color: #94a3b8;
+    flex-shrink: 0;
+    z-index: 1;
+    transition: all 0.2s;
+    margin-left: 4px;
+
+    &:hover {
+      color: #fbbf24;
+    }
+
+    span {
+      font-size: 12px;
+    }
+
+    .el-icon {
+      font-size: 12px;
     }
   }
 }

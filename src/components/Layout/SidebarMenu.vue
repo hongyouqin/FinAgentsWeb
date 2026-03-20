@@ -27,6 +27,10 @@
       <el-icon><Coin /></el-icon>
       <template #title>算力充值</template>
     </el-menu-item>
+    <el-menu-item index="/strategy">
+      <el-icon><Cpu /></el-icon>
+      <template #title>策略</template>
+    </el-menu-item>
     <!-- <el-menu-item index="/learning">
       <el-icon><Reading /></el-icon>
       <template #title>学习中心</template>
@@ -153,7 +157,8 @@ import {
   InfoFilled,
   CreditCard,
   Coin,
-  Service
+  Service,
+  Cpu,
 } from '@element-plus/icons-vue'
 import qhyQrCode from '../../../assets/qhy.png'
 
