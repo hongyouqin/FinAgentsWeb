@@ -52,7 +52,7 @@
                 </div>
               </div>
             </div>
-            <div class="guide-item">
+            <div class="guide-item" style="margin-top: 10px;">
               <span class="indicator-badge trend">锚定趋势分数</span>
               <div class="indicator-info">
                 <span class="indicator-desc">趋势强度，大于 <strong>0.5</strong> 表示强趋势</span>
@@ -63,7 +63,7 @@
                 </div>
               </div>
             </div>
-            <div class="guide-item">
+            <div class="guide-item" style="margin-top: 10px;">
               <span class="indicator-badge emotion">情绪指数</span>
               <div class="indicator-info">
                 <span class="indicator-desc">
@@ -139,7 +139,7 @@
             <el-table-column label="股票" min-width="160">
               <template #default="{ row }">
                 <div class="stock-cell">
-                  <div class="stock-code">{{ row.stock_code }}</div>
+                  <div class="stock-code clickable" @click.stop="openStockPage(row.stock_code)">{{ row.stock_code }}</div>
                   <div class="stock-name">{{ row.stock_name }}</div>
                 </div>
               </template>
@@ -246,12 +246,12 @@
             v-for="(stock, index) in stockList" 
             :key="stock.stock_code"
             class="stock-card"
-            @click="goToAnalysis(stock.stock_code)"
+           
           >
             <div class="card-header">
               <span class="stock-rank" :class="{ 'top': index < 3 }">{{ index + 1 }}</span>
               <div class="stock-info">
-                <span class="stock-code">{{ stock.stock_code }}</span>
+                <span class="stock-code clickable" @click.stop="openStockPage(stock.stock_code)">{{ stock.stock_code }}</span>
                 <span class="stock-name">{{ stock.stock_name }}</span>
               </div>
               <el-tag v-if="stock.industry" size="small" type="info" effect="plain">
@@ -509,6 +509,13 @@ const goToAnalysis = (stockCode: string) => {
   })
 }
 
+// 打开同花顺股票详情页
+const openStockPage = (stockCode: string) => {
+  // 去掉后缀（如 .SH, .SZ），只保留数字部分
+  const code = stockCode.replace(/\.(SH|SZ|BJ)$/i, '')
+  window.open(`https://stockpage.10jqka.com.cn/${code}`, '_blank')
+}
+
 onMounted(() => {
   initParticles()
   loadStockList()
@@ -555,6 +562,9 @@ onMounted(() => {
   min-height: 100vh;
   background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 60%, #f1f5f9 100%);
   padding-bottom: 48px;
+  overflow-x: hidden;
+  width: 100%;
+  max-width: 100vw;
 }
 
 // Hero Section
@@ -747,11 +757,13 @@ onMounted(() => {
   .color-legend {
     display: flex;
     flex-wrap: wrap;
-    gap: 12px;
+    gap: 8px 12px;
     padding: 8px 12px;
     background: #f8fafc;
     border-radius: 8px;
     border: 1px solid #e2e8f0;
+    max-width: 100%;
+    box-sizing: border-box;
   }
 
   .legend-item {
@@ -813,8 +825,8 @@ onMounted(() => {
   .indicator-desc {
     color: #475569;
     line-height: 1.6;
-   
     gap: 4px;
+    word-break: break-word;
 
     .tip-icon {
       color: #f59e0b;
@@ -912,7 +924,6 @@ onMounted(() => {
     font-size: 56px;
     color: #cbd5e1;
     margin-bottom: 16px;
-    display: block;
   }
 
   h3 {
@@ -982,6 +993,20 @@ onMounted(() => {
     color: #1e293b;
     font-size: 14px;
     font-family: 'SF Mono', 'Monaco', monospace;
+
+    &.clickable {
+      cursor: pointer;
+      color: #0891b2;
+      text-decoration: underline;
+      text-decoration-color: rgba(8, 145, 178, 0.3);
+      text-underline-offset: 2px;
+      transition: all 0.2s;
+
+      &:hover {
+        color: #0e7490;
+        text-decoration-color: #0e7490;
+      }
+    }
   }
 
   .stock-name {
@@ -1089,18 +1114,38 @@ onMounted(() => {
 
     .stock-info {
       flex: 1;
+      min-width: 0;
+      overflow: hidden;
 
       .stock-code {
         font-size: 15px;
         font-weight: 700;
         color: #1e293b;
         font-family: 'SF Mono', 'Monaco', monospace;
+        margin-right: 6px;
+
+        &.clickable {
+          cursor: pointer;
+          color: #0891b2;
+          text-decoration: underline;
+          text-decoration-color: rgba(8, 145, 178, 0.3);
+          text-underline-offset: 2px;
+          transition: all 0.2s;
+
+          &:hover {
+            color: #0e7490;
+            text-decoration-color: #0e7490;
+          }
+        }
       }
 
       .stock-name {
         font-size: 12px;
         color: #64748b;
         margin-top: 2px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
       }
     }
   }
@@ -1110,11 +1155,14 @@ onMounted(() => {
     flex-direction: column;
     gap: 8px;
     margin-bottom: 12px;
+    width: 100%;
+    box-sizing: border-box;
 
     .indicator-row {
       display: flex;
       justify-content: space-between;
       align-items: center;
+      width: 100%;
 
       .indicator-label {
         font-size: 13px;
@@ -1125,13 +1173,14 @@ onMounted(() => {
       .indicator-cell-mobile {
         display: flex;
         align-items: center;
-        gap: 8px;
+        gap: 6px;
+        flex-shrink: 0;
       }
 
       .indicator-value {
-        font-size: 15px;
+        font-size: 14px;
         font-weight: 700;
-        min-width: 45px;
+        min-width: 40px;
         text-align: right;
 
         &.timing {
@@ -1152,7 +1201,7 @@ onMounted(() => {
       }
 
       .indicator-progress-mobile {
-        width: 60px;
+        width: 50px;
         flex-shrink: 0;
       }
     }
@@ -1178,14 +1227,17 @@ onMounted(() => {
 
   .hero-subtitle {
     font-size: 14px;
+    padding: 0 8px;
   }
 
   .content-wrapper {
     margin-top: -28px;
-    padding: 0 16px;
+    padding: 0 12px;
   }
 
   .indicators-guide {
+    padding: 14px 16px;
+
     .guide-item {
       flex-direction: column;
       gap: 6px;
@@ -1194,11 +1246,21 @@ onMounted(() => {
         align-self: flex-start;
       }
     }
+
+    .color-legend {
+      gap: 6px 10px;
+      padding: 6px 10px;
+    }
+
+    .legend-item {
+      font-size: 11px;
+    }
   }
 
   .filter-section {
     flex-direction: column;
     align-items: stretch;
+    padding: 14px 16px;
 
     .filter-left {
       flex-direction: column;
@@ -1217,7 +1279,7 @@ onMounted(() => {
   }
 
   .list-section {
-    padding: 16px;
+    padding: 14px 12px;
   }
 
   .desktop-table {
@@ -1227,11 +1289,56 @@ onMounted(() => {
   .mobile-list {
     display: block;
   }
+
+  .stock-card {
+    padding: 14px 12px;
+
+    .card-header {
+      gap: 10px;
+    }
+  }
 }
 
 @media (max-width: 480px) {
   .hero-title {
     font-size: 24px;
+  }
+
+  .content-wrapper {
+    padding: 0 10px;
+  }
+
+  .indicators-guide {
+    padding: 12px 14px;
+  }
+
+  .filter-section {
+    padding: 12px 14px;
+  }
+
+  .list-section {
+    padding: 12px 10px;
+  }
+
+  .stock-card {
+    padding: 12px 10px;
+
+    .card-indicators {
+      .indicator-row {
+        .indicator-cell-mobile {
+          gap: 4px;
+        }
+
+        .indicator-value {
+          font-size: 13px;
+          min-width: 36px;
+        }
+
+        .indicator-progress-mobile {
+          width: 45px;
+        }
+      }
+    }
   }
 }
 </style>
