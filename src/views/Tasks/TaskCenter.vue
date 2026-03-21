@@ -197,7 +197,7 @@
             <el-table-column prop="stock_code" label="股票" width="90">
               <template #default="{ row }">
                 <div class="stock-info">
-                  <div class="stock-code">{{ row.stock_code || row.stock_symbol }}</div>
+                  <div class="stock-code clickable" @click.stop="openStockPage(row.stock_code || row.stock_symbol)">{{ row.stock_code || row.stock_symbol }}</div>
                   <div v-if="row.stock_name" class="stock-name">{{ row.stock_name }}</div>
                 </div>
               </template>
@@ -308,7 +308,7 @@
           >
             <div class="card-header">
               <div class="stock-info">
-                <div class="stock-code">{{ row.stock_code || row.stock_symbol }}</div>
+                <div class="stock-code clickable" @click.stop="openStockPage(row.stock_code || row.stock_symbol)">{{ row.stock_code || row.stock_symbol }}</div>
                 <div v-if="row.stock_name" class="stock-name">{{ row.stock_name }}</div>
               </div>
               <el-tag :type="getStatusType(row.status)" size="small" effect="light">
@@ -770,6 +770,14 @@ const exportSelected = () => {
 
 const goToAnalysis = () => {
   router.push('/analysis/single')
+}
+
+// 打开股票详情页
+const openStockPage = (stockCode: string) => {
+  if (!stockCode) return
+  // 去掉后缀（如 .SH, .SZ, .BJ），只保留数字部分
+  const code = stockCode.replace(/\.(SH|SZ|BJ)$/i, '')
+  window.open(`/stocks/${code}`, '_blank')
 }
 
 // 工具函数
@@ -1260,6 +1268,21 @@ onUnmounted(() => {
     font-weight: 600;
     color: #1e293b;
     font-size: 14px;
+    font-family: 'SF Mono', 'Monaco', monospace;
+
+    &.clickable {
+      cursor: pointer;
+      color: #0891b2;
+      text-decoration: underline;
+      text-decoration-color: rgba(8, 145, 178, 0.3);
+      text-underline-offset: 2px;
+      transition: all 0.2s;
+
+      &:hover {
+        color: #0e7490;
+        text-decoration-color: #0e7490;
+      }
+    }
   }
 
   .stock-name {

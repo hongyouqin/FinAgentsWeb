@@ -65,6 +65,7 @@ import { ref, onMounted, onUnmounted, watch } from 'vue'
 import { useAppStore } from '@/stores/app'
 import { useNotificationStore } from '@/stores/notifications'
 import { useAuthStore } from '@/stores/auth'
+import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import {
   Sunny,
@@ -73,6 +74,9 @@ import {
   Bell,
   QuestionFilled
 } from '@element-plus/icons-vue'
+
+const router = useRouter()
+const route = useRoute()
 
 const appStore = useAppStore()
 const authStore = useAuthStore()
@@ -98,7 +102,18 @@ function onMarkAllRead() { notifStore.markAllRead() }
 function typeLabel(t: string) { return t === 'analysis' ? '分析' : t === 'alert' ? '预警' : '系统' }
 function tagType(t: string) { return t === 'analysis' ? 'success' : t === 'alert' ? 'warning' : 'info' }
 function toLocal(iso: string) { try { return new Date(iso).toLocaleString() } catch { return iso } }
-function go(n: any) { if (n.link) window.open(n.link, '_blank') }
+function go(n: any) { if (n.link) window.open(n.link, '_blank') } // Changed from hardcoded URL to use n.link
+
+const godetile = (analysis: any) => {
+    router.push({
+      name: 'AnalysisReport',
+      params: { id: analysis.task_id },
+      query: {
+        symbol: analysis.stock_code || analysis.symbol || '',
+        date: analysis.created_at ? analysis.created_at.slice(0, 10) : ''
+      }
+    })
+}
 
 onMounted(() => {
   notifStore.refreshUnreadCount()

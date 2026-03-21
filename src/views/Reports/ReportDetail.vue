@@ -37,14 +37,14 @@
           </div>
           
           <div class="action-section">
-            <el-button
+            <!-- <el-button
               v-if="canApplyToTrading"
               type="success"
               @click="applyToTrading"
             >
               <el-icon><ShoppingCart /></el-icon>
               应用到交易
-            </el-button>
+            </el-button> -->
             <el-dropdown trigger="click" @command="downloadReport">
               <el-button type="primary">
                 <el-icon><Download /></el-icon>

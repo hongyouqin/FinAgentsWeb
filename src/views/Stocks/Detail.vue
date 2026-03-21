@@ -8,9 +8,9 @@
         <el-tag size="small">{{ market || '-' }}</el-tag>
       </div>
       <div class="actions">
-        <el-button @click="onToggleFavorite">
+        <!-- <el-button @click="onToggleFavorite">
           <el-icon><Star /></el-icon> {{ isFav ? '已自选' : '加自选' }}
-        </el-button>
+        </el-button> -->
         <!-- 🔥 港股和美股不显示"同步数据"按钮 -->
         <el-button
           v-if="market !== 'HK' && market !== 'US'"
@@ -23,9 +23,9 @@
         <el-button type="warning" @click="clearCache" :loading="clearCacheLoading">
           <el-icon><Delete /></el-icon> 清除缓存
         </el-button>
-        <el-button type="success" @click="goPaperTrading">
+        <!-- <el-button type="success" @click="goPaperTrading">
           <el-icon><CreditCard /></el-icon> 模拟交易
-        </el-button>
+        </el-button> -->
       </div>
     </div>
 
@@ -108,7 +108,7 @@
     </el-card>
 
     <el-row :gutter="16" class="body">
-      <el-col :span="18">
+      <el-col :xs="24" :sm="24" :md="18" :lg="18">
         <!-- K线蜡烛图 -->
         <el-card shadow="hover">
           <template #header>
@@ -239,7 +239,7 @@
 
       </el-col>
 
-      <el-col :span="6">
+      <el-col :xs="24" :sm="24" :md="6" :lg="6">
         <!-- 基本面快照 -->
         <el-card shadow="hover">
           <template #header><div class="card-hd">基本面快照</div></template>
@@ -274,8 +274,8 @@
           <template #header><div class="card-hd">快捷操作</div></template>
           <div class="quick-actions">
             <el-button type="primary" @click="onAnalyze" :icon="TrendCharts" plain>发起分析</el-button>
-            <el-button @click="onToggleFavorite" :icon="Star">{{ isFav ? '移出自选' : '加入自选' }}</el-button>
-            <el-button type="success" :icon="CreditCard" @click="goPaperTrading">模拟交易</el-button>
+            <!-- <el-button @click="onToggleFavorite" :icon="Star">{{ isFav ? '移出自选' : '加入自选' }}</el-button>
+            <el-button type="success" :icon="CreditCard" @click="goPaperTrading">模拟交易</el-button> -->
           </div>
         </el-card>
       </el-col>
@@ -285,7 +285,7 @@
     <el-dialog
       v-model="showReportsDialog"
       title="📊 详细分析报告"
-      width="80%"
+      :width="dialogWidth"
       :close-on-click-modal="false"
       class="reports-dialog"
     >
@@ -314,7 +314,7 @@
     <el-dialog
       v-model="syncDialogVisible"
       title="同步股票数据"
-      width="500px"
+      :width="syncDialogWidth"
     >
       <el-form :model="syncForm" label-width="120px">
         <el-form-item label="股票代码">
@@ -375,12 +375,19 @@ import VChart from 'vue-echarts'
 import type { EChartsOption } from 'echarts'
 import { favoritesApi } from '@/api/favorites'
 import { useNotificationStore } from '@/stores/notifications'
+import { useWindowSize } from '@vueuse/core'
 
 
 echartsUse([CandlestickChart, GridComponent, TooltipComponent, DataZoomComponent, LegendComponent, TitleComponent, CanvasRenderer])
 
 const route = useRoute()
 const router = useRouter()
+
+// 响应式窗口尺寸
+const { width: windowWidth } = useWindowSize()
+const isMobile = computed(() => windowWidth.value <= 768)
+const dialogWidth = computed(() => isMobile.value ? '95%' : '80%')
+const syncDialogWidth = computed(() => isMobile.value ? '95%' : '500px')
 
 
 // 分析状态
@@ -1183,63 +1190,316 @@ function exportReport() {
 </script>
 
 <style scoped lang="scss">
+// 页面容器
 .stock-detail {
-  display: flex; flex-direction: column; gap: 16px;
+  min-height: 100vh;
+  background: linear-gradient(180deg, #f0f9ff 0%, #f8fafc 60%, #f1f5f9 100%);
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
 }
 
-.header { display: flex; justify-content: space-between; align-items: center; }
-.title { display: flex; align-items: center; gap: 12px; }
-.code { font-size: 22px; font-weight: 700; }
-.name { font-size: 18px; color: var(--el-text-color-regular); }
-.actions { display: flex; gap: 8px; }
-
-.quote-card { border-radius: 12px; }
-.quote { display: flex; flex-direction: column; gap: 8px; }
-.price-row { display: flex; align-items: center; gap: 12px; }
-.price { font-size: 32px; font-weight: 800; }
-.change { font-size: 16px; font-weight: 700; }
-.up { color: #e53935; }
-.down { color: #16a34a; }
-.stats { display: grid; grid-template-columns: repeat(8, 1fr); gap: 10px; margin-top: 6px; }
-.stats .item { display: flex; flex-direction: column; font-size: 12px; color: var(--el-text-color-secondary); }
-.stats .item b { color: var(--el-text-color-primary); font-size: 14px; }
-
-.body { margin-top: 4px; }
-.card-hd { display: flex; align-items: center; justify-content: space-between; }
-.k-chart { height: 320px; }
-.legend { margin-top: 8px; font-size: 12px; color: var(--el-text-color-secondary); }
-
-.news-card .news-list { display: flex; flex-direction: column; }
-.news-item { padding: 10px 12px; border-bottom: 1px solid var(--el-border-color-lighter); transition: background-color .2s ease; }
-.news-item:last-child { border-bottom: none; }
-.news-item:hover { background: var(--el-fill-color-light); border-radius: 8px; }
-.news-item .row { display: flex; align-items: flex-start; justify-content: space-between; gap: 8px; }
-.news-item .left { display: flex; align-items: flex-start; gap: 8px; flex: 1 1 auto; min-width: 0; }
-.news-item .tag { flex: 0 0 auto; }
-.news-item .title { font-weight: 600; display: flex; align-items: center; gap: 6px; flex: 1 1 auto; min-width: 0; }
-.news-item .title a, .news-item .title span { color: var(--el-text-color-primary); text-decoration: none; display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2; overflow: hidden; }
-.news-item .title a:hover { text-decoration: underline; }
-.news-item .ext { color: var(--el-text-color-placeholder); font-size: 14px; }
-.news-item .title:hover .ext { color: var(--el-color-primary); }
-.news-item .right { color: var(--el-text-color-secondary); font-size: 12px; white-space: nowrap; margin-left: 8px; }
-.news-item .meta { font-size: 12px; color: var(--el-text-color-secondary); margin-top: 4px; }
-
-.sentiment { font-size: 12px; }
-.sentiment.pos { color: #ef4444; }
-.sentiment.neu { color: #64748b; }
-.sentiment.neg { color: #10b981; }
-
-.facts { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-.fact { display: flex; flex-direction: column; font-size: 12px; }
-.fact b { font-size: 14px; color: var(--el-text-color-primary); }
-
-.quick-actions { display: flex; flex-direction: column; gap: 8px; }
-
-@media (max-width: 1024px) {
-  .stats { grid-template-columns: repeat(4, 1fr); }
+// 头部区域
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: white;
+  border-radius: 16px;
+  padding: 20px 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  flex-wrap: wrap;
+  gap: 16px;
 }
 
-/* 报告相关样式 */
+.title {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.code {
+  font-size: 22px;
+  font-weight: 700;
+  color: #1e293b;
+}
+
+.name {
+  font-size: 18px;
+  color: #64748b;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+// 报价卡片
+.quote-card {
+  border-radius: 16px !important;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06) !important;
+  border: 1px solid rgba(6, 182, 212, 0.1) !important;
+  overflow: hidden;
+
+  :deep(.el-card__body) {
+    padding: 20px 24px;
+  }
+}
+
+.quote {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.price-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.price {
+  font-size: 32px;
+  font-weight: 800;
+  font-family: 'SF Mono', 'Monaco', monospace;
+}
+
+.change {
+  font-size: 16px;
+  font-weight: 700;
+  padding: 4px 12px;
+  border-radius: 8px;
+}
+
+.up {
+  color: #dc2626;
+  &.change { background: rgba(220, 38, 38, 0.1); }
+}
+
+.down {
+  color: #16a34a;
+  &.change { background: rgba(22, 163, 74, 0.1); }
+}
+
+.stats {
+  display: grid;
+  grid-template-columns: repeat(8, 1fr);
+  gap: 12px;
+  margin-top: 8px;
+  padding: 16px;
+  background: #f8fafc;
+  border-radius: 12px;
+}
+
+.stats .item {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #64748b;
+  gap: 4px;
+
+  b {
+    color: #1e293b;
+    font-size: 14px;
+    font-weight: 600;
+  }
+}
+
+// 主体区域
+.body {
+  margin-top: 0;
+}
+
+// 统一卡片样式
+:deep(.el-card) {
+  border-radius: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: none;
+  margin-bottom: 16px;
+  overflow: hidden;
+
+  .el-card__header {
+    padding: 16px 20px;
+    border-bottom: 1px solid #f1f5f9;
+    background: linear-gradient(135deg, #f8fafc 0%, #ffffff 100%);
+  }
+
+  .el-card__body {
+    padding: 20px;
+  }
+}
+
+.card-hd {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 16px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+// K线图
+.kline-container {
+  position: relative;
+}
+
+.k-chart {
+  height: 320px;
+  width: 100%;
+}
+
+.legend {
+  margin-top: 12px;
+  font-size: 12px;
+  color: #94a3b8;
+  padding: 8px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+}
+
+// 新闻卡片
+.news-card .news-list {
+  display: flex;
+  flex-direction: column;
+}
+
+.news-item {
+  padding: 14px 16px;
+  border-bottom: 1px solid #f1f5f9;
+  transition: all 0.2s ease;
+  border-radius: 8px;
+  margin-bottom: 4px;
+
+  &:last-child {
+    border-bottom: none;
+    margin-bottom: 0;
+  }
+
+  &:hover {
+    background: #f0fffe;
+    border-color: transparent;
+  }
+
+  .row {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+  }
+
+  .left {
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .tag {
+    flex-shrink: 0;
+  }
+
+  .title {
+    font-weight: 600;
+    font-size: 14px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+
+    a, span {
+      color: #1e293b;
+      text-decoration: none;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      -webkit-line-clamp: 2;
+      overflow: hidden;
+    }
+
+    a:hover {
+      color: #0891b2;
+      text-decoration: underline;
+    }
+  }
+
+  .ext {
+    color: #94a3b8;
+    font-size: 14px;
+  }
+
+  .title:hover .ext {
+    color: #0891b2;
+  }
+
+  .right {
+    color: #94a3b8;
+    font-size: 12px;
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+
+  .meta {
+    font-size: 12px;
+    color: #94a3b8;
+    margin-top: 6px;
+  }
+}
+
+// 情绪标签
+.sentiment {
+  font-size: 12px;
+  &.pos { color: #ef4444; }
+  &.neu { color: #64748b; }
+  &.neg { color: #10b981; }
+}
+
+// 基本面快照
+.facts {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+}
+
+.fact {
+  display: flex;
+  flex-direction: column;
+  font-size: 12px;
+  color: #64748b;
+  padding: 10px 12px;
+  background: #f8fafc;
+  border-radius: 8px;
+  gap: 4px;
+
+  b {
+    font-size: 14px;
+    color: #1e293b;
+    font-weight: 600;
+  }
+}
+
+// 快捷操作
+.quick-actions {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+  .el-button {
+    width: 100%;
+    justify-content: center;
+  }
+}
+
+.actions-card {
+  position: sticky;
+  top: 20px;
+}
+
+// 报告相关样式
 .reports-section {
   margin-top: 8px;
 }
@@ -1250,12 +1510,14 @@ function exportReport() {
   align-items: center;
   margin-bottom: 16px;
   margin-top: 8px;
+  flex-wrap: wrap;
+  gap: 12px;
 }
 
 .reports-title {
   font-size: 15px;
   font-weight: 600;
-  color: var(--el-text-color-primary);
+  color: #1e293b;
   display: flex;
   align-items: center;
   gap: 6px;
@@ -1266,7 +1528,7 @@ function exportReport() {
   flex-wrap: wrap;
   gap: 10px;
   padding: 12px;
-  background: var(--el-fill-color-lighter);
+  background: #f8fafc;
   border-radius: 8px;
 }
 
@@ -1275,14 +1537,14 @@ function exportReport() {
   transition: all 0.2s ease;
   font-size: 13px;
   padding: 6px 12px;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+  }
 }
 
-.report-tag:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
-}
-
-/* 报告对话框样式 */
+// 报告对话框样式
 .reports-dialog :deep(.el-dialog__body) {
   padding: 0;
 }
@@ -1291,114 +1553,113 @@ function exportReport() {
   padding: 20px;
 }
 
+// Markdown 样式
 .markdown-body {
   font-size: 14px;
   line-height: 1.8;
-  color: var(--el-text-color-primary);
+  color: #334155;
+
+  h1 {
+    font-size: 24px;
+    font-weight: 700;
+    margin: 20px 0 16px;
+    padding-bottom: 8px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+
+  h2 {
+    font-size: 20px;
+    font-weight: 600;
+    margin: 16px 0 12px;
+  }
+
+  h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin: 12px 0 8px;
+  }
+
+  p { margin: 8px 0; }
+
+  ul, ol {
+    margin: 8px 0;
+    padding-left: 24px;
+  }
+
+  li { margin: 4px 0; }
+
+  code {
+    background: #f1f5f9;
+    padding: 2px 6px;
+    border-radius: 4px;
+    font-family: 'Courier New', monospace;
+  }
+
+  pre {
+    background: #f1f5f9;
+    padding: 12px;
+    border-radius: 8px;
+    overflow-x: auto;
+    margin: 12px 0;
+  }
+
+  blockquote {
+    border-left: 4px solid #0891b2;
+    padding-left: 12px;
+    margin: 12px 0;
+    color: #64748b;
+  }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0;
+  }
+
+  th, td {
+    border: 1px solid #e2e8f0;
+    padding: 8px 12px;
+    text-align: left;
+  }
+
+  th {
+    background: #f8fafc;
+    font-weight: 600;
+  }
 }
 
-.markdown-body h1 {
-  font-size: 24px;
-  font-weight: 700;
-  margin: 20px 0 16px;
-  padding-bottom: 8px;
-  border-bottom: 2px solid var(--el-border-color);
-}
-
-.markdown-body h2 {
-  font-size: 20px;
-  font-weight: 600;
-  margin: 16px 0 12px;
-}
-
-.markdown-body h3 {
-  font-size: 16px;
-  font-weight: 600;
-  margin: 12px 0 8px;
-}
-
-.markdown-body p {
-  margin: 8px 0;
-}
-
-.markdown-body ul, .markdown-body ol {
-  margin: 8px 0;
-  padding-left: 24px;
-}
-
-.markdown-body li {
-  margin: 4px 0;
-}
-
-.markdown-body code {
-  background: var(--el-fill-color-light);
-  padding: 2px 6px;
-  border-radius: 4px;
-  font-family: 'Courier New', monospace;
-}
-
-.markdown-body pre {
-  background: var(--el-fill-color-light);
-  padding: 12px;
-  border-radius: 8px;
-  overflow-x: auto;
-  margin: 12px 0;
-}
-
-.markdown-body blockquote {
-  border-left: 4px solid var(--el-color-primary);
-  padding-left: 12px;
-  margin: 12px 0;
-  color: var(--el-text-color-secondary);
-}
-
-.markdown-body table {
-  width: 100%;
-  border-collapse: collapse;
-  margin: 12px 0;
-}
-
-.markdown-body th, .markdown-body td {
-  border: 1px solid var(--el-border-color);
-  padding: 8px 12px;
-  text-align: left;
-}
-
-.markdown-body th {
-  background: var(--el-fill-color-light);
-  font-weight: 600;
-}
-
+// 分析详情卡片
 .analysis-detail-card .detail {
   display: flex;
   flex-direction: column;
   gap: 16px;
 }
 
-/* 分析时间元信息 */
 .analysis-meta {
   display: flex;
   align-items: center;
   gap: 24px;
-  padding: 8px 12px;
-  background: var(--el-fill-color-lighter);
-  border-radius: 6px;
+  padding: 10px 14px;
+  background: #f8fafc;
+  border-radius: 8px;
   font-size: 13px;
-  color: var(--el-text-color-secondary);
+  color: #64748b;
+  flex-wrap: wrap;
+
+  .analysis-time,
+  .confidence {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+
+  .el-icon {
+    font-size: 14px;
+    color: #0891b2;
+  }
 }
 
-.analysis-meta .analysis-time,
-.analysis-meta .confidence {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.analysis-meta .el-icon {
-  font-size: 14px;
-}
-
-/* 投资建议盒子 - 重点突出 */
+// 投资建议盒子
 .recommendation-box {
   background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
   border-radius: 12px;
@@ -1406,11 +1667,11 @@ function exportReport() {
   box-shadow: 0 4px 16px rgba(102, 126, 234, 0.25);
   transition: all 0.3s ease;
   margin: 16px 0;
-}
 
-.recommendation-box:hover {
-  box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
-  transform: translateY(-2px);
+  &:hover {
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.35);
+    transform: translateY(-2px);
+  }
 }
 
 .recommendation-header {
@@ -1421,10 +1682,10 @@ function exportReport() {
   color: rgba(255, 255, 255, 0.95);
   font-size: 15px;
   font-weight: 600;
-}
 
-.recommendation-header .icon {
-  font-size: 20px;
+  .icon {
+    font-size: 20px;
+  }
 }
 
 .recommendation-content {
@@ -1444,7 +1705,7 @@ function exportReport() {
   white-space: pre-wrap;
 }
 
-/* 分析摘要 */
+// 分析摘要
 .summary-section {
   padding: 18px 20px;
   background: #f8fafc;
@@ -1461,11 +1722,11 @@ function exportReport() {
   font-weight: 600;
   color: #1e40af;
   margin-bottom: 12px;
-}
 
-.summary-title .el-icon {
-  font-size: 18px;
-  color: #3b82f6;
+  .el-icon {
+    font-size: 18px;
+    color: #3b82f6;
+  }
 }
 
 .summary-text {
@@ -1477,23 +1738,24 @@ function exportReport() {
   white-space: pre-wrap;
 }
 
-/* 同步状态提示 */
+// 同步状态提示
 .sync-status {
   display: flex;
   align-items: center;
   gap: 6px;
   margin-top: 12px;
-  padding: 8px 12px;
+  padding: 10px 14px;
   background: #f0f9ff;
-  border-radius: 6px;
+  border-radius: 8px;
   border: 1px solid #bae6fd;
   font-size: 13px;
   color: #0369a1;
-}
+  flex-wrap: wrap;
 
-.sync-status .el-icon {
-  font-size: 14px;
-  color: #0284c7;
+  .el-icon {
+    font-size: 14px;
+    color: #0284c7;
+  }
 }
 
 .sync-info {
@@ -1501,5 +1763,257 @@ function exportReport() {
   align-items: center;
   gap: 4px;
   flex-wrap: wrap;
+}
+
+// 移动端适配 - 768px
+@media (max-width: 768px) {
+  .stock-detail {
+    padding: 12px;
+    gap: 12px;
+  }
+
+  .header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 16px;
+    gap: 12px;
+  }
+
+  .title {
+    width: 100%;
+  }
+
+  .code {
+    font-size: 20px;
+  }
+
+  .name {
+    font-size: 16px;
+  }
+
+  .actions {
+    width: 100%;
+    justify-content: flex-start;
+
+    .el-button {
+      padding: 8px 12px;
+      font-size: 13px;
+
+      span {
+        display: none;
+      }
+
+      .el-icon {
+        margin: 0;
+      }
+    }
+  }
+
+  .quote-card :deep(.el-card__body) {
+    padding: 16px;
+  }
+
+  .price {
+    font-size: 28px;
+  }
+
+  .change {
+    font-size: 14px;
+    padding: 3px 8px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(4, 1fr);
+    gap: 8px;
+    padding: 12px;
+  }
+
+  .stats .item {
+    font-size: 11px;
+
+    b {
+      font-size: 13px;
+    }
+  }
+
+  .k-chart {
+    height: 260px;
+  }
+
+  .legend {
+    font-size: 11px;
+    padding: 6px 10px;
+  }
+
+  :deep(.el-card) {
+    border-radius: 12px;
+    margin-bottom: 12px;
+
+    .el-card__header {
+      padding: 12px 16px;
+    }
+
+    .el-card__body {
+      padding: 16px;
+    }
+  }
+
+  .card-hd {
+    font-size: 15px;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+
+  .news-item {
+    padding: 12px;
+
+    .title {
+      font-size: 13px;
+    }
+
+    .right {
+      display: none;
+    }
+
+    .meta {
+      font-size: 11px;
+    }
+  }
+
+  .facts {
+    gap: 8px;
+  }
+
+  .fact {
+    padding: 8px 10px;
+    font-size: 11px;
+
+    b {
+      font-size: 13px;
+    }
+  }
+
+  .quick-actions {
+    flex-direction: row;
+    flex-wrap: wrap;
+
+    .el-button {
+      flex: 1;
+      min-width: calc(50% - 5px);
+    }
+  }
+
+  .actions-card {
+    position: static;
+  }
+
+  .analysis-meta {
+    gap: 12px;
+    padding: 8px 12px;
+    font-size: 12px;
+  }
+
+  .recommendation-box {
+    padding: 16px;
+    margin: 12px 0;
+  }
+
+  .recommendation-content {
+    padding: 12px 16px;
+  }
+
+  .recommendation-text {
+    font-size: 14px;
+  }
+
+  .summary-section {
+    padding: 14px 16px;
+  }
+
+  .reports-preview {
+    padding: 10px;
+    gap: 8px;
+  }
+
+  .report-tag {
+    font-size: 12px;
+    padding: 4px 10px;
+  }
+
+  .report-content {
+    padding: 16px;
+  }
+
+  // 同步对话框表单
+  :deep(.el-form--inline) {
+    .el-form-item {
+      display: block;
+      width: 100%;
+      margin-right: 0;
+      margin-bottom: 16px;
+    }
+
+    .el-form-item__content {
+      width: 100%;
+    }
+
+    .el-input,
+    .el-select,
+    .el-date-picker {
+      width: 100% !important;
+    }
+  }
+}
+
+// 移动端适配 - 480px
+@media (max-width: 480px) {
+  .stock-detail {
+    padding: 10px;
+  }
+
+  .header {
+    padding: 14px;
+  }
+
+  .code {
+    font-size: 18px;
+  }
+
+  .name {
+    font-size: 14px;
+  }
+
+  .price {
+    font-size: 24px;
+  }
+
+  .stats {
+    grid-template-columns: repeat(2, 1fr);
+  }
+
+  .k-chart {
+    height: 220px;
+  }
+
+  .news-item {
+    padding: 10px;
+
+    .left {
+      flex-direction: column;
+      gap: 6px;
+    }
+  }
+
+  .quick-actions .el-button {
+    min-width: 100%;
+  }
+
+  .markdown-body {
+    font-size: 13px;
+
+    h1 { font-size: 20px; }
+    h2 { font-size: 17px; }
+    h3 { font-size: 15px; }
+  }
 }
 </style>
