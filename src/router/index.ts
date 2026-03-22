@@ -412,6 +412,28 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/invite-codes',
+    name: 'InviteCodes',
+    component: () => import('@/layouts/BasicLayout.vue'),
+    meta: {
+      title: '邀请码',
+      icon: 'Ticket',
+      requiresAuth: true,
+      transition: 'fade'
+    },
+    children: [
+      {
+        path: '',
+        name: 'InviteCodesHome',
+        component: () => import('@/views/User/InviteCodes.vue'),
+        meta: {
+          title: '邀请码',
+          requiresAuth: true
+        }
+      }
+    ]
+  },
+  {
     path: '/strategy',
     name: 'Strategy',
     component: () => import('@/layouts/BasicLayout.vue'),

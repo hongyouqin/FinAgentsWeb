@@ -55,6 +55,10 @@
             <el-icon><List /></el-icon>
             算力记录
           </el-dropdown-item>
+          <el-dropdown-item command="invite">
+            <el-icon><Ticket /></el-icon>
+            邀请码
+          </el-dropdown-item>
           <el-dropdown-item command="settings">
             <el-icon><Setting /></el-icon>
             系统设置
@@ -75,7 +79,7 @@ import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
-import { User, Setting, SwitchButton, Coin, Wallet, ArrowRight, List } from '@element-plus/icons-vue'
+import { User, Setting, SwitchButton, Coin, Wallet, ArrowRight, List, Ticket } from '@element-plus/icons-vue'
 import { useTxDialog } from '@/composables/useTxDialog'
 
 const router = useRouter()
@@ -104,6 +108,9 @@ const handleCommand = async (command: string) => {
       break
     case 'tx':
       openTxDialog()
+      break
+    case 'invite':
+      router.push('/invite-codes')
       break
     case 'settings':
       router.push('/settings')

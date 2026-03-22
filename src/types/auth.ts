@@ -65,6 +65,7 @@ export interface SendSmsRequest {
 
 // 注册表单
 export interface RegisterForm {
+  invite_code: string
   username: string
   email: string
   phone: string

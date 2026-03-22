@@ -42,6 +42,16 @@
           size="large"
           class="register-form"
         >
+          <!-- 邀请码 -->
+          <el-form-item label="邀请码" prop="inviteCode">
+            <el-input
+              v-model="registerForm.inviteCode"
+              placeholder="请输入邀请码"
+              prefix-icon="Ticket"
+              clearable
+            />
+          </el-form-item>
+
           <!-- 用户名 -->
           <el-form-item label="用户名" prop="username">
             <el-input
@@ -191,6 +201,7 @@ const particles = ref<Array<{
 
 // 注册表单
 const registerForm = reactive({
+  inviteCode: '',
   username: '',
   phone: '',
   smsCode: '',
@@ -257,6 +268,10 @@ const agreementValidator = (rule: any, value: boolean, callback: any) => {
 
 // 表单验证规则
 const registerRules = {
+  inviteCode: [
+    { required: true, message: '请输入邀请码', trigger: 'blur' },
+    { min: 4, max: 32, message: '邀请码长度为4-32个字符', trigger: 'blur' }
+  ],
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '用户名长度为3-20个字符', trigger: 'blur' }
@@ -343,6 +358,7 @@ const handleRegister = async () => {
 
     // 构造注册请求数据
     const registerData: RegisterForm = {
+      invite_code: registerForm.inviteCode,
       username: registerForm.username,
       phone: registerForm.phone,
       sms_code: registerForm.smsCode,
