@@ -404,6 +404,13 @@ const loadAvailableDates = async () => {
     const data = res.data || res
     const dates = data.dates || []
     availableDatesSet.value = new Set(dates.map((d: any) => d.date))
+    
+    // 设置为最新有数据的日期
+    if (dates.length > 0) {
+      // 日期按降序排列，取第一个（最新的）
+      const sortedDates = dates.map((d: any) => d.date).sort((a: string, b: string) => b.localeCompare(a))
+      selectedDate.value = sortedDates[0]
+    }
   } catch (error) {
     console.error('加载可用日期失败:', error)
   }
@@ -553,9 +560,9 @@ const openStockPage = (stockCode: string) => {
   window.open(`https://stockpage.10jqka.com.cn/${code}`, '_blank')
 }
 
-onMounted(() => {
+onMounted(async () => {
   initParticles()
-  loadAvailableDates()
+  await loadAvailableDates()
   loadStockList()
 })
 </script>
