@@ -214,7 +214,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="进度" width="180">
+            <el-table-column label="进度" width="200">
               <template #default="{ row }">
                 <div class="progress-cell">
                   <el-progress
@@ -227,7 +227,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column prop="start_time" label="开始时间" width="200">
+            <el-table-column prop="start_time" label="开始时间" >
               <template #default="{ row }">
                 <div class="time-cell">
                   <el-icon><Clock /></el-icon>
@@ -436,8 +436,9 @@ import {
   ArrowUp,
   ArrowDown
 } from '@element-plus/icons-vue'
-import { analysisApi } from '@/api/analysis'
+import { analysisApi, type SingleAnalysisRequest } from '@/api/analysis'
 import { marked } from 'marked'
+import { convertAnalystNamesToIds } from '@/constants/analysts'
 import TaskResultDialog from '@/components/Global/TaskResultDialog.vue'
 import TaskReportDialog from '@/components/Global/TaskReportDialog.vue'
 
@@ -681,8 +682,70 @@ const openReport = (row: any) => {
   router.push({ name: 'ReportDetail', params: { id } })
 }
 
-const retryTask = (row: any) => {
-  ElMessage.info('重试功能待实现')
+const retryTask = async (row: any) => {
+  try {
+    const symbol = row.stock_code || row.stock_symbol || row.symbol
+    if (!symbol) {
+      ElMessage.error('无法获取股票代码，无法重试')
+      return
+    }
+
+    await ElMessageBox.confirm(
+      `确定要重试分析 "${row.stock_name || symbol}" 吗？`,
+      '确认重试',
+      {
+        confirmButtonText: '确定',
+        cancelButtonText: '取消',
+        type: 'info'
+      }
+    )
+
+    loading.value = true
+
+    const marketType = row.market_type || 'A股'
+    const request: SingleAnalysisRequest = {
+      symbol,
+      stock_code: symbol,
+      parameters: {
+        market_type: marketType,
+        analysis_date: new Date().toISOString().split('T')[0],
+        research_depth: '标准分析',
+        selected_analysts: convertAnalystNamesToIds(['市场分析师', '基本面分析师', '新闻分析师']),
+        include_sentiment: true,
+        include_risk: true,
+        language: 'zh-CN',
+        quick_analysis_model: 'deepseek-chat',
+        deep_analysis_model: 'deepseek-chat'
+      }
+    }
+
+    const retryRes = await analysisApi.startSingleAnalysis(request)
+
+    if ((retryRes as any)?.success || (retryRes as any)?.data?.task_id || (retryRes as any)?.task_id) {
+      const taskId = row.task_id || row.analysis_id || row.id
+      if (taskId) {
+        try {
+          await analysisApi.deleteTask(taskId)
+        } catch (deleteError) {
+          console.warn('删除原任务失败:', deleteError)
+        }
+      }
+      ElMessage.success('任务已重新提交')
+      activeTab.value = 'running'
+      
+      await loadList()
+      setupPolling()
+    } else {
+      ElMessage.error((retryRes as any)?.message || '重试失败')
+    }
+  } catch (e: any) {
+    if (e !== 'cancel' && e !== 'close') {
+      console.error('重试任务失败:', e)
+      ElMessage.error(e?.message || '重试失败')
+    }
+  } finally {
+    loading.value = false
+  }
 }
 
 const showErrorDetail = async (row: any) => {
