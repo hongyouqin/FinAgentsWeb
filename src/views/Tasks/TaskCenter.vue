@@ -441,6 +441,9 @@ import { marked } from 'marked'
 import { convertAnalystNamesToIds } from '@/constants/analysts'
 import TaskResultDialog from '@/components/Global/TaskResultDialog.vue'
 import TaskReportDialog from '@/components/Global/TaskReportDialog.vue'
+import { useAuthStore } from '@/stores/auth'
+
+const authStore = useAuthStore()
 
 marked.setOptions({ breaks: true, gfm: true })
 
@@ -732,8 +735,9 @@ const retryTask = async (row: any) => {
       }
       ElMessage.success('任务已重新提交')
       activeTab.value = 'running'
-      
+      // 刷新积分余额
       await loadList()
+      authStore.forceRefreshBalance()
       setupPolling()
     } else {
       ElMessage.error((retryRes as any)?.message || '重试失败')
