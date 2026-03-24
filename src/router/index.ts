@@ -545,7 +545,7 @@ router.beforeEach(async (to, from, next) => {
       console.warn('刷新积分余额失败:', err)
     })
     // 确保积分自动刷新定时器已启动
-    authStore.startBalanceAutoRefresh(20000)
+    authStore.startBalanceAutoRefresh(30000)
   }
 
   // 如果已登录且访问登录页或首页，重定向到仪表板
