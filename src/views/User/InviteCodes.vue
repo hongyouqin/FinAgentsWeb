@@ -27,8 +27,25 @@
     </div>
 
     <div class="content-wrapper">
+      <!-- Tab 切换 -->
+      <div class="tab-container">
+        <div
+          v-for="tab in tabs"
+          :key="tab.name"
+          class="tab-item"
+          :class="{ active: activeTab === tab.name }"
+          @click="activeTab = tab.name; loadData()"
+        >
+          <el-icon :size="16">
+            <component :is="tab.icon" />
+          </el-icon>
+          <span>{{ tab.label }}</span>
+        </div>
+      </div>
+
       <!-- 警告提示 -->
       <el-alert
+        v-if="activeTab === 'codes'"
         type="warning"
         :closable="false"
         show-icon
@@ -47,7 +64,7 @@
       </el-alert>
 
       <!-- 操作区域 -->
-      <div class="action-section">
+      <div class="action-section" v-if="activeTab === 'codes'" >
         <div class="action-left">
           <el-button
             type="primary"
@@ -65,155 +82,290 @@
           </span> -->
         </div>
         <el-button
-          :loading="loading"
-          @click="loadCodes"
-          circle
-          class="refresh-btn"
-        >
-          <el-icon><Refresh /></el-icon>
-        </el-button>
-      </div>
+    :loading="loading"
+    @click="loadData"
+    circle
+    class="refresh-btn"
+  >
+    <el-icon><Refresh /></el-icon>
+  </el-button>
+</div>
 
-      <!-- 邀请码列表 -->
-      <div class="list-section">
-        <div class="list-header">
-          <span class="section-title">邀请码列表</span>
-          <el-tag type="info" size="small" effect="plain">共 {{ codeList.length }} 个</el-tag>
-        </div>
+<!-- 邀请码列表 -->
+<div v-if="activeTab === 'codes'" class="list-section">
+  <div class="list-header">
+    <span class="section-title">邀请码列表</span>
+    <el-tag type="info" size="small" effect="plain">共 {{ codeList.length }} 个</el-tag>
+  </div>
 
-        <!-- 加载状态 -->
-        <div v-if="loading" class="loading-container">
-          <el-icon class="rotating"><Loading /></el-icon>
-          <span>加载中...</span>
-        </div>
+  <!-- 加载状态 -->
+  <div v-if="loading" class="loading-container">
+    <el-icon class="rotating"><Loading /></el-icon>
+    <span>加载中...</span>
+  </div>
 
-        <!-- 空状态 -->
-        <div v-else-if="codeList.length === 0" class="empty-state">
-          <el-icon class="empty-icon"><Ticket /></el-icon>
-          <h3>暂无邀请码</h3>
-          <p>点击上方按钮生成您的第一个邀请码</p>
-        </div>
+  <!-- 空状态 -->
+  <div v-else-if="codeList.length === 0" class="empty-state">
+    <el-icon class="empty-icon"><Ticket /></el-icon>
+    <h3>暂无邀请码</h3>
+    <p>点击上方按钮生成您的第一个邀请码</p>
+  </div>
 
-        <!-- 桌面端表格 -->
-        <div v-else class="desktop-table">
-          <el-table :data="codeList" style="width: 100%">
-            <el-table-column label="序号" width="70" align="center">
-              <template #default="{ $index }">
-                <span class="index-badge">{{ $index + 1 }}</span>
-              </template>
-            </el-table-column>
+  <!-- 桌面端表格 -->
+  <div v-else class="desktop-table">
+    <el-table :data="codeList" style="width: 100%">
+      <el-table-column label="序号" width="70" align="center">
+        <template #default="{ $index }">
+          <span class="index-badge">{{ $index + 1 }}</span>
+        </template>
+      </el-table-column>
 
-            <el-table-column label="邀请码" min-width="200">
-              <template #default="{ row }">
-                <div class="code-cell">
-                  <span class="code-text">{{ row.code }}</span>
-                  <el-button size="small" text type="primary" @click="copyCode(row.code)">
-                    <el-icon><CopyDocument /></el-icon>
-                  </el-button>
-                </div>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="生成时间" width="180">
-              <template #default="{ row }">
-                <span class="time-text">{{ formatTime(row.created_at_datetime) }}</span>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="过期时间" width="180">
-              <template #default="{ row }">
-                <span class="time-text">{{ formatTime(row.expire_at_datetime) }}</span>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="状态" width="120" align="center">
-              <template #default="{ row }">
-                <el-tag
-                  :type="getStatusType(row)"
-                  size="small"
-                  effect="light"
-                >
-                  {{ getStatusText(row) }}
-                </el-tag>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="使用情况" width="120" align="center">
-              <template #default="{ row }">
-                <span class="usage-text">{{ row.used_count }} / {{ row.max_uses }}</span>
-              </template>
-            </el-table-column>
-          </el-table>
-        </div>
-
-        <!-- 分页 -->
-        <div v-if="pagination.total > 0" class="pagination-wrapper desktop-pagination">
-          <el-pagination
-            v-model:current-page="pagination.page"
-            v-model:page-size="pagination.pageSize"
-            :total="pagination.total"
-            :page-sizes="[10, 20, 50]"
-            layout="total, sizes, prev, pager, next"
-            @size-change="handleSizeChange"
-            @current-change="handlePageChange"
-          />
-        </div>
-
-        <!-- 移动端卡片 -->
-        <div v-if="codeList.length > 0" class="mobile-list">
-          <div
-            v-for="(item, index) in codeList"
-            :key="item.code"
-            class="code-card"
-            :class="{ 'is-valid': item.is_valid, 'is-invalid': !item.is_valid }"
-          >
-            <div class="card-header">
-              <span class="card-index">#{{ index + 1 }}</span>
-              <el-tag
-                :type="getStatusType(item)"
-                size="small"
-                effect="light"
-              >
-                {{ getStatusText(item) }}
-              </el-tag>
-            </div>
-            <div class="card-body">
-              <div class="code-row">
-                <span class="code-value">{{ item.code }}</span>
-                <el-button size="small" text type="primary" @click="copyCode(item.code)">
-                  <el-icon><CopyDocument /></el-icon>
-                </el-button>
-              </div>
-              <div class="info-row">
-                <span class="info-label">生成时间</span>
-                <span class="info-value">{{ formatTime(item.created_at_datetime) }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">过期时间</span>
-                <span class="info-value">{{ formatTime(item.expire_at_datetime) }}</span>
-              </div>
-              <div class="info-row">
-                <span class="info-label">使用情况</span>
-                <span class="info-value">{{ item.used_count }} / {{ item.max_uses }}</span>
-              </div>
-            </div>
+      <el-table-column label="邀请码" min-width="200">
+        <template #default="{ row }">
+          <div class="code-cell">
+            <span class="code-text">{{ row.code }}</span>
+            <el-button size="small" text type="primary" @click="copyCode(row.code)">
+              <el-icon><CopyDocument /></el-icon>
+            </el-button>
           </div>
-        </div>
+        </template>
+      </el-table-column>
 
-        <!-- 移动端分页 -->
-        <div v-if="pagination.total > 0" class="pagination-wrapper mobile-pagination">
-          <el-pagination
-            v-model:current-page="pagination.page"
-            :total="pagination.total"
-            :page-size="pagination.pageSize"
-            layout="prev, pager, next"
-            small
-            @current-change="handlePageChange"
-          />
+      <el-table-column label="生成时间" width="180">
+        <template #default="{ row }">
+          <span class="time-text">{{ formatTime(row.created_at_datetime) }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="过期时间" width="180">
+        <template #default="{ row }">
+          <span class="time-text">{{ formatTime(row.expire_at_datetime) }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="状态" width="120" align="center">
+        <template #default="{ row }">
+          <el-tag
+            :type="getStatusType(row)"
+            size="small"
+            effect="light"
+          >
+            {{ getStatusText(row) }}
+          </el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="使用情况" width="120" align="center">
+        <template #default="{ row }">
+          <span class="usage-text">{{ row.used_count }} / {{ row.max_uses }}</span>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+
+  <!-- 分页 -->
+  <div v-if="pagination.total > 0" class="pagination-wrapper desktop-pagination">
+    <el-pagination
+      v-model:current-page="pagination.page"
+      v-model:page-size="pagination.pageSize"
+      :total="pagination.total"
+      :page-sizes="[10, 20, 50]"
+      layout="total, sizes, prev, pager, next"
+      @size-change="handleSizeChange"
+      @current-change="handlePageChange"
+    />
+  </div>
+
+  <!-- 移动端卡片 -->
+  <div v-if="codeList.length > 0" class="mobile-list">
+    <div
+      v-for="(item, index) in codeList"
+      :key="item.code"
+      class="code-card"
+      :class="{ 'is-valid': item.is_valid, 'is-invalid': !item.is_valid }"
+    >
+      <div class="card-header">
+        <span class="card-index">#{{ index + 1 }}</span>
+        <el-tag
+          :type="getStatusType(item)"
+          size="small"
+          effect="light"
+        >
+          {{ getStatusText(item) }}
+        </el-tag>
+      </div>
+      <div class="card-body">
+        <div class="code-row">
+          <span class="code-value">{{ item.code }}</span>
+          <el-button size="small" text type="primary" @click="copyCode(item.code)">
+            <el-icon><CopyDocument /></el-icon>
+          </el-button>
+        </div>
+        <div class="info-row">
+          <span class="info-label">生成时间</span>
+          <span class="info-value">{{ formatTime(item.created_at_datetime) }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">过期时间</span>
+          <span class="info-value">{{ formatTime(item.expire_at_datetime) }}</span>
+        </div>
+        <div class="info-row">
+          <span class="info-label">使用情况</span>
+          <span class="info-value">{{ item.used_count }} / {{ item.max_uses }}</span>
         </div>
       </div>
     </div>
   </div>
+
+  <!-- 移动端分页 -->
+  <div v-if="pagination.total > 0" class="pagination-wrapper mobile-pagination">
+    <el-pagination
+      v-model:current-page="pagination.page"
+      :total="pagination.total"
+      :page-size="pagination.pageSize"
+      layout="prev, pager, next"
+      small
+      @current-change="handlePageChange"
+    />
+  </div>
+</div>
+
+<!-- 已邀请用户列表 -->
+<div v-if="activeTab === 'invited'" class="list-section">
+  <div class="list-header">
+    <span class="section-title">已邀请用户</span>
+    <el-tag type="info" size="small" effect="plain">共 {{ invitedUsers.length }} 人</el-tag>
+  </div>
+
+  <!-- 加载状态 -->
+  <div v-if="loading" class="loading-container">
+    <el-icon class="rotating"><Loading /></el-icon>
+    <span>加载中...</span>
+  </div>
+
+  <!-- 空状态 -->
+  <div v-else-if="invitedUsers.length === 0" class="empty-state">
+    <el-icon class="empty-icon"><User /></el-icon>
+    <h3>暂无邀请用户</h3>
+    <p>生成邀请码并分享给好友，邀请他们加入</p>
+  </div>
+
+  <!-- 桌面端表格 -->
+  <div v-else class="desktop-table">
+    <el-table :data="invitedUsers" style="width: 100%">
+      <el-table-column label="序号" width="70" align="center">
+        <template #default="{ $index }">
+          <span class="index-badge">{{ $index + 1 }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="用户名" min-width="150">
+        <template #default="{ row }">
+          <span class="username-text">{{ row.username }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="手机号" min-width="150">
+        <template #default="{ row }">
+          <span class="phone-text">{{ row.phone }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="邀请时间" width="180">
+        <template #default="{ row }">
+          <span class="time-text">{{ formatTime(row.invited_at) }}</span>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="奖励算力" width="120" align="center">
+        <template #default="{ row }">
+          <el-tag type="primary" size="small" effect="light">
+            {{ row.reward_granted }} ⚡
+          </el-tag>
+        </template>
+      </el-table-column>
+
+      <el-table-column label="状态" width="120" align="center">
+        <template #default="{ row }">
+          <el-tag
+            :type="row.status === 'active' ? 'success' : 'warning'"
+            size="small"
+            effect="light"
+          >
+            {{ row.status === 'active' ? '活跃' : '未激活' }}
+          </el-tag>
+        </template>
+      </el-table-column>
+    </el-table>
+  </div>
+
+  <!-- 分页 -->
+  <div v-if="pagination.total > 0" class="pagination-wrapper desktop-pagination">
+    <el-pagination
+      v-model:current-page="pagination.page"
+      v-model:page-size="pagination.pageSize"
+      :total="pagination.total"
+      :page-sizes="[10, 20, 50]"
+      layout="total, sizes, prev, pager, next"
+      @size-change="handleSizeChange"
+      @current-change="handlePageChange"
+    />
+  </div>
+
+  <!-- 移动端卡片 -->
+  <div v-if="invitedUsers.length > 0" class="mobile-list">
+    <div
+      v-for="(item, index) in invitedUsers"
+      :key="item.user_id"
+      class="user-card"
+    >
+      <div class="card-header">
+        <span class="card-index">#{{ index + 1 }}</span>
+        <el-tag
+          :type="item.status === 'active' ? 'success' : 'warning'"
+          size="small"
+          effect="light"
+        >
+          {{ item.status === 'active' ? '活跃' : '未激活' }}
+        </el-tag>
+      </div>
+      <div class="card-body">
+        <div class="user-info">
+          <div class="user-row">
+            <span class="info-label">用户名</span>
+            <span class="info-value">{{ item.username }}</span>
+          </div>
+          <div class="user-row">
+            <span class="info-label">手机号</span>
+            <span class="info-value">{{ item.phone }}</span>
+          </div>
+          <div class="user-row">
+            <span class="info-label">邀请时间</span>
+            <span class="info-value">{{ formatTime(item.invited_at) }}</span>
+          </div>
+          <div class="user-row">
+            <span class="info-label">奖励算力</span>
+            <span class="info-value">{{ item.reward_granted }} ⚡</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- 移动端分页 -->
+  <div v-if="pagination.total > 0" class="pagination-wrapper mobile-pagination">
+    <el-pagination
+      v-model:current-page="pagination.page"
+      :total="pagination.total"
+      :page-size="pagination.pageSize"
+      layout="prev, pager, next"
+      small
+      @current-change="handlePageChange"
+    />
+  </div>
+</div>
+</div>
+</div>
 </template>
 
 <script setup lang="ts">
@@ -221,6 +373,7 @@ import { ref, computed, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Ticket,
+  User,
   Warning,
   Plus,
   InfoFilled,
@@ -232,9 +385,16 @@ import { inviteApi, type InviteCode } from '@/api/invite'
 
 defineOptions({ name: 'InviteCodes' })
 
+const activeTab = ref<'codes'|'invited'>('codes')
 const loading = ref(false)
 const generating = ref(false)
 const codeList = ref<InviteCode[]>([])
+const invitedUsers = ref<any[]>([])
+
+const tabs = ref([
+  { name: 'codes', label: '邀请码', icon: Ticket },
+  { name: 'invited', label: '已邀请用户', icon: User }
+])
 
 // 分页
 const pagination = ref({
@@ -261,6 +421,15 @@ const canGenerate = computed(() => {
   return codeList.value.every(code => code.is_used_up || code.is_expired || !code.is_valid)
 })
 
+// 加载数据
+const loadData = async () => {
+  if (activeTab.value === 'codes') {
+    await loadCodes()
+  } else {
+    await loadInvitedUsers()
+  }
+}
+
 // 加载邀请码列表
 const loadCodes = async () => {
   loading.value = true
@@ -280,16 +449,35 @@ const loadCodes = async () => {
   }
 }
 
+// 加载已邀请用户列表
+const loadInvitedUsers = async () => {
+  loading.value = true
+  try {
+    const res = await inviteApi.getInvitedUsers({ 
+      page: pagination.value.page, 
+      page_size: pagination.value.pageSize 
+    })
+    const data = (res as any)?.data?.data || (res as any)?.data || {}
+    invitedUsers.value = data.items || []
+    pagination.value.total = data.total || 0
+  } catch (error: any) {
+    console.error('加载已邀请用户失败:', error)
+    ElMessage.error(error.message || '加载已邀请用户失败')
+  } finally {
+    loading.value = false
+  }
+}
+
 // 分页变化
 const handlePageChange = (page: number) => {
   pagination.value.page = page
-  loadCodes()
+  loadData()
 }
 
 const handleSizeChange = (size: number) => {
   pagination.value.pageSize = size
   pagination.value.page = 1
-  loadCodes()
+  loadData()
 }
 
 // 生成邀请码
@@ -361,7 +549,7 @@ const getStatusText = (item: InviteCode): string => {
 
 onMounted(() => {
   initParticles()
-  loadCodes()
+  loadData()
 })
 </script>
 
@@ -542,6 +730,47 @@ onMounted(() => {
   padding: 0 24px;
   position: relative;
   z-index: 2;
+}
+
+// Tab 切换
+.tab-container {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 20px;
+  background: white;
+  border-radius: 12px;
+  padding: 4px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+
+  .tab-item {
+    flex: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    padding: 12px 20px;
+    border-radius: 8px;
+    cursor: pointer;
+    color: #64748b;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+
+    &:hover {
+      background: #f1f5f9;
+      color: #334155;
+    }
+
+    &.active {
+      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
+      color: white;
+      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
+    }
+
+    .el-icon {
+      font-size: 16px;
+    }
+  }
 }
 
 // 警告提示
@@ -740,6 +969,17 @@ onMounted(() => {
   color: #475569;
 }
 
+.username-text {
+  font-size: 14px;
+  font-weight: 600;
+  color: #1e293b;
+}
+
+.phone-text {
+  font-size: 13px;
+  color: #64748b;
+}
+
 // 分页
 .pagination-wrapper {
   margin-top: 20px;
@@ -828,6 +1068,49 @@ onMounted(() => {
   }
 }
 
+.user-card {
+  background: #f8fafc;
+  border-radius: 12px;
+  padding: 16px;
+  margin-bottom: 12px;
+  border: 2px solid #e2e8f0;
+
+  .card-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+
+    .card-index {
+      font-size: 13px;
+      font-weight: 600;
+      color: #64748b;
+    }
+  }
+
+  .card-body {
+    .user-info {
+      .user-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+
+        .info-label {
+          font-size: 13px;
+          color: #64748b;
+        }
+
+        .info-value {
+          font-size: 13px;
+          color: #1e293b;
+          font-weight: 500;
+        }
+      }
+    }
+  }
+}
+
 // 移动端适配
 @media (max-width: 768px) {
   .hero-section {
@@ -845,6 +1128,19 @@ onMounted(() => {
   .content-wrapper {
     margin-top: -28px;
     padding: 0 12px;
+  }
+
+  .tab-container {
+    margin-bottom: 16px;
+
+    .tab-item {
+      padding: 10px 16px;
+      font-size: 13px;
+
+      .el-icon {
+        font-size: 14px;
+      }
+    }
   }
 
   .warning-alert {

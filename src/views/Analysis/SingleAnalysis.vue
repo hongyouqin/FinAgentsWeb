@@ -619,9 +619,9 @@ const progressInfo = ref({
 })
 const pollingTimer = ref<any>(null)
 
-// 是否允许开始新分析：非运行中，或运行已超 10 分钟
+// 是否允许开始新分析：非运行中，或运行已超 5 分钟
 const allowNewAnalysis = computed(() =>
-  analysisStatus.value !== 'running' || progressInfo.value.elapsedTime >= 600
+  analysisStatus.value !== 'running' || progressInfo.value.elapsedTime >= 300
 )
 
 // ─── sessionStorage 持久化：记录进行中的任务 ────────────────────

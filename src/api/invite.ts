@@ -59,5 +59,15 @@ export const inviteApi = {
    */
   create(): Promise<{ success: boolean; message: string; data: CreateInviteCodeResponse }> {
     return request.post('/api/invite-codes/create')
+  },
+
+  /**
+   * 获取已邀请用户列表
+   */
+  getInvitedUsers(params?: {
+    page?: number
+    page_size?: number
+  }): Promise<{ success: boolean; data: any }> {
+    return request.get('/api/invite/invited-users', { params })
   }
 }
