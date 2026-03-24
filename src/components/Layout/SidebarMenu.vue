@@ -109,10 +109,10 @@
       </el-sub-menu> -->
     </el-sub-menu>
 
-    <el-menu-item index="/about">
+    <!-- <el-menu-item index="/about">
       <el-icon><InfoFilled /></el-icon>
       <template #title>关于</template>
-    </el-menu-item>
+    </el-menu-item> -->
 
     <!-- 交流与客服：点击弹框，不跳转页面 -->
     <el-menu-item @click="showContactDialog = true">

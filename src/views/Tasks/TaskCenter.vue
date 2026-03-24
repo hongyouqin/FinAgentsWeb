@@ -709,7 +709,7 @@ const retryTask = async (row: any) => {
       parameters: {
         market_type: marketType,
         analysis_date: new Date().toISOString().split('T')[0],
-        research_depth: '标准分析',
+        research_depth: '深度分析',
         selected_analysts: convertAnalystNamesToIds(['市场分析师', '基本面分析师', '新闻分析师']),
         include_sentiment: true,
         include_risk: true,
