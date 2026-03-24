@@ -42,7 +42,6 @@
           <span>{{ tab.label }}</span>
         </div>
       </div>
-
       <!-- 警告提示 -->
       <el-alert
         v-if="activeTab === 'codes'"
@@ -62,6 +61,39 @@
           </p> -->
         </div>
       </el-alert>
+      <!-- 奖励规则 -->
+      <div class="reward-section">
+        <el-button
+          type="info"
+          size="small"
+          @click="showRewardDialog = true"
+          icon="InfoFilled"
+        >
+          邀请奖励规则
+        </el-button>
+      </div>
+
+      <!-- 奖励规则弹窗 -->
+      <el-dialog
+        v-model="showRewardDialog"
+        title="邀请奖励规则"
+        width="400px"
+        :close-on-click-modal="true"
+      >
+        <div class="reward-rules">
+          <h4>新用户注册奖励</h4>
+          <p>新用户注册送5算力</p>
+
+          <h4>邀请奖励</h4>
+          <p>邀请人获得10算力</p>
+
+          <h4>阶梯奖励</h4>
+          <p>0-9人: 10算力</p>
+          <p>5-14人: 15算力</p>
+          <p>15-29人: 18算力</p>
+          <p>30人以上: 36算力</p>
+        </div>
+      </el-dialog>
 
       <!-- 操作区域 -->
       <div class="action-section" v-if="activeTab === 'codes'" >
@@ -390,6 +422,7 @@ const loading = ref(false)
 const generating = ref(false)
 const codeList = ref<InviteCode[]>([])
 const invitedUsers = ref<any[]>([])
+const showRewardDialog = ref(false)
 
 const tabs = ref([
   { name: 'codes', label: '邀请码', icon: Ticket },
@@ -730,6 +763,27 @@ onMounted(() => {
   padding: 0 24px;
   position: relative;
   z-index: 2;
+}
+
+// 奖励规则
+.reward-section {
+  margin-bottom: 20px;
+  text-align: right;
+}
+
+.reward-rules {
+  h4 {
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+    margin: 16px 0 8px 0;
+  }
+
+  p {
+    font-size: 14px;
+    color: #475569;
+    margin: 4px 0;
+  }
 }
 
 // Tab 切换
