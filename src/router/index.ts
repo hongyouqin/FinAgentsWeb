@@ -539,7 +539,14 @@ router.beforeEach(async (to, from, next) => {
     return
   }
 
-
+  // 如果已登录，刷新积分余额并确保定时器运行（确保实时性）
+  if (authStore.isAuthenticated && to.meta.requiresAuth) {
+    authStore.fetchUserBalance().catch(err => {
+      console.warn('刷新积分余额失败:', err)
+    })
+    // 确保积分自动刷新定时器已启动
+    authStore.startBalanceAutoRefresh(20000)
+  }
 
   // 如果已登录且访问登录页或首页，重定向到仪表板
   if (authStore.isAuthenticated && (to.name === 'Login' || to.name === 'Landing')) {

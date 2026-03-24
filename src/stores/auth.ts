@@ -29,6 +29,10 @@ export interface AuthState {
   totalRecharged: number  // 累计充值
   totalConsumed: number   // 累计消耗
   balanceSymbol: string   // 单位符号
+
+  // 积分刷新定时器
+  balanceRefreshTimer: ReturnType<typeof setInterval> | null
+  lastBalanceFetchTime: number
 }
 
 export const useAuthStore = defineStore('auth', {
@@ -77,7 +81,10 @@ export const useAuthStore = defineStore('auth', {
       available: 0,
       totalRecharged: 0,
       totalConsumed: 0,
-      balanceSymbol: '⚡'
+      balanceSymbol: '⚡',
+
+      balanceRefreshTimer: null,
+      lastBalanceFetchTime: 0
     }
   },
 
@@ -166,6 +173,9 @@ export const useAuthStore = defineStore('auth', {
       this.permissions = []
       this.roles = []
 
+      // 停止积分自动刷新定时器
+      this.stopBalanceAutoRefresh()
+
       // 清除API请求头
       this.setAuthHeader(null)
 
@@ -226,6 +236,9 @@ export const useAuthStore = defineStore('auth', {
 
           // 获取积分余额
           this.fetchUserBalance()
+
+          // 启动积分自动刷新定时器（每20秒刷新一次）
+          this.startBalanceAutoRefresh(20000)
 
           // 启动 token 自动刷新定时器
           const { setupTokenRefreshTimer } = await import('@/utils/auth')
@@ -466,9 +479,38 @@ export const useAuthStore = defineStore('auth', {
         this.totalRecharged = d.total_recharged ?? 0
         this.totalConsumed  = d.total_consumed  ?? 0
         this.balanceSymbol  = d.symbol          ?? '⚡'
+        this.lastBalanceFetchTime = Date.now()
       } catch (e) {
         console.error('❌ 获取积分余额失败:', e)
       }
+    },
+
+    // 启动积分自动刷新定时器
+    startBalanceAutoRefresh(interval = 20000) {
+      // 如果定时器已经在运行，不需要重复启动
+      if (this.balanceRefreshTimer) {
+        return
+      }
+      this.balanceRefreshTimer = setInterval(() => {
+        if (this.isAuthenticated) {
+          this.fetchUserBalance()
+        }
+      }, interval)
+      console.log(`✅ 积分自动刷新定时器已启动，间隔: ${interval}ms`)
+    },
+
+    // 停止积分自动刷新定时器
+    stopBalanceAutoRefresh() {
+      if (this.balanceRefreshTimer) {
+        clearInterval(this.balanceRefreshTimer)
+        this.balanceRefreshTimer = null
+        console.log('⏹️ 积分自动刷新定时器已停止')
+      }
+    },
+
+    // 强制刷新积分（忽略最小间隔）
+    async forceRefreshBalance() {
+      await this.fetchUserBalance()
     },
 
     // 设置重定向路径
@@ -494,6 +536,8 @@ export const useAuthStore = defineStore('auth', {
             this.isAuthenticated = true
             await this.fetchUserPermissions()
             this.fetchUserBalance()
+            // 启动积分自动刷新定时器
+            this.startBalanceAutoRefresh(20000)
             console.log('✅ 认证状态验证成功')
           } else {
             // Token无效，尝试刷新

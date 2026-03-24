@@ -901,6 +901,9 @@ const submitAnalysis = async () => {
     const response = await analysisApi.startSingleAnalysis(request)
     ElMessage.success('分析任务已提交')
 
+    // 刷新积分余额
+    authStore.forceRefreshBalance()
+
     currentTaskId.value = response.data.task_id
 
     if (!currentTaskId.value) {
