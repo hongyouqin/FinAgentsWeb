@@ -576,7 +576,7 @@ const analysisForm = reactive<AnalysisForm>({
   symbol: '',
   market: 'A股',
   analysisDate: new Date(),
-  researchDepth: 3,
+  researchDepth: 4,
   selectedAnalysts: ['市场分析师', '基本面分析师', '新闻分析师'],
   includeSentiment: true,
   includeRisk: true,
