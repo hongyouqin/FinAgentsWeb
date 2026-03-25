@@ -693,6 +693,16 @@ onMounted(() => {
     &::placeholder {
       color: rgba(255, 255, 255, 0.3);
     }
+
+    // 修复浏览器自动填充时的白底问题
+    &:-webkit-autofill,
+    &:-webkit-autofill:hover,
+    &:-webkit-autofill:focus,
+    &:-webkit-autofill:active {
+      -webkit-box-shadow: 0 0 0 1000px rgba(15, 23, 42, 0.5) inset !important;
+      -webkit-text-fill-color: white !important;
+      transition: background-color 5000s ease-in-out 0s;
+    }
   }
 
   :deep(.el-checkbox__label) {
