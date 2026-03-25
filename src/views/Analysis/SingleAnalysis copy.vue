@@ -940,6 +940,7 @@ const submitAnalysis = async () => {
     const request: SingleAnalysisRequest = {
       symbol: analysisForm.symbol,
       stock_code: analysisForm.symbol,  // 兼容字段
+      price: '0',
       parameters: {
         market_type: analysisForm.market,
         analysis_date: analysisDate.toISOString().split('T')[0],

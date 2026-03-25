@@ -654,6 +654,25 @@ const currentResult = ref<any>(null)
 const currentRow = ref<any>(null)
 const reportSections = ref<Array<{ key?: string; title: string; content: any }>>([])
 
+// 分析费用
+const analysisPrice = ref({ price: 0, unit: '⚡', desc: '' })
+const fetchAnalysisPrice = async () => {
+  try {
+    const res = await analysisApi.getConsumePrice()
+    
+  
+    const d = res.data ?? res
+    console.log('获取分析费用结果:', d)
+    analysisPrice.value = {
+      price: d.price ?? 0,
+      unit: d.unit || '⚡',
+      desc: d.desc ?? ''
+    }
+  } catch (e) {
+    console.error('获取分析费用失败:', e)
+  }
+}
+
 const openResult = (row: any) => {
   const id = row?.task_id || row?.analysis_id || row?.id
   if (!id) return ElMessage.warning('未找到任务ID')
@@ -704,11 +723,13 @@ const retryTask = async (row: any) => {
     )
 
     loading.value = true
-
+    await fetchAnalysisPrice()
+    
     const marketType = row.market_type || 'A股'
     const request: SingleAnalysisRequest = {
       symbol,
       stock_code: symbol,
+      price: analysisPrice.value.price,
       parameters: {
         market_type: marketType,
         analysis_date: new Date().toISOString().split('T')[0],
@@ -915,6 +936,7 @@ onMounted(() => {
   if (validTabs.includes(tab)) {
     activeTab.value = tab as any
   }
+  fetchAnalysisPrice()
   loadList()
   setupPolling()
   initParticles()
@@ -926,6 +948,7 @@ watch(() => (route.query as any)?.tab, (newVal) => {
   if (validTabs.includes(tab)) {
     activeTab.value = tab as any
     currentPage.value = 1
+    fetchAnalysisPrice()
     loadList()
     setupPolling()
   }

@@ -3,6 +3,7 @@
  * 股票分析API
  */
 
+import type { number } from 'echarts/types/src/echarts.all.js'
 import { request, type ApiResponse } from './request'
 
 // 分析相关类型定义
@@ -23,6 +24,7 @@ export interface AnalysisRequest {
 export interface SingleAnalysisRequest {
   symbol?: string  // 主字段：6位股票代码
   stock_code?: string  // 兼容字段（已废弃）
+  price?: number  // 价格范围
   parameters?: {
     market_type?: string
     analysis_date?: string
