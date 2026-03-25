@@ -11,7 +11,7 @@
           <Logo :size="32" />
           
           <span v-show="!appStore.sidebarCollapsed" class="logo-text">
-            FinAgents
+              NB.STOCK
           </span>
         </div>
 

@@ -108,7 +108,7 @@ onMounted(() => {
           <div class="logo-glow">
             <Logo :size="40" />
           </div>
-          <span class="logo-text">FinAgents</span>
+          <span class="logo-text">NB.STOCK</span>
           <span class="logo-badge">AI</span>
         </div>
 

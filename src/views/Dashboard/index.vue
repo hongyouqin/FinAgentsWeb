@@ -4,7 +4,7 @@
     <div class="welcome-section">
       <div class="welcome-content">
         <h1 class="welcome-title">
-          欢迎使用FinAgents
+          欢迎使用NB.STOCK
           <span class="version-badge">v1.0.0-preview</span>
         </h1>
         <p class="welcome-subtitle">

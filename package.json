@@ -1,7 +1,7 @@
 {
-  "name": "tradingagents-frontend",
+  "name": "NB.STOCK",
   "version": "1.0.0-preview",
-  "description": "TradingAgents-CN 现代化前端界面",
+  "description": "NB.STOCK 现代化前端界面",
   "type": "module",
   "scripts": {
     "dev": "vite",

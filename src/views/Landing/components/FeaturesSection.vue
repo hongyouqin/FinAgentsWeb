@@ -18,8 +18,8 @@ const features = ref([
   },
   {
     id: 'multi-market',
-    title: '多市场覆盖',
-    description: '支持 A股、港股、美股，一站式多市场股票追踪与数据聚合',
+    title: '市场覆盖',
+    description: '一站式多市场股票追踪与数据聚合',
     icon: 'globe',
     link: '/screening',
     color: 'from-blue-500 to-cyan-400'
@@ -48,14 +48,14 @@ const features = ref([
     link: '/favorites',
     color: 'from-cyan-500 to-blue-600'
   },
-  {
-    id: 'paper-trading',
-    title: '模拟盘',
-    description: '零风险模拟交易环境，验证投资策略，提升交易技能',
-    icon: 'wallet',
-    link: '/paper',
-    color: 'from-blue-600 to-cyan-400'
-  }
+  // {
+  //   id: 'paper-trading',
+  //   title: '模拟盘',
+  //   description: '零风险模拟交易环境，验证投资策略，提升交易技能',
+  //   icon: 'wallet',
+  //   link: '/paper',
+  //   color: 'from-blue-600 to-cyan-400'
+  // }
 ])
 
 const handleCardClick = (link: string) => {

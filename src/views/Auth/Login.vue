@@ -28,8 +28,8 @@
         <div class="logo-wrapper">
           <Logo :size="56" />
         </div>
-        <h1 class="title">FinAgents</h1>
-        <p class="subtitle">AI智能股票分析平台</p>
+        <h1 class="title">NB.STOCK</h1>
+        <p class="subtitle">牛逼股票</p>
       </div>
 
       <!-- 登录卡片 -->
@@ -198,7 +198,7 @@
       <!-- 免责声明 -->
       <div class="disclaimer">
         <p class="disclaimer-text">
-          FinAgents 是一个 AI 多 Agents 的股票分析学习平台。平台中的分析结论、观点和“投资建议”均由 AI 自动生成，仅用于学习、研究与交流，不构成任何形式的投资建议或承诺。市场有风险，入市需谨慎。
+          NB.STOCK 是一个 多智能体 的股票分析学习平台。平台中的分析结论、观点和“投资建议”均由 AI 自动生成，仅用于学习、研究与交流，不构成任何形式的投资建议或承诺。市场有风险，入市需谨慎。
         </p>
       </div>
     </div>

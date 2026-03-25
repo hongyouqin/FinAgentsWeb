@@ -22,7 +22,7 @@ const routes: RouteRecordRaw[] = [
     name: 'Landing',
     component: () => import('@/views/Landing/index.vue'),
     meta: {
-      title: 'FinAgents - AI 驱动的智能股票分析平台',
+      title: 'NB.STOCK',
       hideInMenu: true,
       requiresAuth: false,
       transition: 'fade'
@@ -514,7 +514,7 @@ router.beforeEach(async (to, from, next) => {
   // 设置页面标题
   const title = to.meta.title as string
   if (title) {
-    document.title = `${title} - AI智能体投研`
+    document.title = `${title} - 牛逼股票`
   }
 
   console.log('🚦 路由守卫检查:', {
