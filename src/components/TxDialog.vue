@@ -51,8 +51,8 @@
           </el-table-column>
           <el-table-column label="算力变动" width="110" align="right">
             <template #default="{ row }">
-              <span class="tx-amount" :class="row.type === 'RECHARGE' ? 'tx-in' : 'tx-out'">
-                {{ row.type === 'RECHARGE' ? '+' : '-' }}{{ row.amount }}
+              <span class="tx-amount" :class="getAmountClass(row.type)">
+                {{ getAmountPrefix(row.type) }}{{ row.amount }}
               </span>
             </template>
           </el-table-column>
@@ -74,8 +74,8 @@
           <div v-for="item in txList" :key="item.id" class="tx-mobile-item">
             <div class="tx-mobile-top">
               <el-tag :type="getTxTypeTag(item.type)" size="small" round>{{ getTxTypeText(item.type) }}</el-tag>
-              <span class="tx-amount" :class="item.type === 'RECHARGE' ? 'tx-in' : 'tx-out'">
-                {{ item.type === 'RECHARGE' ? '+' : '-' }}{{ item.amount }} ⚡
+              <span class="tx-amount" :class="getAmountClass(item.type)">
+                {{ getAmountPrefix(item.type) }}{{ item.amount }} ⚡
               </span>
             </div>
             <div class="tx-mobile-desc">{{ item.description || '—' }}</div>
@@ -116,6 +116,18 @@ const {
   getTxTypeTag,
   getTxTypeText,
 } = useTxDialog()
+
+const getAmountClass = (type: string) => {
+  if (type === 'RECHARGE') return 'tx-in'
+  if (type === 'FREEZE') return 'tx-freeze'
+  return 'tx-out'
+}
+
+const getAmountPrefix = (type: string) => {
+  if (type === 'RECHARGE') return '+'
+  if (type === 'FREEZE') return ''
+  return '-'
+}
 </script>
 
 <style lang="scss" scoped>
@@ -171,6 +183,7 @@ const {
   font-weight: 700;
   &.tx-in { color: #059669; }
   &.tx-out { color: #ef4444; }
+  &.tx-freeze { color: #f59e0b; }
 }
 .tx-balance { font-size: 13px; color: #1e293b; font-weight: 500; }
 .tx-balance-na { color: #cbd5e1; }

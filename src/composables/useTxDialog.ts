@@ -5,7 +5,7 @@ import paymentApi from '@/api/payment'
 // ─── 模块级单例状态，全局共享 ──────────────────────────
 const showTxDialog = ref(false)
 const txLoading = ref(false)
-const txType = ref<'ALL' | 'RECHARGE' | 'CONSUME'>('ALL')
+const txType = ref<'ALL' | 'RECHARGE' | 'CONSUME' | 'FREEZE'>('ALL')
 const txLimit = ref(50)
 const txList = ref<any[]>([])
 
@@ -13,6 +13,7 @@ export const txTypeTabs = [
   { label: '全部', value: 'ALL' },
   { label: '充值', value: 'RECHARGE' },
   { label: '消耗', value: 'CONSUME' },
+  { label: '冻结', value: 'FREEZE' },
 ]
 
 export const loadTransactions = async () => {
@@ -49,19 +50,21 @@ export function useTxDialog() {
   }
 
   const selectTxType = (val: string) => {
-    txType.value = val as 'ALL' | 'RECHARGE' | 'CONSUME'
+    txType.value = val as 'ALL' | 'RECHARGE' | 'CONSUME' | 'FREEZE'
     loadTransactions()
   }
 
-  const getTxTypeTag = (type: string): 'success' | 'danger' | 'info' => {
+  const getTxTypeTag = (type: string): 'success' | 'danger' | 'info' | 'warning' => {
     if (type === 'RECHARGE') return 'success'
     if (type === 'CONSUME') return 'danger'
+    if (type === 'FREEZE') return 'warning'
     return 'info'
   }
 
   const getTxTypeText = (type: string) => {
     if (type === 'RECHARGE') return '充值'
     if (type === 'CONSUME') return '消耗'
+    if (type === 'FREEZE') return '冻结'
     return type
   }
 

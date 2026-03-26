@@ -138,6 +138,7 @@
               </div>
               <div class="cost-right">
                 <span class="balance-text">余额 {{ authStore.points }} ⚡</span>
+                <span class="balance-text">冻结 {{ authStore.frozen }} ⚡</span>
                 <el-tag v-if="authStore.points < analysisPrice.price" type="danger" size="small" effect="light">算力不足</el-tag>
               </div>
             </div>
