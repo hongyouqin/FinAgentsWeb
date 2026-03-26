@@ -28,6 +28,7 @@ export const loadTransactions = async () => {
     txList.value = list.map((item: any) => ({
       id: item.id ?? item.transaction_id ?? item.order_no ?? '',
       type: (item.transaction_type ?? item.type ?? '').toUpperCase(),
+      status: (item.status ?? '').toUpperCase(),
       amount: item.power_amount ?? item.amount ?? item.points ?? 0,
       after_balance: item.after_balance ?? null,
       description: item.description ?? item.remark ?? item.note ?? '',
@@ -68,6 +69,22 @@ export function useTxDialog() {
     return type
   }
 
+  const getTxStatusTag = (status: string): 'success' | 'danger' | 'info' | 'warning' => {
+    if (status === 'CONFIRMED') return 'success'
+    if (status === 'FROZEN') return 'warning'
+    if (status === 'CANCELLED') return 'info'
+    if (status === 'EXPIRED') return 'danger'
+    return 'info'
+  }
+
+  const getTxStatusText = (status: string) => {
+    if (status === 'FROZEN') return '已冻结'
+    if (status === 'CONFIRMED') return '已完成'
+    if (status === 'CANCELLED') return '已取消'
+    if (status === 'EXPIRED') return '已过期'
+    return status || '—'
+  }
+
   return {
     showTxDialog,
     txLoading,
@@ -79,5 +96,7 @@ export function useTxDialog() {
     selectTxType,
     getTxTypeTag,
     getTxTypeText,
+    getTxStatusTag,
+    getTxStatusText,
   }
 }

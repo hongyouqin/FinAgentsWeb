@@ -2,7 +2,7 @@
   <el-dialog
     v-model="showTxDialog"
     title="算力记录"
-    :width="isMobile ? '95vw' : '680px'"
+    :width="isMobile ? '95vw' : '800px'"
     :align-center="!isMobile"
     destroy-on-close
   >
@@ -62,6 +62,13 @@
               <span v-else class="tx-balance-na">—</span>
             </template>
           </el-table-column>
+          <el-table-column label="状态" width="90" align="center">
+            <template #default="{ row }">
+              <el-tag :type="getTxStatusTag(row.status)" size="small" round>
+                {{ getTxStatusText(row.status) }}
+              </el-tag>
+            </template>
+          </el-table-column>
           <el-table-column label="说明" min-width="160" prop="description">
             <template #default="{ row }">
               <span class="tx-desc">{{ row.description || '—' }}</span>
@@ -73,7 +80,10 @@
         <div v-else class="tx-mobile-list">
           <div v-for="item in txList" :key="item.id" class="tx-mobile-item">
             <div class="tx-mobile-top">
-              <el-tag :type="getTxTypeTag(item.type)" size="small" round>{{ getTxTypeText(item.type) }}</el-tag>
+              <div class="tx-mobile-tags">
+                <el-tag :type="getTxTypeTag(item.type)" size="small" round>{{ getTxTypeText(item.type) }}</el-tag>
+                <el-tag :type="getTxStatusTag(item.status)" size="small" round>{{ getTxStatusText(item.status) }}</el-tag>
+              </div>
               <span class="tx-amount" :class="getAmountClass(item.type)">
                 {{ getAmountPrefix(item.type) }}{{ item.amount }} ⚡
               </span>
@@ -115,6 +125,8 @@ const {
   selectTxType,
   getTxTypeTag,
   getTxTypeText,
+  getTxStatusTag,
+  getTxStatusText,
 } = useTxDialog()
 
 const getAmountClass = (type: string) => {
@@ -200,6 +212,7 @@ const getAmountPrefix = (type: string) => {
 }
 .tx-mobile-item { padding: 14px; border-radius: 12px; border: 1px solid #e2e8f0; background: #f8fafc; }
 .tx-mobile-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.tx-mobile-tags { display: flex; gap: 6px; }
 .tx-mobile-desc { font-size: 12px; color: #64748b; margin-bottom: 6px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .tx-mobile-bot {
   display: flex;
