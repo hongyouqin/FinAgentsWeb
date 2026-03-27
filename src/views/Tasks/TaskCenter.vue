@@ -738,8 +738,8 @@ const retryTask = async (row: any) => {
         include_sentiment: true,
         include_risk: true,
         language: 'zh-CN',
-        quick_analysis_model: 'deepseek-chat',
-        deep_analysis_model: 'deepseek-chat'
+        quick_analysis_model: 'deepseek-reasoner',
+        deep_analysis_model: 'deepseek-reasoner'
       }
     }
 

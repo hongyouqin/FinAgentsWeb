@@ -398,6 +398,7 @@ const availableModels = computed(() => {
   const models: Record<string, Array<{ label: string; value: string }>> = {
     deepseek: [
       { label: 'deepseek-chat', value: 'deepseek-chat' },
+      { label: 'deepseek-reasoner', value: 'deepseek-reasoner' },
       { label: 'deepseek-coder', value: 'deepseek-coder' }
     ],
     dashscope: [

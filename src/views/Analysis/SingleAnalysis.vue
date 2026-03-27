@@ -895,8 +895,8 @@ const submitAnalysis = async () => {
         include_sentiment: analysisForm.includeSentiment,
         include_risk: analysisForm.includeRisk,
         language: analysisForm.language,
-        quick_analysis_model: 'deepseek-chat',
-        deep_analysis_model: 'deepseek-chat'
+        quick_analysis_model: 'deepseek-reasoner',
+        deep_analysis_model: 'deepseek-reasoner'
       }
     }
 
