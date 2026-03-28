@@ -579,7 +579,7 @@ const handleRecharge = async () => {
       startCountdown(expireSec)
       startPolling(orderNo)
 
-    } else if (scene === 'MWEB' || scene === 'H5') {
+    } else if (scene === 'JSAPI' || scene === 'H5') {
       // 手机浏览器: 获取支付链接，展示跳转按钮
       const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
       if (!payUrl) throw new Error('未获取到支付链接')
@@ -594,20 +594,21 @@ const handleRecharge = async () => {
       }
       document.addEventListener('visibilitychange', handleVisibility, { once: true })
 
-    } else if (scene === 'JSAPI') {
-      // 微信内浏览器: 同样用链接跳转方式，无需调起 wx.chooseWXPay
-      const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
-      if (!payUrl) throw new Error('未获取到支付链接')
-      mwebPayUrl.value = payUrl
-      startCountdown(expireSec)
-      startPolling(orderNo)
-      const handleVisibility = () => {
-        if (!document.hidden && payStatus.value === 'pending') {
-          startPolling(orderNo)
-        }
-      }
-      document.addEventListener('visibilitychange', handleVisibility, { once: true })
-    }
+    } 
+    // else if (scene === 'JSAPI') {
+    //   // 微信内浏览器: 同样用链接跳转方式，无需调起 wx.chooseWXPay
+    //   const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
+    //   if (!payUrl) throw new Error('未获取到支付链接')
+    //   mwebPayUrl.value = payUrl
+    //   startCountdown(expireSec)
+    //   startPolling(orderNo)
+    //   const handleVisibility = () => {
+    //     if (!document.hidden && payStatus.value === 'pending') {
+    //       startPolling(orderNo)
+    //     }
+    //   }
+    //   document.addEventListener('visibilitychange', handleVisibility, { once: true })
+    // }
   } catch (e: any) {
     showPayDialog.value = false
     ElMessage.error(e?.message || '发起支付失败，请重试')
