@@ -466,9 +466,9 @@ const getPayEnv = (): 'wechat' | 'mobile' | 'pc' => {
 }
 
 const getPaymentScene = (): 'NATIVE' | 'JSAPI' | 'MWEB' => {
-  const env = getPayEnv()
-  if (env === 'wechat') return 'JSAPI'
-  if (env === 'mobile') return 'MWEB'
+  // const env = getPayEnv()
+  // if (env === 'wechat') return 'JSAPI'
+  // if (env === 'mobile') return 'MWEB'
   return 'NATIVE'
 }
 
