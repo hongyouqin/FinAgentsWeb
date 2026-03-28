@@ -869,7 +869,7 @@ const basics = reactive({
 
 // 操作
 function onAnalyze() {
-  router.push({ name: 'SingleAnalysis', query: { stock: code.value } })
+  router.push({ name: 'SingleAnalysis', query: { symbol: code.value } })
 }
 async function onToggleFavorite() {
   try {

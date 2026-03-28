@@ -101,13 +101,93 @@
             </div> -->
 
             <!-- 错误/帮助提示 -->
-            <div v-if="stockCodeError" class="input-message error">
-              <el-icon><CircleClose /></el-icon>
-              {{ stockCodeError }}
-            </div>
-            <div v-else-if="stockCodeHelp" class="input-message help">
-              <el-icon><InfoFilled /></el-icon>
-              {{ stockCodeHelp }}
+             <div style="display: flex;align-items: center;justify-content: space-between;">
+                <div>
+                  <div v-if="stockCodeError" class="input-message error">
+                    <el-icon><CircleClose /></el-icon>
+                    {{ stockCodeError }}
+                  </div>
+                  <div v-else-if="stockCodeHelp" class="input-message help">
+                    <el-icon><InfoFilled /></el-icon>
+                    {{ stockCodeHelp }}
+                  </div>
+              </div>
+
+              <div class="iputswc" style="margin-top: 14px;">
+                <el-tooltip content="了解分析类型区别" placement="top">
+                  <el-icon class="analysis-info-icon" @click="showAnalysisTypeDialog = true">
+                    <Warning />
+                  </el-icon>
+                </el-tooltip>
+                <div 
+                  class="analysis-type-switch"
+                  :class="{ 'is-deep': isDeepAnalysis }"
+                  @click="toggleAnalysisType"
+                >
+                  <span class="switch-label">{{ isDeepAnalysis ? '深度推理' : '标准分析' }}</span>
+                  <el-icon v-if="isDeepAnalysis"><Cpu /></el-icon>
+                  <el-icon v-else><Document /></el-icon>
+                </div>
+              </div>
+
+              <!-- 分析类型说明弹框 -->
+              <el-dialog
+                v-model="showAnalysisTypeDialog"
+                title="分析类型说明"
+                
+                :close-on-click-modal="true"
+                class="analysis-type-dialog-wrapper"
+              >
+                <div class="analysis-type-dialog">
+                  <div class="type-card" :class="{ 'is-active': !isDeepAnalysis }">
+                    <div class="type-header">
+                      <el-icon><Document /></el-icon>
+                      <span class="type-title">标准分析</span>
+                    </div>
+                    <div class="type-content">
+                      <div class="type-item">
+                        <span class="item-label">价格</span>
+                        <span class="item-value">{{ analysisPrice.types.standard.price }} ⚡</span>
+                      </div>
+                      <div class="type-item">
+                        <span class="item-label">耗时</span>
+                        <span class="item-value">约 8 - 12 分钟</span>
+                      </div>
+                      <!-- <div class="type-item">
+                        <span class="item-label">模型</span>
+                        <span class="item-value">deepseek-chat</span>
+                      </div> -->
+                      <div class="type-desc">{{ analysisPrice.types.standard.description }}</div>
+                    </div>
+                  </div>
+                  <div class="type-card" :class="{ 'is-active': isDeepAnalysis }">
+                    <div class="type-header">
+                      <el-icon><Cpu /></el-icon>
+                      <span class="type-title">深度推理</span>
+                    </div>
+                    <div class="type-content">
+                      <div class="type-item">
+                        <span class="item-label">价格</span>
+                        <span class="item-value">{{ analysisPrice.types.deep.price }} ⚡</span>
+                      </div>
+                      <div class="type-item">
+                        <span class="item-label">耗时</span>
+                        <span class="item-value">约 16 - 24 分钟</span>
+                      </div>
+                      <!-- <div class="type-item">
+                        <span class="item-label">模型</span>
+                        <span class="item-value">deepseek-reasoner</span>
+                      </div> -->
+                      <div class="type-desc">{{ analysisPrice.types.deep.description }}</div>
+                    </div>
+                  </div>
+                  <div class="type-tip">
+                    <el-icon><InfoFilled /></el-icon>
+                    <span>深度推理使用更强的推理模型，适合需要深度思考的复杂分析场景</span>
+                  </div>
+                </div>
+              </el-dialog>
+
             </div>
 
            
@@ -130,16 +210,16 @@
             </div>
 
               <!-- 费用与余额提示 -->
-            <div v-if="analysisPrice.price > 0" class="cost-bar" :class="{ 'cost-insufficient': authStore.points < analysisPrice.price }">
+            <div v-if="currentPrice > 0" class="cost-bar" :class="{ 'cost-insufficient': authStore.points < currentPrice }">
               <div class="cost-left">
                 <el-icon><Coin /></el-icon>
-                <span>本次分析消耗 <em>{{ analysisPrice.price }}</em> ⚡</span>
-                <span v-if="analysisPrice.desc" class="cost-desc">· {{ analysisPrice.desc }}</span>
+                <span>本次消耗 <em>{{ currentPrice }}</em> ⚡</span>
+                <span v-if="currentPriceDesc" class="cost-desc">· {{ currentPriceDesc }}</span>
               </div>
               <div class="cost-right">
                 <span class="balance-text">余额 {{ authStore.points }} ⚡</span>
                 <span class="balance-text">冻结 {{ authStore.frozen }} ⚡</span>
-                <el-tag v-if="authStore.points < analysisPrice.price" type="danger" size="small" effect="light">算力不足</el-tag>
+                <el-tag v-if="authStore.points < currentPrice" type="danger" size="small" effect="light">算力不足</el-tag>
               </div>
             </div>
           </div>
@@ -506,7 +586,8 @@ import {
   Document,
   Trophy,
   QuestionFilled,
-  MagicStick
+  MagicStick,
+  Cpu
 } from '@element-plus/icons-vue'
 import { analysisApi, type SingleAnalysisRequest } from '@/api/analysis'
 import { stocksApi } from '@/api/stocks'
@@ -693,18 +774,52 @@ const loadingPitch = ref(false)
 const scrollPaused = ref(false)
 
 // 分析费用
-const analysisPrice = ref({ price: 0, unit: '⚡', desc: '' })
+const analysisPrice = ref({
+  types: {
+    standard: { name: 'standard', label: '标准分析', price: 1.5, description: '快速分析，适合常规报告', unit: '⚡' },
+    deep: { name: 'deep', label: '深度推理', price: 1.8, description: '深度分析，适合复杂报告，但耗时较长', unit: '⚡' }
+  },
+  unit: '⚡'
+})
+
+// 是否深度分析
+const isDeepAnalysis = ref(false)
+
+// 分析类型说明弹框
+const showAnalysisTypeDialog = ref(false)
+
+// 当前价格（根据分析类型计算）
+const currentPrice = computed(() => {
+  return isDeepAnalysis.value 
+    ? analysisPrice.value.types.deep.price 
+    : analysisPrice.value.types.standard.price
+})
+
+// 当前价格描述
+const currentPriceDesc = computed(() => {
+  return isDeepAnalysis.value 
+    ? analysisPrice.value.types.deep.description 
+    : analysisPrice.value.types.standard.description
+})
+
+// 切换分析类型
+const toggleAnalysisType = () => {
+  isDeepAnalysis.value = !isDeepAnalysis.value
+}
+
 const fetchAnalysisPrice = async () => {
   try {
     const res = await analysisApi.getConsumePrice()
     
-  
     const d = res.data ?? res
     console.log('获取分析费用结果:', d)
-    analysisPrice.value = {
-      price: d.price ?? 0,
-      unit: d.unit || '⚡',
-      desc: d.desc ?? ''
+    
+    if (d.types) {
+      analysisPrice.value.types = d.types
+      analysisPrice.value.unit = d.unit || '⚡'
+    } else {
+      analysisPrice.value.types.standard.price = d.price ?? 1.5
+      analysisPrice.value.types.deep.price = d.price * 1.2 ?? 1.8
     }
   } catch (e) {
     console.error('获取分析费用失败:', e)
@@ -855,8 +970,8 @@ const submitAnalysis = async () => {
   }
 
   // 检查积分是否足够
-  if (analysisPrice.value.price > 0 && authStore.points < analysisPrice.value.price) {
-    ElMessage.error(`算力不足！本次分析需要 ${analysisPrice.value.price} ⚡，当前余额 ${authStore.points} ⚡，请先前往充値`)
+  if (currentPrice.value > 0 && authStore.points < currentPrice.value) {
+    ElMessage.error(`算力不足！本次分析需要 ${currentPrice.value} ⚡，当前余额 ${authStore.points} ⚡，请先前往充值`)
     router.push('/recharge')
     return
   }
@@ -886,17 +1001,17 @@ const submitAnalysis = async () => {
     const request: SingleAnalysisRequest = {
       symbol: analysisForm.symbol,
       stock_code: analysisForm.symbol,
-      price: analysisPrice.value.price,
+      price: currentPrice.value,
       parameters: {
         market_type: analysisForm.market,
         analysis_date: analysisDate.toISOString().split('T')[0],
-        research_depth: getDepthDescription(analysisForm.researchDepth),
+        research_depth: isDeepAnalysis.value ? '深度分析' : '标准分析',
         selected_analysts: convertAnalystNamesToIds(analysisForm.selectedAnalysts),
         include_sentiment: analysisForm.includeSentiment,
         include_risk: analysisForm.includeRisk,
         language: analysisForm.language,
-        quick_analysis_model: 'deepseek-reasoner',
-        deep_analysis_model: 'deepseek-reasoner'
+        quick_analysis_model: isDeepAnalysis.value ? 'deepseek-reasoner' : 'deepseek-chat',
+        deep_analysis_model: isDeepAnalysis.value ? 'deepseek-reasoner' : 'deepseek-chat'
       }
     }
 
@@ -1248,6 +1363,12 @@ onMounted(() => {
 onActivated(() => {
   // 刷新最近分析列表，确保数据最新
   loadRecentAnalyses()
+  // 检查是否有新的 symbol 参数
+  const { symbol } = route.query
+  if (symbol && symbol !== analysisForm.stockCode) {
+    analysisForm.stockCode = symbol as string
+    validateStockCodeInput()
+  }
 })
 
 // 组件卸载
@@ -1881,6 +2002,165 @@ onUnmounted(() => {
     font-size: 14px;
   }
 }
+
+// 分析类型开关
+.analysis-type-switch {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  background: #f1f5f9;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  font-size: 13px;
+  color: #64748b;
+  user-select: none;
+
+  &:hover {
+    background: #e2e8f0;
+    border-color: #cbd5e1;
+  }
+
+  &.is-deep {
+    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(5, 150, 105, 0.1));
+    border-color: #06b6d4;
+    color: #0891b2;
+
+    .switch-label {
+      font-weight: 600;
+    }
+  }
+
+  .switch-label {
+    font-weight: 500;
+  }
+
+  .el-icon {
+    font-size: 14px;
+  }
+}
+
+// 分析类型信息图标
+.analysis-info-icon {
+  font-size: 16px;
+  color: #f59e0b;
+  cursor: pointer;
+  transition: all 0.2s ease;
+
+  &:hover {
+    color: #d97706;
+    transform: scale(1.1);
+  }
+}
+
+// 输入区域开关容器
+.iputswc {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+// 分析类型说明弹框
+.analysis-type-dialog {
+  .type-card {
+    padding: 16px;
+    margin-bottom: 12px;
+    border: 1px solid #e2e8f0;
+    border-radius: 10px;
+    background: #f8fafc;
+    transition: all 0.2s ease;
+
+    &.is-active {
+      border-color: #06b6d4;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(5, 150, 105, 0.05));
+    }
+
+    .type-header {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      margin-bottom: 12px;
+
+      .el-icon {
+        font-size: 18px;
+        color: #06b6d4;
+      }
+
+      .type-title {
+        font-size: 15px;
+        font-weight: 600;
+        color: #1e293b;
+      }
+    }
+
+    .type-content {
+      .type-item {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 6px 0;
+        border-bottom: 1px dashed #e2e8f0;
+
+        &:last-of-type {
+          border-bottom: none;
+        }
+
+        .item-label {
+          color: #64748b;
+          font-size: 13px;
+        }
+
+        .item-value {
+          color: #1e293b;
+          font-weight: 500;
+          font-size: 13px;
+        }
+      }
+
+      .type-desc {
+        margin-top: 10px;
+        padding-top: 10px;
+        font-size: 12px;
+        color: #64748b;
+        border-top: 1px solid #e2e8f0;
+      }
+    }
+  }
+
+  .type-tip {
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    padding: 12px;
+    background: rgba(245, 158, 11, 0.1);
+    border-radius: 8px;
+    font-size: 12px;
+    color: #92400e;
+
+    .el-icon {
+      font-size: 14px;
+      flex-shrink: 0;
+      margin-top: 1px;
+    }
+  }
+}
+
+// 分析类型弹框移动端适配
+
+  @media (max-width: 540px) {
+    :deep(.el-dialog) {
+      width: 92% !important;
+      max-width: 92%;
+     
+    }
+    .analysis-type-dialog-wrapper {
+      width: 92% !important;
+      max-width: 92%;
+    }
+  }
+
 
 // 股票信息展示栏
 .stock-info-bar {

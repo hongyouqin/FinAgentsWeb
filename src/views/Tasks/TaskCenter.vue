@@ -704,74 +704,86 @@ const openReport = (row: any) => {
   router.push({ name: 'ReportDetail', params: { id } })
 }
 
-const retryTask = async (row: any) => {
-  try {
-    const symbol = row.stock_code || row.stock_symbol || row.symbol
-    if (!symbol) {
-      ElMessage.error('无法获取股票代码，无法重试')
-      return
-    }
-
-    await ElMessageBox.confirm(
-      `确定要重试分析 "${row.stock_name || symbol}" 吗？`,
-      '确认重试',
-      {
-        confirmButtonText: '确定',
-        cancelButtonText: '取消',
-        type: 'info'
-      }
-    )
-
-    loading.value = true
-    await fetchAnalysisPrice()
-    
-    const marketType = row.market_type || 'A股'
-    const request: SingleAnalysisRequest = {
-      symbol,
-      stock_code: symbol,
-      price: analysisPrice.value.price,
-      parameters: {
-        market_type: marketType,
-        analysis_date: new Date().toISOString().split('T')[0],
-        research_depth: '深度分析',
-        selected_analysts: convertAnalystNamesToIds(['市场分析师', '基本面分析师', '新闻分析师']),
-        include_sentiment: true,
-        include_risk: true,
-        language: 'zh-CN',
-        quick_analysis_model: 'deepseek-reasoner',
-        deep_analysis_model: 'deepseek-reasoner'
-      }
-    }
-
-    const retryRes = await analysisApi.startSingleAnalysis(request)
-
-    if ((retryRes as any)?.success || (retryRes as any)?.data?.task_id || (retryRes as any)?.task_id) {
-      const taskId = row.task_id || row.analysis_id || row.id
-      if (taskId) {
-        try {
-          await analysisApi.deleteTask(taskId)
-        } catch (deleteError) {
-          console.warn('删除原任务失败:', deleteError)
-        }
-      }
-      ElMessage.success('任务已重新提交')
-      activeTab.value = 'running'
-      // 刷新积分余额
-      await loadList()
-      authStore.forceRefreshBalance()
-      setupPolling()
-    } else {
-      ElMessage.error((retryRes as any)?.message || '重试失败')
-    }
-  } catch (e: any) {
-    if (e !== 'cancel' && e !== 'close') {
-      console.error('重试任务失败:', e)
-      ElMessage.error(e?.message || '重试失败')
-    }
-  } finally {
-    loading.value = false
+const retryTask = (row: any) => {
+  const symbol = row.stock_code || row.stock_symbol || row.symbol
+  if (!symbol) {
+    ElMessage.warning('无法获取股票代码')
+    return
   }
+  router.push({
+    path: '/analysis/single',
+    query: { symbol }
+  })
 }
+
+// const retryTask = async (row: any) => {
+//   try {
+//     const symbol = row.stock_code || row.stock_symbol || row.symbol
+//     if (!symbol) {
+//       ElMessage.error('无法获取股票代码，无法重试')
+//       return
+//     }
+
+//     await ElMessageBox.confirm(
+//       `确定要重试分析 "${row.stock_name || symbol}" 吗？`,
+//       '确认重试',
+//       {
+//         confirmButtonText: '确定',
+//         cancelButtonText: '取消',
+//         type: 'info'
+//       }
+//     )
+
+//     loading.value = true
+//     await fetchAnalysisPrice()
+    
+//     const marketType = row.market_type || 'A股'
+//     const request: SingleAnalysisRequest = {
+//       symbol,
+//       stock_code: symbol,
+//       price: analysisPrice.value.price,
+//       parameters: {
+//         market_type: marketType,
+//         analysis_date: new Date().toISOString().split('T')[0],
+//         research_depth: '深度分析',
+//         selected_analysts: convertAnalystNamesToIds(['市场分析师', '基本面分析师', '新闻分析师']),
+//         include_sentiment: true,
+//         include_risk: true,
+//         language: 'zh-CN',
+//         quick_analysis_model: 'deepseek-reasoner',
+//         deep_analysis_model: 'deepseek-reasoner'
+//       }
+//     }
+
+//     const retryRes = await analysisApi.startSingleAnalysis(request)
+
+//     if ((retryRes as any)?.success || (retryRes as any)?.data?.task_id || (retryRes as any)?.task_id) {
+//       const taskId = row.task_id || row.analysis_id || row.id
+//       if (taskId) {
+//         try {
+//           await analysisApi.deleteTask(taskId)
+//         } catch (deleteError) {
+//           console.warn('删除原任务失败:', deleteError)
+//         }
+//       }
+//       ElMessage.success('任务已重新提交')
+//       activeTab.value = 'running'
+//       // 刷新积分余额
+//       await loadList()
+//       authStore.forceRefreshBalance()
+//       setupPolling()
+//     } else {
+//       ElMessage.error((retryRes as any)?.message || '重试失败')
+//     }
+//   } catch (e: any) {
+//     if (e !== 'cancel' && e !== 'close') {
+//       console.error('重试任务失败:', e)
+//       ElMessage.error(e?.message || '重试失败')
+//     }
+//   } finally {
+//     loading.value = false
+//   }
+// }
 
 const showErrorDetail = async (row: any) => {
   try {
