@@ -465,12 +465,17 @@ const getPayEnv = (): 'wechat' | 'mobile' | 'pc' => {
   return 'pc'
 }
 
-const getPaymentScene = (): 'NATIVE' | 'JSAPI' | 'MWEB' => {
+const getPaymentScene = (): 'NATIVE' | 'JSAPI' | 'H5' => {
   // const env = getPayEnv()
   // if (env === 'wechat') return 'JSAPI'
-  // if (env === 'mobile') return 'MWEB'
+  // if (env === 'mobile') return 'H5'
+  const env = getPayEnv()
+  if (env === 'wechat') return 'JSAPI'
+  if (env === 'mobile') return 'H5'
   return 'NATIVE'
 }
+
+
 
 /** 解析 prepare 返回中的支付 URL，兆容多种字段名 */
 const resolveQrUrl = (data: any): string => {
@@ -539,6 +544,7 @@ const handleRecharge = async () => {
     return
   }
   const scene = getPaymentScene()
+   const mscene = 'NATIVE'
   payScene.value = scene
   payLoading.value = true
   qrDataUrl.value = ''
@@ -550,7 +556,7 @@ const handleRecharge = async () => {
     // Step 1: 创建订单
     const createRes = await paymentApi.createOrder({
       package_id: selectedPackage.value!,
-      payment_scene: scene
+      payment_scene: mscene
     })
     const createData = createRes?.data ?? createRes
     const orderNo = createData?.order_no
@@ -573,7 +579,7 @@ const handleRecharge = async () => {
       startCountdown(expireSec)
       startPolling(orderNo)
 
-    } else if (scene === 'MWEB') {
+    } else if (scene === 'MWEB' || scene === 'H5') {
       // 手机浏览器: 获取支付链接，展示跳转按钮
       const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
       if (!payUrl) throw new Error('未获取到支付链接')
