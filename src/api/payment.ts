@@ -3,6 +3,7 @@ import { request } from './request'
 export interface CreateOrderParams {
   package_id: string
   payment_scene: 'NATIVE' | 'JSAPI' | 'MWEB'
+  code?: string
 }
 
 export interface CreateOrderResult {
@@ -16,8 +17,25 @@ export interface PrepareOrderResult {
   code_url?: string     // NATIVE 模式下的微信二维码链接
   qr_code_url?: string  // 备用字段名
   url?: string          // 通用备用字段
+  mweb_url?: string     // H5 支付链接
+  h5_url?: string       // H5 支付链接备用
   order_no: string
   expire_seconds?: number
+  // JSAPI 支付参数
+  appId?: string
+  timeStamp?: string
+  nonceStr?: string
+  package?: string
+  signType?: string
+  paySign?: string
+  // 微信 SDK 配置参数（可选，用于其他微信功能）
+  wxConfig?: {
+    appId: string
+    timestamp: string
+    nonceStr: string
+    signature: string
+    jsApiList: string[]
+  }
 }
 
 export interface OrderStatus {

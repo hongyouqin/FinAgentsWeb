@@ -287,7 +287,7 @@
         </div>
 
         <!-- 手机端（MWEB/JSAPI）: 支付链接跳转 -->
-        <div v-else-if="(payScene === 'MWEB' || payScene === 'JSAPI') && payStatus === 'pending'" class="qr-area qr-mweb">
+        <div v-else-if="(payScene === 'H5' || payScene === 'JSAPI') && payStatus === 'pending'" class="qr-area qr-mweb">
           <el-icon size="48"><Promotion /></el-icon>
           <p class="mweb-tip">请点击下方按钮前往支付</p>
           <el-button
@@ -333,6 +333,7 @@ import { useAuthStore } from '@/stores/auth'
 import paymentApi from '@/api/payment'
 import QRCode from 'qrcode'
 import { useTxDialog } from '@/composables/useTxDialog'
+import weixin from '@/utils/weixin'
 import {
   Coin, Wallet, CreditCard, Document, Refresh, Promotion, List
 } from '@element-plus/icons-vue'
@@ -340,6 +341,8 @@ import {
 const authStore = useAuthStore()
 const { width: windowWidth } = useWindowSize()
 const isMobile = computed(() => windowWidth.value <= 768)
+
+const wechatCode = ref<string | null>(null)
 
 // 粒子背景
 const particles = ref<Array<{ x: number; y: number; size: number; opacity: number }>>([])
@@ -448,7 +451,7 @@ const pendingPackageName = computed(() => {
 // ─── 支付对话框 ─────────────────────────────────────────
 const showPayDialog = ref(false)
 const payLoading = ref(false)          // 下单中
-const payScene = ref<'NATIVE' | 'JSAPI' | 'MWEB'>('NATIVE')  // 支付场景
+const payScene = ref<'NATIVE' | 'JSAPI' | 'H5'>('NATIVE')  // 支付场景
 const qrDataUrl = ref('')              // 二维码图片 base64
 const mwebPayUrl = ref('')             // MWEB 支付跳转链接
 const currentOrderNo = ref('')         // 当前订单号
@@ -471,7 +474,7 @@ const getPaymentScene = (): 'NATIVE' | 'JSAPI' | 'H5' => {
   // if (env === 'mobile') return 'H5'
   const env = getPayEnv()
   if (env === 'wechat') return 'JSAPI'
-  if (env === 'mobile') return 'H5'
+  if (env === 'mobile') return 'NATIVE'
   return 'NATIVE'
 }
 
@@ -537,6 +540,20 @@ const countdownDisplay = computed(() => {
   return `${m}:${s}`
 })
 
+/** 从 URL 中获取微信授权 code */
+const getWechatCodeFromUrl = (): string | null => {
+  const params = new URLSearchParams(window.location.search)
+  return params.get('code')
+}
+
+/** 清理 URL 中的 code 参数 */
+const clearWechatCodeFromUrl = () => {
+  const url = new URL(window.location.href)
+  url.searchParams.delete('code')
+  url.searchParams.delete('state')
+  window.history.replaceState({}, '', url.toString())
+}
+
 /** 点击「立即充值」- 下单 + 准备支付 */
 const handleRecharge = async () => {
   if (!canRecharge.value) {
@@ -544,7 +561,7 @@ const handleRecharge = async () => {
     return
   }
   const scene = getPaymentScene()
-   const mscene = 'NATIVE'
+  const mscene = scene === 'JSAPI' ? 'JSAPI' : 'NATIVE'
   payScene.value = scene
   payLoading.value = true
   qrDataUrl.value = ''
@@ -553,67 +570,110 @@ const handleRecharge = async () => {
   showPayDialog.value = true
 
   try {
-    // Step 1: 创建订单
-    const createRes = await paymentApi.createOrder({
-      package_id: selectedPackage.value!,
-      payment_scene: mscene
-    })
-    const createData = createRes?.data ?? createRes
-    const orderNo = createData?.order_no
-    if (!orderNo) throw new Error('未获取到订单号')
-    currentOrderNo.value = orderNo
+    if (scene === 'JSAPI') {
+      await handleJSAPIPayment()
+      return
+    }
 
-    // Step 2: 准备支付
-    const prepareRes = await paymentApi.prepareOrder(orderNo)
-    const prepareData = prepareRes?.data ?? prepareRes
-    const expireSec = prepareData?.expire_seconds ?? 300
-
-    if (scene === 'NATIVE') {
-      // PC: 生成二维码
-      const qrUrl = resolveQrUrl(prepareData)
-      if (!qrUrl) throw new Error('未获取到支付二维码链接')
-      qrDataUrl.value = await QRCode.toDataURL(qrUrl, {
-        width: 220, margin: 2,
-        color: { dark: '#0f172a', light: '#ffffff' }
-      })
-      startCountdown(expireSec)
-      startPolling(orderNo)
-
-    } else if (scene === 'JSAPI' || scene === 'H5') {
-      // 手机浏览器: 获取支付链接，展示跳转按钮
-      const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
-      if (!payUrl) throw new Error('未获取到支付链接')
-      mwebPayUrl.value = payUrl
-      startCountdown(expireSec)
-      startPolling(orderNo)
-      // 页面重新可见时（用户从支付页返回）继续轮询
-      const handleVisibility = () => {
-        if (!document.hidden && payStatus.value === 'pending') {
-          startPolling(orderNo)
-        }
-      }
-      document.addEventListener('visibilitychange', handleVisibility, { once: true })
-
-    } 
-    // else if (scene === 'JSAPI') {
-    //   // 微信内浏览器: 同样用链接跳转方式，无需调起 wx.chooseWXPay
-    //   const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
-    //   if (!payUrl) throw new Error('未获取到支付链接')
-    //   mwebPayUrl.value = payUrl
-    //   startCountdown(expireSec)
-    //   startPolling(orderNo)
-    //   const handleVisibility = () => {
-    //     if (!document.hidden && payStatus.value === 'pending') {
-    //       startPolling(orderNo)
-    //     }
-    //   }
-    //   document.addEventListener('visibilitychange', handleVisibility, { once: true })
-    // }
+    await handleNormalPayment(mscene)
   } catch (e: any) {
     showPayDialog.value = false
     ElMessage.error(e?.message || '发起支付失败，请重试')
   } finally {
     payLoading.value = false
+  }
+}
+
+/** 处理 JSAPI 微信支付 */
+const handleJSAPIPayment = async () => {
+  if (!wechatCode.value) {
+    showPayDialog.value = false
+    payLoading.value = false
+    const redirectUri = window.location.href
+    const state = 'recharge'
+    weixin.getWechatCode('', redirectUri, state)
+    return
+  }
+
+  const createRes = await paymentApi.createOrder({
+    package_id: selectedPackage.value!,
+    payment_scene: 'JSAPI',
+    code: wechatCode.value!
+  })
+  const createData = createRes?.data ?? createRes
+  const orderNo = createData?.order_no
+  if (!orderNo) throw new Error('未获取到订单号')
+  currentOrderNo.value = orderNo
+
+  const prepareRes = await paymentApi.prepareOrder(orderNo)
+  const prepareData = prepareRes?.data ?? prepareRes
+  const expireSec = prepareData?.expire_seconds ?? 300
+
+  const { appId, timeStamp, nonceStr, package: packageStr, signType, paySign, wxConfig } = prepareData
+  if (!appId || !timeStamp || !nonceStr || !packageStr || !signType || !paySign) {
+    throw new Error('支付参数不完整')
+  }
+
+  startCountdown(expireSec)
+  startPolling(orderNo)
+
+  try {
+    if (wxConfig) {
+      await weixin.config(wxConfig)
+    }
+    await weixin.chooseWXPay({
+      appId,
+      timeStamp,
+      nonceStr,
+      package: packageStr,
+      signType,
+      paySign
+    })
+  } catch (payError: any) {
+    if (payError?.errMsg === 'chooseWXPay:cancel') {
+      ElMessage.info('支付已取消')
+    } else {
+      ElMessage.error(payError?.errMsg || '支付失败')
+    }
+  }
+}
+
+/** 处理普通支付（NATIVE/H5） */
+const handleNormalPayment = async (paymentScene: string) => {
+  const createRes = await paymentApi.createOrder({
+    package_id: selectedPackage.value!,
+    payment_scene: paymentScene as any
+  })
+  const createData = createRes?.data ?? createRes
+  const orderNo = createData?.order_no
+  if (!orderNo) throw new Error('未获取到订单号')
+  currentOrderNo.value = orderNo
+
+  const prepareRes = await paymentApi.prepareOrder(orderNo)
+  const prepareData = prepareRes?.data ?? prepareRes
+  const expireSec = prepareData?.expire_seconds ?? 300
+
+  if (payScene.value === 'NATIVE') {
+    const qrUrl = resolveQrUrl(prepareData)
+    if (!qrUrl) throw new Error('未获取到支付二维码链接')
+    qrDataUrl.value = await QRCode.toDataURL(qrUrl, {
+      width: 220, margin: 2,
+      color: { dark: '#0f172a', light: '#ffffff' }
+    })
+    startCountdown(expireSec)
+    startPolling(orderNo)
+  } else if (payScene.value === 'H5') {
+    const payUrl = resolveQrUrl(prepareData) || prepareData?.mweb_url || prepareData?.h5_url
+    if (!payUrl) throw new Error('未获取到支付链接')
+    mwebPayUrl.value = payUrl
+    startCountdown(expireSec)
+    startPolling(orderNo)
+    const handleVisibility = () => {
+      if (!document.hidden && payStatus.value === 'pending') {
+        startPolling(orderNo)
+      }
+    }
+    document.addEventListener('visibilitychange', handleVisibility, { once: true })
   }
 }
 
@@ -705,6 +765,18 @@ onMounted(() => {
   authStore.fetchUserBalance()
   fetchPackages()
   loadHistory()
+  
+  if (weixin.isWechatEnv()) {
+    const code = getWechatCodeFromUrl()
+    if (code) {
+      wechatCode.value = code
+      clearWechatCodeFromUrl()
+    } else {
+      const redirectUri = window.location.href
+      const state = 'recharge'
+      weixin.getWechatCode('', redirectUri, state)
+    }
+  }
 })
 
 onUnmounted(() => {

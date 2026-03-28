@@ -15,6 +15,7 @@ import { setupGlobalComponents } from './components'
 import { useAuthStore } from './stores/auth'
 import { useAppStore } from './stores/app'
 import { setupTokenRefreshTimer } from './utils/auth'
+import weixin from './utils/weixin'
 import './styles/index.scss'
 import './styles/dark-theme.scss'
 
@@ -46,6 +47,9 @@ app.use(ElementPlus, {
 
 // 注册全局组件
 setupGlobalComponents(app)
+
+// 注册全局 $wx 方法
+app.config.globalProperties.$wx = weixin
 
 // 全局错误处理
 app.config.errorHandler = (err, vm, info) => {

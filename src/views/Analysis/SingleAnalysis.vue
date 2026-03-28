@@ -112,21 +112,42 @@
                     {{ stockCodeHelp }}
                   </div>
               </div>
+             </div>
+             <div style="display: flex;align-items: center;justify-content: space-between;">
+                <div>
+                  <!-- <div v-if="stockCodeError" class="input-message error">
+                    <el-icon><CircleClose /></el-icon>
+                    {{ stockCodeError }}
+                  </div>
+                  <div v-else-if="stockCodeHelp" class="input-message help">
+                    <el-icon><InfoFilled /></el-icon>
+                    {{ stockCodeHelp }}
+                  </div> -->
+              </div>
 
-              <div class="iputswc" style="margin-top: 14px;">
+              <div class="iputswc" style="margin-top: 4px;">
                 <el-tooltip content="了解分析类型区别" placement="top">
                   <el-icon class="analysis-info-icon" @click="showAnalysisTypeDialog = true">
                     <Warning />
                   </el-icon>
                 </el-tooltip>
-                <div 
-                  class="analysis-type-switch"
-                  :class="{ 'is-deep': isDeepAnalysis }"
-                  @click="toggleAnalysisType"
-                >
-                  <span class="switch-label">{{ isDeepAnalysis ? '深度推理' : '标准分析' }}</span>
-                  <el-icon v-if="isDeepAnalysis"><Cpu /></el-icon>
-                  <el-icon v-else><Document /></el-icon>
+                <div class="analysis-type-switch">
+                  <div 
+                    class="switch-option"
+                    :class="{ 'is-active': !isDeepAnalysis }"
+                    @click="isDeepAnalysis = false"
+                  >
+                    <el-icon><Document /></el-icon>
+                    <span>标准分析</span>
+                  </div>
+                  <div 
+                    class="switch-option"
+                    :class="{ 'is-active': isDeepAnalysis }"
+                    @click="isDeepAnalysis = true"
+                  >
+                    <el-icon><Cpu /></el-icon>
+                    <span>深度推理</span>
+                  </div>
                 </div>
               </div>
 
@@ -429,7 +450,10 @@
                     @click="viewAnalysis(analysis)"
                   >
                     <div class="analysis-info">
-                      <div class="stock-code">{{ analysis.stock_code || analysis.symbol }}</div>
+                      <div class="stock-code">
+                        {{ analysis.stock_code || analysis.symbol }}
+                        <span v-if="analysis.stock_name" class="stock-name">{{ analysis.stock_name }}</span>
+                      </div>
                       <div class="analysis-time">{{ formatTime1(analysis.start_time) }}</div>
                     </div>
                     <el-tag :type="getStatusType(analysis.status)" size="small">
@@ -1987,7 +2011,7 @@ onUnmounted(() => {
   display: flex;
   align-items: center;
   gap: 6px;
-  margin-top: 12px;
+  margin-top: 5px;
   font-size: 13px;
   
   &.error {
@@ -2005,40 +2029,62 @@ onUnmounted(() => {
 
 // 分析类型开关
 .analysis-type-switch {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 12px;
+  display: inline-flex;
   background: #f1f5f9;
   border: 1px solid #e2e8f0;
   border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.2s ease;
-  font-size: 13px;
-  color: #64748b;
+  padding: 2px;
+  gap: 2px;
   user-select: none;
 
-  &:hover {
-    background: #e2e8f0;
-    border-color: #cbd5e1;
-  }
+  .switch-option {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 12px;
+    color: #64748b;
+    background: transparent;
 
-  &.is-deep {
-    background: linear-gradient(135deg, rgba(6, 182, 212, 0.1), rgba(5, 150, 105, 0.1));
-    border-color: #06b6d4;
-    color: #0891b2;
+    &:hover {
+      background: rgba(0, 0, 0, 0.05);
+    }
 
-    .switch-label {
-      font-weight: 600;
+    &.is-active {
+      background: linear-gradient(135deg, #0ea5e9, #06b6d4);
+      color: white;
+      box-shadow: 0 2px 8px rgba(14, 165, 233, 0.3);
+
+      .el-icon {
+        color: white;
+      }
+    }
+
+    .el-icon {
+      font-size: 14px;
     }
   }
+}
 
-  .switch-label {
-    font-weight: 500;
-  }
+@media (max-width: 640px) {
+  .analysis-type-switch {
+    border-radius: 6px;
+    padding: 2px;
+    gap: 2px;
 
-  .el-icon {
-    font-size: 14px;
+    .switch-option {
+      gap: 3px;
+      padding: 5px 10px;
+      border-radius: 4px;
+      font-size: 11px;
+
+      .el-icon {
+        font-size: 12px;
+      }
+    }
   }
 }
 
@@ -2688,6 +2734,15 @@ onUnmounted(() => {
         font-weight: 600;
         color: #1e293b;
         margin-bottom: 4px;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+
+        .stock-name {
+          font-size: 13px;
+          font-weight: 500;
+          color: #64748b;
+        }
       }
       
       .analysis-time {
