@@ -162,15 +162,15 @@ const routes: RouteRecordRaw[] = [
           requiresAuth: false
         }
       },
-      {
-        path: 'article/:id',
-        name: 'LearningArticle',
-        component: () => import('@/views/Learning/Article.vue'),
-        meta: {
-          title: '文章详情',
-          requiresAuth: false
-        }
-      }
+      // {
+      //   path: 'article/:id',
+      //   name: 'LearningArticle',
+      //   component: () => import('@/views/Learning/Article.vue'),
+      //   meta: {
+      //     title: '文章详情',
+      //     requiresAuth: false
+      //   }
+      // }
     ]
   },
   {
