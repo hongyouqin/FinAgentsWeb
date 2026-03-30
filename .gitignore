@@ -1,5 +1,4 @@
 # 依赖锁文件
-yarn.lock
 
 # 本地环境变量
 .env.local
