@@ -99,7 +99,7 @@
               <template #default="{ row }">
                 <div class="report-title-cell">
                   <div class="report-name" @click="viewReport(row)">{{ row.title }}</div>
-                  <div class="report-sub">{{ row.stock_code }} · {{ row.stock_name }}</div>
+                  <div class="report-sub"><span class="stock-code" @click="openStockPage(row.stock_code)">{{ row.stock_code }}</span> · {{ row.stock_name }}</div>
                 </div>
               </template>
             </el-table-column>
@@ -198,7 +198,7 @@
               </el-tag>
             </div>
             <div class="card-meta">
-              <span class="meta-badge">{{ row.stock_code }}</span>
+              <span class="meta-badge"  @click="openStockPage(row.stock_code)">{{ row.stock_code }}</span>
               <span class="meta-text" v-if="row.stock_name">{{ row.stock_name }}</span>
               <el-tag :type="getTypeColor(row.type)" size="small" effect="plain" class="type-tag">
                 {{ getTypeText(row.type) }}
@@ -469,6 +469,13 @@ const initParticles = () => {
     size: Math.random() * 3 + 1,
     opacity: Math.random() * 0.5 + 0.15
   }))
+}
+
+const openStockPage = (stockCode: string) => {
+  if (!stockCode) return
+  // 去掉后缀（如 .SH, .SZ, .BJ），只保留数字部分
+  const code = stockCode.replace(/\.(SH|SZ|BJ)$/i, '')
+  window.open(`https://stockpage.10jqka.com.cn/${code}`, '_blank')
 }
 
 onMounted(() => {
@@ -762,9 +769,20 @@ onMounted(() => {
   }
 
   .report-sub {
-    font-size: 12px;
-    color: #94a3b8;
-    margin-top: 2px;
+    .stock-code {
+      cursor: pointer;
+      color: #0891b2;
+      text-decoration: underline;
+      text-decoration-color: rgba(8, 145, 178, 0.3);
+      text-underline-offset: 2px;
+      transition: all 0.2s;
+
+      &:hover {
+        color: #0e7490;
+        text-decoration-color: #0e7490;
+      }
+    }
+    
   }
 }
 
@@ -854,12 +872,23 @@ onMounted(() => {
     margin-bottom: 8px;
 
     .meta-badge {
-      background: rgba(6, 182, 212, 0.1);
-      color: #0891b2;
+      // background: rgba(6, 182, 212, 0.1);
+      // color: #0891b2;
       padding: 2px 8px;
       border-radius: 6px;
-      font-size: 12px;
+      font-size: 14px;
       font-weight: 600;
+      cursor: pointer;
+      color: #0891b2;
+      text-decoration: underline;
+      text-decoration-color: rgba(8, 145, 178, 0.3);
+      text-underline-offset: 2px;
+      transition: all 0.2s;
+
+      &:hover {
+        color: #0e7490;
+        text-decoration-color: #0e7490;
+      }
     }
 
     .meta-text {

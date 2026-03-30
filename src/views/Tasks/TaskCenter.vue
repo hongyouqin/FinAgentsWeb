@@ -876,8 +876,10 @@ const goToAnalysis = () => {
 const openStockPage = (stockCode: string) => {
   if (!stockCode) return
   // 去掉后缀（如 .SH, .SZ, .BJ），只保留数字部分
+  // const code = stockCode.replace(/\.(SH|SZ|BJ)$/i, '')
+  // window.open(`/stocks/${code}`, '_blank')
   const code = stockCode.replace(/\.(SH|SZ|BJ)$/i, '')
-  window.open(`/stocks/${code}`, '_blank')
+  window.open(`https://stockpage.10jqka.com.cn/${code}`, '_blank')
 }
 
 // 工具函数
