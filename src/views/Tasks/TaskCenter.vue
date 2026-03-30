@@ -450,7 +450,7 @@ marked.setOptions({ breaks: true, gfm: true })
 const router = useRouter()
 const route = useRoute()
 
-const activeTab = ref<'running'|'completed'|'failed'|'all'>('running')
+const activeTab = ref<'running'|'completed'|'failed'|'all'>('all')
 const loading = ref(false)
 const keyword = ref('')
 const currentPage = ref(1)
