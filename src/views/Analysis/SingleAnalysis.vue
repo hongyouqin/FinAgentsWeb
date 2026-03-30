@@ -807,7 +807,13 @@ const analysisPrice = ref({
 })
 
 // 是否深度分析
-const isDeepAnalysis = ref(false)
+const savedAnalysisType = localStorage.getItem('analysisType')
+const isDeepAnalysis = ref(savedAnalysisType === 'deep')
+
+// 监听分析类型变化，保存到 localStorage
+watch(isDeepAnalysis, (newValue) => {
+  localStorage.setItem('analysisType', newValue ? 'deep' : 'standard')
+})
 
 // 分析类型说明弹框
 const showAnalysisTypeDialog = ref(false)
