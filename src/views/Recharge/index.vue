@@ -591,7 +591,7 @@ const handleJSAPIPayment = async () => {
     payLoading.value = false
     const redirectUri = window.location.href
     const state = 'recharge'
-    weixin.getWechatCode('wx183521434338da29', redirectUri, state)
+    weixin.getWechatCode('wx4b2ebb414a1f0891', redirectUri, state)
     return
   }
 
@@ -774,7 +774,7 @@ onMounted(() => {
     } else {
       const redirectUri = window.location.href
       const state = 'recharge'
-      weixin.getWechatCode('wx183521434338da29', redirectUri, state)
+      weixin.getWechatCode('wx4b2ebb414a1f0891', redirectUri, state)
     }
   }
 })
