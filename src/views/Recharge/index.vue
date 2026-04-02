@@ -343,6 +343,7 @@ const { width: windowWidth } = useWindowSize()
 const isMobile = computed(() => windowWidth.value <= 768)
 
 const wechatCode = ref<string | null>(null)
+const isWxConfigured = ref(false)
 
 // 粒子背景
 const particles = ref<Array<{ x: number; y: number; size: number; opacity: number }>>([])
@@ -584,6 +585,26 @@ const handleRecharge = async () => {
   }
 }
 
+/** 初始化微信 SDK 配置 */
+const initWxConfig = async () => {
+  if (!wechatCode.value || !weixin.isWechatEnv()) {
+    return
+  }
+
+  try {
+    const configRes = await paymentApi.configcallback(wechatCode.value!)
+    const configData = configRes?.data ?? configRes
+    const wxConfig = configData?.wxConfig
+    if (wxConfig) {
+      await weixin.config(wxConfig)
+      isWxConfigured.value = true
+      console.log('微信 SDK 配置成功')
+    }
+  } catch (e: any) {
+    console.warn('初始化 wxConfig 失败:', e)
+  }
+}
+
 /** 处理 JSAPI 微信支付 */
 const handleJSAPIPayment = async () => {
   if (!wechatCode.value) {
@@ -591,14 +612,17 @@ const handleJSAPIPayment = async () => {
     payLoading.value = false
     const redirectUri = window.location.href
     const state = 'recharge'
-    weixin.getWechatCode('wx4b2ebb414a1f0891', redirectUri, state)
+    weixin.getWechatCode('wx183521434338da29', redirectUri, state)
     return
+  }
+
+  if (!isWxConfigured.value) {
+    await initWxConfig()
   }
 
   const createRes = await paymentApi.createOrder({
     package_id: selectedPackage.value!,
     payment_scene: 'JSAPI',
-    code: wechatCode.value!
   })
   const createData = createRes?.data ?? createRes
   const orderNo = createData?.order_no
@@ -609,7 +633,7 @@ const handleJSAPIPayment = async () => {
   const prepareData = prepareRes?.data ?? prepareRes
   const expireSec = prepareData?.expire_seconds ?? 300
 
-  const { appId, timeStamp, nonceStr, package: packageStr, signType, paySign, wxConfig } = prepareData
+  const { appId, timeStamp, nonceStr, package: packageStr, signType, paySign } = prepareData
   if (!appId || !timeStamp || !nonceStr || !packageStr || !signType || !paySign) {
     throw new Error('支付参数不完整')
   }
@@ -618,9 +642,6 @@ const handleJSAPIPayment = async () => {
   startPolling(orderNo)
 
   try {
-    if (wxConfig) {
-      await weixin.config(wxConfig)
-    }
     await weixin.chooseWXPay({
       appId,
       timeStamp,
@@ -771,10 +792,11 @@ onMounted(() => {
     if (code) {
       wechatCode.value = code
       clearWechatCodeFromUrl()
+      initWxConfig()
     } else {
       const redirectUri = window.location.href
       const state = 'recharge'
-      weixin.getWechatCode('wx4b2ebb414a1f0891', redirectUri, state)
+      weixin.getWechatCode('wx183521434338da29', redirectUri, state)
     }
   }
 })

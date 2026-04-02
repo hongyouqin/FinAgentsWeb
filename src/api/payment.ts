@@ -100,7 +100,17 @@ const paymentApi = {
    */
   getTransactions(params?: { limit?: number; transaction_type?: 'RECHARGE' | 'CONSUME' | 'ALL' }): Promise<any> {
     return request.get('/api/payment/transactions', { params })
+  },
+
+  /**
+   * 准备微信 JSAPI 支付（获取 wxConfig）
+   * POST /api/payment/recharge/prepare_recharge_payment
+   */
+  configcallback(code: string): Promise<any> {
+    return request.post('/api/payment/wechat/callback', { code })
   }
+
+  
 }
 
 export default paymentApi

@@ -33,7 +33,7 @@ class WeixinSDK {
         timestamp: config.timestamp,
         nonceStr: config.nonceStr,
         signature: config.signature,
-        jsApiList: config.jsApiList
+        jsApiList: ['chooseWXPay']
       })
 
       this.wx.ready(() => {
