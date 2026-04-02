@@ -585,6 +585,61 @@ const handleRecharge = async () => {
   }
 }
 
+/** 调用微信支付 JSBridge */
+const invokeWeixinPay = (payParams: {
+  appId: string
+  timeStamp: string
+  nonceStr: string
+  package: string
+  signType: string
+  paySign: string
+}): Promise<void> => {
+  return new Promise((resolve, reject) => {
+    const onBridgeReady = () => {
+      // @ts-ignore
+      WeixinJSBridge.invoke(
+        'getBrandWCPayRequest',
+        {
+          appId: payParams.appId,
+          timeStamp: payParams.timeStamp,
+          nonceStr: payParams.nonceStr,
+          package: payParams.package,
+          signType: payParams.signType,
+          paySign: payParams.paySign
+        },
+        (res: any) => {
+          if (res.err_msg === 'get_brand_wcpay_request:ok') {
+            ElMessage.success('支付成功！')
+            resolve()
+          } else if (res.err_msg === 'get_brand_wcpay_request:cancel') {
+            ElMessage.info('支付已取消')
+            reject(new Error('用户取消支付'))
+          } else {
+            ElMessage.error(res.err_desc || '支付失败')
+            reject(new Error(res.err_desc || '支付失败'))
+          }
+        }
+      )
+    }
+
+    // @ts-ignore
+    if (typeof WeixinJSBridge === 'undefined') {
+      // @ts-ignore
+      if (document.addEventListener) {
+        // @ts-ignore
+        document.addEventListener('WeixinJSBridgeReady', onBridgeReady, false)
+      } else if ((document as any).attachEvent) {
+        // @ts-ignore
+        document.attachEvent('WeixinJSBridgeReady', onBridgeReady)
+        // @ts-ignore
+        document.attachEvent('onWeixinJSBridgeReady', onBridgeReady)
+      }
+    } else {
+      onBridgeReady()
+    }
+  })
+}
+
 /** 初始化微信 SDK 配置 */
 const initWxConfig = async () => {
   if (!wechatCode.value || !weixin.isWechatEnv()) {
@@ -616,10 +671,6 @@ const handleJSAPIPayment = async () => {
     return
   }
 
-  if (!isWxConfigured.value) {
-    await initWxConfig()
-  }
-
   const createRes = await paymentApi.createOrder({
     package_id: selectedPackage.value!,
     payment_scene: 'JSAPI',
@@ -641,22 +692,15 @@ const handleJSAPIPayment = async () => {
   startCountdown(expireSec)
   startPolling(orderNo)
 
-  try {
-    await weixin.chooseWXPay({
-      appId,
-      timeStamp,
-      nonceStr,
-      package: packageStr,
-      signType,
-      paySign
-    })
-  } catch (payError: any) {
-    if (payError?.errMsg === 'chooseWXPay:cancel') {
-      ElMessage.info('支付已取消')
-    } else {
-      ElMessage.error(payError?.errMsg || '支付失败')
-    }
-  }
+  // 使用 WeixinJSBridge 原生调用
+  await invokeWeixinPay({
+    appId,
+    timeStamp,
+    nonceStr,
+    package: packageStr,
+    signType,
+    paySign
+  })
 }
 
 /** 处理普通支付（NATIVE/H5） */
@@ -792,7 +836,7 @@ onMounted(() => {
     if (code) {
       wechatCode.value = code
       clearWechatCodeFromUrl()
-      initWxConfig()
+      // initWxConfig()
     } else {
       const redirectUri = window.location.href
       const state = 'recharge'

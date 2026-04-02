@@ -102,7 +102,14 @@ function onMarkAllRead() { notifStore.markAllRead() }
 function typeLabel(t: string) { return t === 'analysis' ? '分析' : t === 'alert' ? '预警' : '系统' }
 function tagType(t: string) { return t === 'analysis' ? 'success' : t === 'alert' ? 'warning' : 'info' }
 function toLocal(iso: string) { try { return new Date(iso).toLocaleString() } catch { return iso } }
-function go(n: any) { if (n.link) window.open(n.link, '_blank') } // Changed from hardcoded URL to use n.link
+function go(n: any) { 
+  if (n.link){
+      console.log(n.link) 
+      window.open(n.link, '_blank') 
+  }
+ 
+  
+} // Changed from hardcoded URL to use n.link
 
 const godetile = (analysis: any) => {
     router.push({
