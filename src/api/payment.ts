@@ -107,7 +107,7 @@ const paymentApi = {
    * POST /api/payment/recharge/prepare_recharge_payment
    */
   configcallback(code: string): Promise<any> {
-    return request.post('/api/payment/wechat/callback', { code })
+    return request.get(`/api/payment/wechat/callback?code=${code}`)
   }
 
   
