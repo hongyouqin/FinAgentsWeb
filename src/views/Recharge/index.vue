@@ -651,7 +651,7 @@ const initWxConfig = async () => {
     const configData = configRes?.data ?? configRes
     const wxConfig = configData?.wxConfig
     if (wxConfig) {
-      await weixin.config(wxConfig)
+      // await weixin.config(wxConfig)
       isWxConfigured.value = true
       console.log('微信 SDK 配置成功')
     }
@@ -670,6 +670,7 @@ const handleJSAPIPayment = async () => {
     weixin.getWechatCode('wx183521434338da29', redirectUri, state)
     return
   }
+  await initWxConfig()
 
   const createRes = await paymentApi.createOrder({
     package_id: selectedPackage.value!,
@@ -836,7 +837,7 @@ onMounted(() => {
     if (code) {
       wechatCode.value = code
       clearWechatCodeFromUrl()
-      // initWxConfig()
+      initWxConfig()
     } else {
       const redirectUri = window.location.href
       const state = 'recharge'
