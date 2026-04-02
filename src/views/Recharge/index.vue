@@ -590,7 +590,7 @@ const invokeWeixinPay = (payParams: {
   appId: string
   timeStamp: string
   nonceStr: string
-  package: string
+  packageValue: string
   signType: string
   paySign: string
 }): Promise<void> => {
@@ -603,7 +603,7 @@ const invokeWeixinPay = (payParams: {
           appId: payParams.appId,
           timeStamp: payParams.timeStamp,
           nonceStr: payParams.nonceStr,
-          package: payParams.package,
+          package: payParams.packageValue,  // 映射到微信支付 API 的 package 字段
           signType: payParams.signType,
           paySign: payParams.paySign
         },
@@ -685,8 +685,15 @@ const handleJSAPIPayment = async () => {
   const prepareData = prepareRes?.data ?? prepareRes
   const expireSec = prepareData?.expire_seconds ?? 300
 
-  const { appId, timeStamp, nonceStr, package: packageStr, signType, paySign } = prepareData
-  if (!appId || !timeStamp || !nonceStr || !packageStr || !signType || !paySign) {
+  // 使用字符串访问避免 package 保留字冲突
+  const appId = prepareData.appId
+  const timeStamp = prepareData.timeStamp
+  const nonceStr = prepareData.nonceStr
+  const packageValue = prepareData['package']  // 使用字符串访问
+  const signType = prepareData.signType
+  const paySign = prepareData.paySign
+
+  if (!appId || !timeStamp || !nonceStr || !packageValue || !signType || !paySign) {
     throw new Error('支付参数不完整')
   }
 
@@ -698,7 +705,7 @@ const handleJSAPIPayment = async () => {
     appId,
     timeStamp,
     nonceStr,
-    package: packageStr,
+    packageValue,
     signType,
     paySign
   })
