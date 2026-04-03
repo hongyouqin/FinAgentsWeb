@@ -1306,6 +1306,7 @@ const viewAnalysis = (analysis: AnalysisTask) => {
       params: { id: analysis.task_id },
       query: {
         symbol: analysis.stock_code || analysis.symbol || '',
+        name: analysis.stock_name || analysis.name || '',
         date: analysis.created_at ? analysis.created_at.slice(0, 10) : ''
       }
     })

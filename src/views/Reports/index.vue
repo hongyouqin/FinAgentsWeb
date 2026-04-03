@@ -366,6 +366,7 @@ const viewAnalysisReport = (report: any) => {
     params: { id },
     query: {
       symbol: report.stock_code || '',
+      name: report.stock_name || '',
       date: report.created_at ? report.created_at.slice(0, 10) : (report.analysis_date || '')
     }
   })

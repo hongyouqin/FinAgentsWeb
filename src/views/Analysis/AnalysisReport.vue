@@ -100,8 +100,11 @@ const downloading = ref(false)
 // 从 URL query 中读取展示元信息（可选）
 const taskInfo = ref({
   symbol: route.query.symbol as string || '',
+  name: route.query.name as string || '',
   date: route.query.date as string || ''
 })
+
+
 
 const loadReport = async () => {
   if (!taskId.value) {
@@ -333,7 +336,14 @@ const downloadImage = async () => {
         const url = URL.createObjectURL(blob)
         const link = document.createElement('a')
         link.href = url
-        link.download = `分析报告_${taskId.value}_${new Date().getTime()}.png`
+        
+        // 生成文件名：分析报告—股票名称 + 股票代码 + 时间戳
+        const timestamp = new Date().getTime()
+        const symbolName = taskInfo.value.name || 'unknown'
+        const stockCode = taskInfo.value.symbol || 'unknown' // 替换特殊字符
+        const fileName = `分析报告_${symbolName}_${stockCode}_${timestamp}.png`
+        
+        link.download = fileName
         document.body.appendChild(link)
         link.click()
         document.body.removeChild(link)

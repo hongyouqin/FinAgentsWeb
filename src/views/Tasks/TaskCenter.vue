@@ -681,6 +681,7 @@ const openResult = (row: any) => {
     params: { id },
     query: {
       symbol: row.stock_code || row.stock_symbol || '',
+      name: row.stock_name || '',
       date: row.created_at ? row.created_at.slice(0, 10) : (row.start_time ? row.start_time.slice(0, 10) : '')
     }
   })
