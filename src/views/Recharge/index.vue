@@ -127,11 +127,11 @@
             type="primary"
             size="large"
             class="recharge-btn"
-            :disabled="!canRecharge"
+            :disabled="!canRecharge || isSubmitting"
             @click="handleRecharge"
           >
             <el-icon><CreditCard /></el-icon>
-            立即充值
+            {{ isSubmitting ? '处理中...' : '立即充值' }}
           </el-button>
         </div>
       </div>
@@ -345,6 +345,9 @@ const isMobile = computed(() => windowWidth.value <= 768)
 const wechatCode = ref<string | null>(null)
 const isWxConfigured = ref(false)
 
+// 防抖控制
+const isSubmitting = ref(false)
+
 // 粒子背景
 const particles = ref<Array<{ x: number; y: number; size: number; opacity: number }>>([])
 const initParticles = () => {
@@ -557,10 +560,19 @@ const clearWechatCodeFromUrl = () => {
 
 /** 点击「立即充值」- 下单 + 准备支付 */
 const handleRecharge = async () => {
+  // 防抖：如果正在提交，直接返回
+  if (isSubmitting.value) {
+    return
+  }
+
   if (!canRecharge.value) {
     ElMessage.warning('请选择充值套餐')
     return
   }
+
+  // 设置防抖标志
+  isSubmitting.value = true
+
   const scene = getPaymentScene()
   const mscene = scene === 'JSAPI' ? 'JSAPI' : 'NATIVE'
   payScene.value = scene
@@ -582,6 +594,10 @@ const handleRecharge = async () => {
     ElMessage.error(e?.message || '发起支付失败，请重试')
   } finally {
     payLoading.value = false
+    // 延迟释放防抖标志，避免快速重复点击
+    setTimeout(() => {
+      isSubmitting.value = false
+    }, 500)
   }
 }
 
@@ -597,6 +613,7 @@ const invokeWeixinPay = (payParams: {
   return new Promise((resolve, reject) => {
     const onBridgeReady = () => {
       // @ts-ignore
+      console.log('WeixinJSBridge ready', payParams)
       WeixinJSBridge.invoke(
         'getBrandWCPayRequest',
         {
