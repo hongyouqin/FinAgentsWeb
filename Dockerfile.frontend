@@ -20,10 +20,9 @@ RUN yarn install --frozen-lockfile --production=false --network-timeout 300000
 # 复制前端源代码（现在所有源码都在当前目录）
 COPY . .
 
-# 移除 assets 和 docs 的复制，因为它们不在项目中
-
 # 构建生产版本（跳过类型检查以加快构建速度）
 RUN yarn vite build
+RUN cp -r ./assets ./dist/
 
 # 运行阶段：使用Nginx提供静态文件服务
 FROM nginx:alpine AS runtime
