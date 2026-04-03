@@ -67,7 +67,7 @@ export interface SendSmsRequest {
 export interface RegisterForm {
   invite_code: string
   username: string
-  email: string
+  // email: string
   phone: string
   password: string
   sms_code: string

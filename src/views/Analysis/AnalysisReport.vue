@@ -84,6 +84,7 @@ import {
 } from '@element-plus/icons-vue'
 import { analysisApi } from '@/api/analysis'
 import html2canvas from 'html2canvas'
+import qrCodeImgPath from '@/../assets/qrcodes.jpg'
 
 const route = useRoute()
 const router = useRouter()
@@ -241,7 +242,7 @@ const downloadImage = async () => {
     // 在 Canvas 底部绘制公众号二维码
     const qrCodeImg = new Image()
     qrCodeImg.crossOrigin = 'anonymous'
-    qrCodeImg.src = '/assets/qrcodes.jpg'
+    qrCodeImg.src = qrCodeImgPath
 
     await new Promise((resolve, reject) => {
       qrCodeImg.onload = resolve
@@ -252,7 +253,6 @@ const downloadImage = async () => {
     const footerHeight = 240 // 底部区域总高度（增加留白）
     const qrSize = 130 // 二维码正方形尺寸
     const padding = 30 // 左右边距
-    const spacing = 20 // 元素间距
 
     // 创建新的 Canvas，增加底部空间
     const newCanvas = document.createElement('canvas')

@@ -95,14 +95,14 @@
           </el-form-item>
 
           <!-- 邮箱 -->
-          <el-form-item label="邮箱" prop="email">
+          <!-- <el-form-item label="邮箱" prop="email">
             <el-input
               v-model="registerForm.email"
               placeholder="请输入邮箱"
               prefix-icon="Message"
               clearable
             />
-          </el-form-item>
+          </el-form-item> -->
 
           <!-- 密码 -->
           <el-form-item label="密码" prop="password">
@@ -211,7 +211,7 @@ const registerForm = reactive({
   username: '',
   phone: '',
   smsCode: '',
-  email: '',
+  // email: '',
   password: '',
   confirmPassword: '',
   agreement: false
@@ -274,10 +274,10 @@ const agreementValidator = (rule: any, value: boolean, callback: any) => {
 
 // 表单验证规则
 const registerRules = {
-  inviteCode: [
-    { required: true, message: '请输入邀请码', trigger: 'blur' },
-    { min: 4, max: 32, message: '邀请码长度为4-32个字符', trigger: 'blur' }
-  ],
+  // inviteCode: [
+  //   { required: true, message: '请输入邀请码', trigger: 'blur' },
+  //   { min: 4, max: 32, message: '邀请码长度为4-32个字符', trigger: 'blur' }
+  // ],
   username: [
     { required: true, message: '请输入用户名', trigger: 'blur' },
     { min: 3, max: 20, message: '用户名长度为3-20个字符', trigger: 'blur' }
@@ -289,9 +289,9 @@ const registerRules = {
     { required: true, message: '请输入验证码', trigger: 'blur' },
     { len: 6, message: '验证码为6位数字', trigger: 'blur' }
   ],
-  email: [
-    { required: true, validator: emailValidator, trigger: 'blur' }
-  ],
+  // email: [
+  //   { required: true, validator: emailValidator, trigger: 'blur' }
+  // ],
   password: [
     { required: true, validator: passwordValidator, trigger: 'blur' }
   ],
@@ -368,7 +368,7 @@ const handleRegister = async () => {
       username: registerForm.username,
       phone: registerForm.phone,
       sms_code: registerForm.smsCode,
-      email: registerForm.email,
+      // email: registerForm.email,
       password: registerForm.password
     }
 
