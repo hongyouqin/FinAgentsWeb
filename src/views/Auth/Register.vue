@@ -197,6 +197,30 @@ const registerLoading = ref(false)
 const sendingSms = ref(false)
 const smsCountdown = ref(0)
 
+// 从 localStorage 恢复倒计时状态（防止刷新页面后重新发送）
+const restoreSmsCountdown = () => {
+  const savedTime = localStorage.getItem('sms_countdown_end')
+  if (savedTime) {
+    const endTime = parseInt(savedTime, 10)
+    const now = Date.now()
+    const remaining = Math.ceil((endTime - now) / 1000)
+    
+    if (remaining > 0) {
+      smsCountdown.value = remaining
+      // 继续倒计时
+      const timer = setInterval(() => {
+        smsCountdown.value--
+        if (smsCountdown.value <= 0) {
+          clearInterval(timer)
+          localStorage.removeItem('sms_countdown_end')
+        }
+      }, 1000)
+    } else {
+      localStorage.removeItem('sms_countdown_end')
+    }
+  }
+}
+
 // 背景粒子
 const particles = ref<Array<{
   x: number
@@ -312,6 +336,12 @@ const smsButtonText = computed(() => {
 
 // 发送短信验证码
 const handleSendSms = async () => {
+  // 如果正在倒计时，不允许再次发送
+  if (smsCountdown.value > 0) {
+    ElMessage.warning(`请等待 ${smsCountdown.value} 秒后再试`)
+    return
+  }
+
   try {
     // 验证手机号
     await registerFormRef.value.validateField('phone')
@@ -328,10 +358,16 @@ const handleSendSms = async () => {
       ElMessage.success('验证码已发送，5分钟内有效')
       // 开始倒计时
       smsCountdown.value = 60
+      
+      // 保存倒计时结束时间到 localStorage（跨页面/刷新保持）
+      const endTime = Date.now() + 60 * 1000
+      localStorage.setItem('sms_countdown_end', endTime.toString())
+      
       const timer = setInterval(() => {
         smsCountdown.value--
         if (smsCountdown.value <= 0) {
           clearInterval(timer)
+          localStorage.removeItem('sms_countdown_end')
         }
       }, 1000)
     } else {
@@ -409,6 +445,7 @@ const initParticles = () => {
 
 onMounted(() => {
   initParticles()
+  restoreSmsCountdown() // 恢复倒计时状态
 })
 </script>
 
