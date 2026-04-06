@@ -719,32 +719,32 @@ const handleJSAPIPayment = async () => {
 
  
 
-  try {
-    await weixin.chooseWXPay({
-      appId,
-      timeStamp,
-      nonceStr,
-      package: packageValue,
-      signType,
-      paySign
-    })
-  } catch (payError: any) {
-    if (payError?.errMsg === 'chooseWXPay:cancel') {
-      ElMessage.info('支付已取消')
-    } else {
-      ElMessage.error(payError?.errMsg || '支付失败')
-    }
-  }
+  // try {
+  //   await weixin.chooseWXPay({
+  //     appId,
+  //     timeStamp,
+  //     nonceStr,
+  //     package: packageValue,
+  //     signType,
+  //     paySign
+  //   })
+  // } catch (payError: any) {
+  //   if (payError?.errMsg === 'chooseWXPay:cancel') {
+  //     ElMessage.info('支付已取消')
+  //   } else {
+  //     ElMessage.error(payError?.errMsg || '支付失败')
+  //   }
+  // }
 
   // 使用 WeixinJSBridge 原生调用
-  // await invokeWeixinPay({
-  //   appId,
-  //   timeStamp,
-  //   nonceStr,
-  //   packageValue,
-  //   signType,
-  //   paySign
-  // })
+  await invokeWeixinPay({
+    appId,
+    timeStamp,
+    nonceStr,
+    packageValue,
+    signType,
+    paySign
+  })
 }
 
 /** 处理普通支付（NATIVE/H5） */
