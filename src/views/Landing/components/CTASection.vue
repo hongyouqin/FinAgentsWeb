@@ -1,10 +1,18 @@
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import wechatLogin from '@/utils/wechatLogin'
 
 const router = useRouter()
 
 const handleStartNow = () => {
-  router.push('/login')
+  // 判断是否在微信环境
+  if (wechatLogin.isWechat()) {
+    console.log('📱 微信环境，跳转到首页触发自动登录')
+    router.push('/')
+  } else {
+    console.log('💻 非微信环境，跳转到登录页')
+    router.push('/login')
+  }
 }
 
 const handleLearnMore = () => {

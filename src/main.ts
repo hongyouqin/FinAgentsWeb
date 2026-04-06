@@ -16,6 +16,7 @@ import { useAuthStore } from './stores/auth'
 import { useAppStore } from './stores/app'
 import { setupTokenRefreshTimer } from './utils/auth'
 import weixin from './utils/weixin'
+import wechatLogin from './utils/wechatLogin'
 import './styles/index.scss'
 import './styles/dark-theme.scss'
 
@@ -112,23 +113,29 @@ const initApp = async () => {
 
     if (apiConnected) {
       console.log('✅ API连接正常，检查认证状态...')
-      // 检查本地存储的认证信息（设置较短的超时时间）
-      const checkPromise = authStore.checkAuthStatus()
-      const timeoutPromise = new Promise((_, reject) => {
-        setTimeout(() => reject(new Error('认证检查超时')), 5000) // 5秒超时
-      })
 
-      await Promise.race([checkPromise, timeoutPromise])
-      console.log('✅ 认证状态初始化完成')
+      // 1. 先检查微信登录（如果在微信环境中且有 code）
+      const isWechatLogin = await checkWechatLogin()
 
-      // 如果用户已登录，启动 token 自动刷新定时器
-      if (authStore.isAuthenticated) {
-        setupTokenRefreshTimer()
+      // 2. 如果不是微信登录，则检查本地认证状态
+      if (!isWechatLogin) {
+        const checkPromise = authStore.checkAuthStatus()
+        const timeoutPromise = new Promise((_, reject) => {
+          setTimeout(() => reject(new Error('认证检查超时')), 5000) // 5秒超时
+        })
+
+        await Promise.race([checkPromise, timeoutPromise])
+        console.log('✅ 认证状态初始化完成')
+
+        // 如果用户已登录，启动 token 自动刷新定时器
+        if (authStore.isAuthenticated) {
+          setupTokenRefreshTimer()
+        }
       }
     } else {
       console.log('⚠️ API连接失败，跳过认证检查')
     }
-  } catch (error) {
+  } catch (error: any) {
     console.warn('⚠️ 应用初始化失败，但应用将继续启动:', error)
     // 如果是网络错误，不影响应用启动
     if (error.code === 'ECONNABORTED' || error.message?.includes('timeout')) {
@@ -138,6 +145,32 @@ const initApp = async () => {
     // 无论认证状态如何，都挂载应用
     app.mount('#app')
     console.log('🚀 应用已挂载')
+  }
+}
+
+/**
+ * 检查并处理微信登录
+ */
+async function checkWechatLogin(): Promise<boolean> {
+  try {
+    // 初始化微信登录配置
+    wechatLogin.init({
+      appId: import.meta.env.VITE_WECHAT_APP_ID || 'wx183521434338da29',
+      redirectUri: window.location.origin + window.location.pathname
+    })
+
+    // 检查并处理微信登录
+    const success = await wechatLogin.checkAndLogin()
+    
+    if (success) {
+      console.log('✅ 微信登录处理完成')
+      return true
+    }
+    
+    return false
+  } catch (error) {
+    console.error('❌ 微信登录检查失败:', error)
+    return false
   }
 }
 

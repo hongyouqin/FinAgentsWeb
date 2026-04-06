@@ -679,15 +679,15 @@ const initWxConfig = async () => {
 
 /** 处理 JSAPI 微信支付 */
 const handleJSAPIPayment = async () => {
-  if (!wechatCode.value) {
-    showPayDialog.value = false
-    payLoading.value = false
-    const redirectUri = window.location.href
-    const state = 'recharge'
-    weixin.getWechatCode('wx183521434338da29', redirectUri, state)
-    return
-  }
-  await initWxConfig()
+  // if (!wechatCode.value) {
+  //   showPayDialog.value = false
+  //   payLoading.value = false
+  //   const redirectUri = window.location.href
+  //   const state = 'recharge'
+  //   weixin.getWechatCode('wx183521434338da29', redirectUri, state)
+  //   return
+  // }
+  // await initWxConfig()
 
   const createRes = await paymentApi.createOrder({
     package_id: selectedPackage.value!,
@@ -717,15 +717,34 @@ const handleJSAPIPayment = async () => {
   startCountdown(expireSec)
   startPolling(orderNo)
 
+ 
+
+  try {
+    await weixin.chooseWXPay({
+      appId,
+      timeStamp,
+      nonceStr,
+      package: packageValue,
+      signType,
+      paySign
+    })
+  } catch (payError: any) {
+    if (payError?.errMsg === 'chooseWXPay:cancel') {
+      ElMessage.info('支付已取消')
+    } else {
+      ElMessage.error(payError?.errMsg || '支付失败')
+    }
+  }
+
   // 使用 WeixinJSBridge 原生调用
-  await invokeWeixinPay({
-    appId,
-    timeStamp,
-    nonceStr,
-    packageValue,
-    signType,
-    paySign
-  })
+  // await invokeWeixinPay({
+  //   appId,
+  //   timeStamp,
+  //   nonceStr,
+  //   packageValue,
+  //   signType,
+  //   paySign
+  // })
 }
 
 /** 处理普通支付（NATIVE/H5） */
@@ -856,18 +875,18 @@ onMounted(() => {
   fetchPackages()
   loadHistory()
   
-  if (weixin.isWechatEnv()) {
-    const code = getWechatCodeFromUrl()
-    if (code) {
-      wechatCode.value = code
-      clearWechatCodeFromUrl()
-      initWxConfig()
-    } else {
-      const redirectUri = window.location.href
-      const state = 'recharge'
-      weixin.getWechatCode('wx183521434338da29', redirectUri, state)
-    }
-  }
+  // if (weixin.isWechatEnv()) {
+  //   const code = getWechatCodeFromUrl()
+  //   if (code) {
+  //     wechatCode.value = code
+  //     clearWechatCodeFromUrl()
+  //     initWxConfig()
+  //   } else {
+  //     const redirectUri = window.location.href
+  //     const state = 'recharge'
+  //     weixin.getWechatCode('wx183521434338da29', redirectUri, state)
+  //   }
+  // }
 })
 
 onUnmounted(() => {

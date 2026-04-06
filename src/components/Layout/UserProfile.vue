@@ -81,6 +81,7 @@ import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { User, Setting, SwitchButton, Coin, Wallet, ArrowRight, List, Ticket } from '@element-plus/icons-vue'
 import { useTxDialog } from '@/composables/useTxDialog'
+import wechatLogin from '@/utils/wechatLogin'
 
 const router = useRouter()
 const appStore = useAppStore()
@@ -118,7 +119,17 @@ const handleCommand = async (command: string) => {
     case 'logout':
       await authStore.logout()
       ElMessage.success('已退出登录')
-      router.push('/login')
+      
+      // 判断是否在微信环境
+      if (wechatLogin.isWechat()) {
+        // 微信环境：跳转到首页，会自动触发微信授权登录
+        console.log('📱 微信环境，跳转到首页')
+        router.push('/')
+      } else {
+        // 非微信环境：跳转到登录页
+        console.log('💻 非微信环境，跳转到登录页')
+        router.push('/login')
+      }
       break
   }
 }

@@ -73,6 +73,12 @@ class WeixinSDK {
     const url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=snsapi_base&state=${state}#wechat_redirect`
     window.location.href = url
   }
+
+  getWechatCodeForUser(appId: string, redirectUri: string, state: string = 'STATE') {
+    const encodedRedirectUri = encodeURIComponent(redirectUri)
+    const url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
+    window.location.href = url
+  }
 }
 
 const weixin = new WeixinSDK()

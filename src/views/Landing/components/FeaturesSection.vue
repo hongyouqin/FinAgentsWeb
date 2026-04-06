@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useAuthStore } from '@/stores/auth'
+import wechatLogin from '@/utils/wechatLogin'
 
 const router = useRouter()
 const authStore = useAuthStore()
@@ -60,7 +61,14 @@ const features = ref([
 
 const handleCardClick = (link: string) => {
   if (!authStore.isAuthenticated) {
-    router.push('/login')
+    // 未登录，判断是否在微信环境
+    if (wechatLogin.isWechat()) {
+      console.log('📱 微信环境，跳转到首页触发自动登录')
+      router.push('/')
+    } else {
+      console.log('💻 非微信环境，跳转到登录页')
+      router.push('/login')
+    }
     return
   }
   router.push(link)
