@@ -174,7 +174,7 @@ class WechatLogin {
         timestamp: config.timestamp,
         nonceStr: config.nonceStr,
         signature: config.signature,
-        jsApiList: config.jsApiList || ['chooseWXPay', 'updateAppMessageShareData', 'updateTimelineShareData', 'downloadImage']
+        jsApiList: ['chooseWXPay', 'updateAppMessageShareData', 'updateTimelineShareData', 'downloadImage', 'saveImageToPhotosAlbum']
       })
 
       console.log('✅ 微信 JSSDK 注册成功')
