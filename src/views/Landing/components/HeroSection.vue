@@ -47,8 +47,8 @@ const handleStartAnalysis = () => {
   if (!authStore.isAuthenticated) {
     // 未登录，判断是否在微信环境
     if (wechatLogin.isWechat()) {
-      console.log('📱 微信环境，跳转到首页触发自动登录')
-      router.push('/')
+      console.log('📱 微信环境，触发重新授权获取 code')
+      wechatLogin.startAuth()
     } else {
       console.log('💻 非微信环境，跳转到登录页')
       router.push('/login')
@@ -70,8 +70,8 @@ const handleViewDemo = () => {
 const handleLogin = () => {
   // 判断是否在微信环境
   if (wechatLogin.isWechat()) {
-    console.log('📱 微信环境，跳转到首页触发自动登录')
-    router.push('/')
+    console.log('📱 微信环境，触发重新授权获取 code')
+    wechatLogin.startAuth()
   } else {
     console.log('💻 非微信环境，跳转到登录页')
     router.push('/login')

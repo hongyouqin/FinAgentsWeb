@@ -122,9 +122,10 @@ const handleCommand = async (command: string) => {
       
       // 判断是否在微信环境
       if (wechatLogin.isWechat()) {
-        // 微信环境：跳转到首页，会自动触发微信授权登录
-        console.log('📱 微信环境，跳转到首页')
-        router.push('/')
+        // 微信环境：触发重新授权获取 code
+        console.log('📱 微信环境，触发重新授权获取 code')
+         router.push('/')
+        // wechatLogin.startAuth()
       } else {
         // 非微信环境：跳转到登录页
         console.log('💻 非微信环境，跳转到登录页')

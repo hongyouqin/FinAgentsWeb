@@ -85,6 +85,7 @@ import {
 import { analysisApi } from '@/api/analysis'
 import html2canvas from 'html2canvas'
 import qrCodeImgPath from '@/../assets/qrcodes.jpg'
+import weixin from '@/utils/weixin'
 
 const route = useRoute()
 const router = useRouter()
@@ -330,33 +331,161 @@ const downloadImage = async () => {
     ctx.fillText('✨', newCanvas.width / 2 - 80, qrY + actualQrHeight + 54)
     ctx.fillText('✨', newCanvas.width / 2 + 80, qrY + actualQrHeight + 54)
 
-    // 下载图片
-    newCanvas.toBlob((blob: Blob | null) => {
-      if (blob) {
-        const url = URL.createObjectURL(blob)
-        const link = document.createElement('a')
-        link.href = url
-        
-        // 生成文件名：分析报告—股票名称 + 股票代码 + 时间戳
-        const timestamp = new Date().getTime()
-        const symbolName = taskInfo.value.name || 'unknown'
-        const stockCode = taskInfo.value.symbol || 'unknown' // 替换特殊字符
-        const fileName = `分析报告_${symbolName}_${stockCode}_${timestamp}.png`
-        
-        link.download = fileName
-        document.body.appendChild(link)
-        link.click()
-        document.body.removeChild(link)
-        URL.revokeObjectURL(url)
-        ElMessage.success('图片下载成功')
-      }
-    }, 'image/png')
+    // 判断是否在微信环境
+    if (weixin.isWechatEnv()) {
+      // 微信环境：使用 JSAPI 保存图片
+      await saveImageInWechat(newCanvas)
+    } else {
+      // 非微信环境：直接下载
+      downloadImageInBrowser(newCanvas)
+    }
   } catch (e: any) {
     console.error('下载失败:', e)
     ElMessage.error(e?.message || '下载图片失败，请重试')
   } finally {
     downloading.value = false
   }
+}
+
+/**
+ * 微信环境保存图片到相册
+ */
+const saveImageInWechat = async (canvas: HTMLCanvasElement) => {
+  try {
+    // 将 Canvas 转换为 Base64 数据
+    const base64Data = canvas.toDataURL('image/png')
+    
+    // 创建 Blob 对象
+    const blob = await new Promise<Blob>((resolve) => {
+      canvas.toBlob((b) => resolve(b!), 'image/png')
+    })
+
+    // 创建临时 URL
+    const tempUrl = URL.createObjectURL(blob)
+
+    // 微信环境特殊处理：
+    // 微信 JSAPI 的 saveImageToPhotosAlbum 需要通过 chooseImage/uploadImage 获取 localId
+    // 对于 Canvas 生成的图片，无法直接获取 localId
+    // 因此采用：打开图片预览页，提示用户长按保存
+    
+    // 在新窗口打开图片
+    const newWindow = window.open(tempUrl, '_blank')
+    
+    if (newWindow) {
+      ElMessage.success({
+        message: '📱 图片已在新窗口打开，请长按图片选择「保存到手机」',
+        duration: 6000,
+        showClose: true
+      })
+    } else {
+      // 如果弹窗被拦截，使用图片预览方案
+      ElMessage.warning('📱 弹窗被拦截，正在创建预览图')
+      showImagePreview(base64Data)
+    }
+
+    // 延迟释放 URL
+    setTimeout(() => URL.revokeObjectURL(tempUrl), 30000)
+  } catch (error: any) {
+    console.error('微信保存图片失败:', error)
+    ElMessage.warning('微信预览失败，正在下载图片')
+    // 降级到浏览器下载
+    downloadImageInBrowser(canvas)
+  }
+}
+
+/**
+ * 显示图片预览（微信环境降级方案）
+ */
+const showImagePreview = (base64Data: string) => {
+  // 创建全屏预览容器
+  const overlay = document.createElement('div')
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.9);
+    z-index: 9999;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  `
+
+  // 提示文字
+  const tip = document.createElement('div')
+  tip.style.cssText = `
+    color: white;
+    font-size: 16px;
+    margin-bottom: 20px;
+    text-align: center;
+    font-weight: 500;
+  `
+  tip.textContent = '👆 长按图片保存到相册'
+  overlay.appendChild(tip)
+
+  // 图片
+  const img = document.createElement('img')
+  img.src = base64Data
+  img.style.cssText = `
+    max-width: 100%;
+    max-height: 80vh;
+    border-radius: 8px;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+  `
+  overlay.appendChild(img)
+
+  // 关闭按钮
+  const closeBtn = document.createElement('div')
+  closeBtn.style.cssText = `
+    color: white;
+    font-size: 14px;
+    margin-top: 20px;
+    padding: 10px 30px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 20px;
+    cursor: pointer;
+  `
+  closeBtn.textContent = '点击关闭'
+  closeBtn.onclick = () => document.body.removeChild(overlay)
+  overlay.appendChild(closeBtn)
+
+  // 点击背景关闭
+  overlay.onclick = (e) => {
+    if (e.target === overlay) {
+      document.body.removeChild(overlay)
+    }
+  }
+
+  document.body.appendChild(overlay)
+}
+
+/**
+ * 浏览器环境下载图片
+ */
+const downloadImageInBrowser = (canvas: HTMLCanvasElement) => {
+  canvas.toBlob((blob: Blob | null) => {
+    if (blob) {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // 生成文件名：分析报告—股票名称 + 股票代码 + 时间戳
+      const timestamp = new Date().getTime()
+      const symbolName = taskInfo.value.name || 'unknown'
+      const stockCode = taskInfo.value.symbol || 'unknown'
+      const fileName = `分析报告_${symbolName}_${stockCode}_${timestamp}.png`
+      
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      ElMessage.success('图片下载成功')
+    }
+  }, 'image/png')
 }
 
 onMounted(() => {

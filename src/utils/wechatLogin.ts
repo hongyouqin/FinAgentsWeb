@@ -76,13 +76,19 @@ class WechatLogin {
     try {
       console.log('📨 处理微信授权回调，code:', code)
 
+      // 获取当前页面的完整 URL（用于后端生成 JSSDK 配置）
+      const currentUrl = window.location.href.split('?')[0] // 去除 code 参数
+
       // 1. 调用后端接口，用 code 换取登录信息
-      const response = await fetch('/api/wechat/login', {
+      const response = await fetch('/api/auth/wechat/login', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json'
         },
-        body: JSON.stringify({ code })
+        body: JSON.stringify({ 
+          code,
+          url: currentUrl // 传递当前页面 URL，用于生成 JSSDK 签名
+        })
       })
 
       if (!response.ok) {

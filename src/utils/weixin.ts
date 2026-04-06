@@ -33,7 +33,7 @@ class WeixinSDK {
         timestamp: config.timestamp,
         nonceStr: config.nonceStr,
         signature: config.signature,
-        jsApiList: ['chooseWXPay']
+        jsApiList: config.jsApiList || ['chooseWXPay', 'saveImageToPhotosAlbum']
       })
 
       this.wx.ready(() => {
@@ -78,6 +78,42 @@ class WeixinSDK {
     const encodedRedirectUri = encodeURIComponent(redirectUri)
     const url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
     window.location.href = url
+  }
+
+  /**
+   * 保存图片到系统相册（微信环境）
+   * @param localId 图片的本地ID，通过 uploadImage 或 getLocalImgData 获取
+   */
+  saveImageToPhotosAlbum(localId: string): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.wx.saveImageToPhotosAlbum({
+        localId,
+        success: () => {
+          resolve()
+        },
+        fail: (err: any) => {
+          reject(err)
+        }
+      })
+    })
+  }
+
+  /**
+   * 获取本地图片数据（用于预览）
+   * @param localId 图片的本地ID
+   */
+  getLocalImgData(localId: string): Promise<{ localData: string }> {
+    return new Promise((resolve, reject) => {
+      this.wx.getLocalImgData({
+        localId,
+        success: (res: any) => {
+          resolve(res)
+        },
+        fail: (err: any) => {
+          reject(err)
+        }
+      })
+    })
   }
 }
 
