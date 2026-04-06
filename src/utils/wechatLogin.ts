@@ -10,6 +10,7 @@ import { ElMessage } from 'element-plus'
 interface WechatLoginConfig {
   appId: string
   redirectUri: string
+  onSuccess?: () => void // 登录成功后的回调
 }
 
 class WechatLogin {
@@ -20,6 +21,13 @@ class WechatLogin {
    */
   init(config: WechatLoginConfig) {
     this.config = config
+  }
+
+  /**
+   * 获取当前配置
+   */
+  getConfig(): WechatLoginConfig | null {
+    return this.config
   }
 
   /**
@@ -138,6 +146,11 @@ class WechatLogin {
 
       console.log('✅ 微信登录成功')
       ElMessage.success('微信登录成功')
+
+      // 6. 触发成功回调（如果配置了）
+      if (this.config?.onSuccess) {
+        this.config.onSuccess()
+      }
 
       return true
     } catch (error: any) {

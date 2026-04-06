@@ -355,36 +355,16 @@ const saveImageInWechat = async (canvas: HTMLCanvasElement) => {
     // 将 Canvas 转换为 Base64 数据
     const base64Data = canvas.toDataURL('image/png')
     
-    // 创建 Blob 对象
-    const blob = await new Promise<Blob>((resolve) => {
-      canvas.toBlob((b) => resolve(b!), 'image/png')
-    })
-
-    // 创建临时 URL
-    const tempUrl = URL.createObjectURL(blob)
-
     // 微信环境特殊处理：
-    // 微信 JSAPI 的 saveImageToPhotosAlbum 需要通过 chooseImage/uploadImage 获取 localId
-    // 对于 Canvas 生成的图片，无法直接获取 localId
-    // 因此采用：打开图片预览页，提示用户长按保存
+    // 微信不支持 window.open，直接使用全屏预览方案
+    // 用户长按图片即可保存到相册
+    showImagePreview(base64Data)
     
-    // 在新窗口打开图片
-    const newWindow = window.open(tempUrl, '_blank')
-    
-    if (newWindow) {
-      ElMessage.success({
-        message: '📱 图片已在新窗口打开，请长按图片选择「保存到手机」',
-        duration: 6000,
-        showClose: true
-      })
-    } else {
-      // 如果弹窗被拦截，使用图片预览方案
-      ElMessage.warning('📱 弹窗被拦截，正在创建预览图')
-      showImagePreview(base64Data)
-    }
-
-    // 延迟释放 URL
-    setTimeout(() => URL.revokeObjectURL(tempUrl), 30000)
+    ElMessage.success({
+      message: '📱 图片已显示，请长按图片选择「保存到手机」',
+      duration: 5000,
+      showClose: true
+    })
   } catch (error: any) {
     console.error('微信保存图片失败:', error)
     ElMessage.warning('微信预览失败，正在下载图片')

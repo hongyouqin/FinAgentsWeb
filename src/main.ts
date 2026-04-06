@@ -156,7 +156,14 @@ async function checkWechatLogin(): Promise<boolean> {
     // 初始化微信登录配置
     wechatLogin.init({
       appId: import.meta.env.VITE_WECHAT_APP_ID || 'wx183521434338da29',
-      redirectUri: window.location.origin + window.location.pathname
+      redirectUri: window.location.origin + window.location.pathname,
+      onSuccess: () => {
+        // 登录成功后跳转到首页
+        console.log('🏠 微信登录成功，跳转到首页')
+        const redirectPath = useAuthStore().getAndClearRedirectPath()
+        console.log('🔄 重定向到:', redirectPath)
+        router.push(redirectPath)
+      }
     })
 
     // 检查并处理微信登录
