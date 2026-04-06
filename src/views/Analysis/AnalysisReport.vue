@@ -67,7 +67,7 @@
       <iframe
         ref="iframeRef"
         class="report-iframe"
-        sandbox="allow-same-origin allow-scripts allow-popups"
+        sandbox="allow-same-origin allow-scripts allow-popups allow-modals"
         :srcdoc="htmlContent"
         @load="onIframeLoad"
       />
@@ -376,37 +376,17 @@ const downloadImage = async () => {
  */
 const saveImageInWechat = async (canvas: HTMLCanvasElement) => {
   try {
-    // 将 Base64 转换为 Blob
-    const blob = await new Promise<Blob>((resolve) => {
-      canvas.toBlob((b) => resolve(b!), 'image/png')
-    })
-
-    // 创建临时 URL
-    const tempUrl = URL.createObjectURL(blob)
-
-    // 使用微信 previewImage API 预览图片
-    // 用户可以在预览界面长按保存到相册
-    await weixin.previewImage(tempUrl, [tempUrl])
-    
-    ElMessage.success({
-      message: '📱 图片已打开，可左右滑动查看，长按可保存到相册',
-      duration: 4000,
-      showClose: true
-    })
-
-    // 延迟释放 URL
-    setTimeout(() => URL.revokeObjectURL(tempUrl), 60000)
-  } catch (error: any) {
-    console.error('微信预览图片失败:', error)
-    ElMessage.warning('微信预览失败，使用备用方案')
-    // 降级到自定义预览
+    // 直接转换为 Base64 并显示自定义预览
     const base64Data = canvas.toDataURL('image/png')
     showImagePreview(base64Data)
+  } catch (error: any) {
+    console.error('微信预览图片失败:', error)
+    ElMessage.error('预览失败，请重试')
   }
 }
 
 /**
- * 显示图片预览（微信环境降级方案）
+ * 显示图片预览（全屏弹框）
  */
 const showImagePreview = (base64Data: string) => {
   // 创建全屏预览容器
@@ -417,57 +397,126 @@ const showImagePreview = (base64Data: string) => {
     left: 0;
     right: 0;
     bottom: 0;
-    background: rgba(0, 0, 0, 0.9);
-    z-index: 9999;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
     padding: 20px;
+    animation: fadeIn 0.3s ease;
   `
 
-  // 提示文字
+  // 添加动画样式
+  const styleEl = document.createElement('style')
+  styleEl.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  `
+  document.head.appendChild(styleEl)
+
+  // 顶部提示区域
+  const tipContainer = document.createElement('div')
+  tipContainer.style.cssText = `
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10001;
+  `
+
+  // 主提示文字
   const tip = document.createElement('div')
   tip.style.cssText = `
     color: white;
-    font-size: 16px;
-    margin-bottom: 20px;
-    text-align: center;
-    font-weight: 500;
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
   `
-  tip.textContent = '👆 长按图片保存到相册'
-  overlay.appendChild(tip)
+  tip.innerHTML = '💾 长按图片保存到相册'
+  tipContainer.appendChild(tip)
+
+  // 副提示文字
+  const subTip = document.createElement('div')
+  subTip.style.cssText = `
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  `
+  subTip.textContent = '保存后可分享给好友或朋友圈'
+  tipContainer.appendChild(subTip)
+
+  overlay.appendChild(tipContainer)
+
+  // 图片容器
+  const imgContainer = document.createElement('div')
+  imgContainer.style.cssText = `
+    max-width: 90%;
+    max-height: 75vh;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    background: white;
+    padding: 8px;
+  `
 
   // 图片
   const img = document.createElement('img')
   img.src = base64Data
   img.style.cssText = `
+    display: block;
     max-width: 100%;
-    max-height: 80vh;
-    border-radius: 8px;
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.5);
+    max-height: 75vh;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: default;
   `
-  overlay.appendChild(img)
+  imgContainer.appendChild(img)
+  overlay.appendChild(imgContainer)
 
-  // 关闭按钮
+  // 底部关闭按钮
   const closeBtn = document.createElement('div')
   closeBtn.style.cssText = `
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
     color: white;
     font-size: 14px;
-    margin-top: 20px;
-    padding: 10px 30px;
-    background: rgba(255, 255, 255, 0.2);
-    border-radius: 20px;
+    padding: 12px 40px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
     cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    user-select: none;
   `
-  closeBtn.textContent = '点击关闭'
-  closeBtn.onclick = () => document.body.removeChild(overlay)
+  closeBtn.textContent = '✕ 关闭预览'
+  closeBtn.onmouseenter = () => {
+    closeBtn.style.background = 'rgba(255, 255, 255, 0.25)'
+    closeBtn.style.transform = 'translateX(-50%) scale(1.05)'
+  }
+  closeBtn.onmouseleave = () => {
+    closeBtn.style.background = 'rgba(255, 255, 255, 0.15)'
+    closeBtn.style.transform = 'translateX(-50%) scale(1)'
+  }
+  closeBtn.onclick = () => {
+    document.body.removeChild(overlay)
+    document.head.removeChild(styleEl)
+  }
   overlay.appendChild(closeBtn)
 
-  // 点击背景关闭
+  // 点击背景关闭（点击图片不关闭）
   overlay.onclick = (e) => {
     if (e.target === overlay) {
       document.body.removeChild(overlay)
+      document.head.removeChild(styleEl)
     }
   }
 
