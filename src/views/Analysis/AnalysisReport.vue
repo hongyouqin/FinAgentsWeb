@@ -87,6 +87,30 @@ import html2canvas from 'html2canvas'
 import qrCodeImgPath from '@/../assets/qrcodes.jpg'
 import weixin from '@/utils/weixin'
 
+/**
+ * 绘制圆角矩形（兼容所有浏览器）
+ */
+function drawRoundRect(
+  ctx: CanvasRenderingContext2D,
+  x: number,
+  y: number,
+  width: number,
+  height: number,
+  radius: number
+) {
+  ctx.beginPath()
+  ctx.moveTo(x + radius, y)
+  ctx.lineTo(x + width - radius, y)
+  ctx.quadraticCurveTo(x + width, y, x + width, y + radius)
+  ctx.lineTo(x + width, y + height - radius)
+  ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height)
+  ctx.lineTo(x + radius, y + height)
+  ctx.quadraticCurveTo(x, y + height, x, y + height - radius)
+  ctx.lineTo(x, y + radius)
+  ctx.quadraticCurveTo(x, y, x + radius, y)
+  ctx.closePath()
+}
+
 const route = useRoute()
 const router = useRouter()
 
@@ -293,9 +317,9 @@ const downloadImage = async () => {
     const qrY = canvas.height + 20 // 增加顶部间距
     const qrRadius = 12 // 圆角半径
     
+    // 绘制圆角矩形（兼容移动端）
     ctx.fillStyle = '#ffffff'
-    ctx.beginPath()
-    ctx.roundRect(qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, qrRadius)
+    drawRoundRect(ctx, qrX - 10, qrY - 10, qrSize + 20, qrSize + 20, qrRadius)
     ctx.fill()
     
     // 绘制阴影
