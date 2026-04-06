@@ -238,7 +238,7 @@ export const useAuthStore = defineStore('auth', {
           this.fetchUserBalance()
 
           // 启动积分自动刷新定时器（每60秒刷新一次）
-          this.startBalanceAutoRefresh(60000)
+          this.startBalanceAutoRefresh(30000)
 
           // 启动 token 自动刷新定时器
           const { setupTokenRefreshTimer } = await import('@/utils/auth')
@@ -537,7 +537,7 @@ export const useAuthStore = defineStore('auth', {
             await this.fetchUserPermissions()
             this.fetchUserBalance()
             // 启动积分自动刷新定时器
-            this.startBalanceAutoRefresh(60000)
+            this.startBalanceAutoRefresh(30000)
             console.log('✅ 认证状态验证成功')
           } else {
             // Token无效，尝试刷新
