@@ -352,24 +352,32 @@ const downloadImage = async () => {
  */
 const saveImageInWechat = async (canvas: HTMLCanvasElement) => {
   try {
-    // 将 Canvas 转换为 Base64 数据
-    const base64Data = canvas.toDataURL('image/png')
-    
-    // 微信环境特殊处理：
-    // 微信不支持 window.open，直接使用全屏预览方案
-    // 用户长按图片即可保存到相册
-    showImagePreview(base64Data)
+    // 将 Base64 转换为 Blob
+    const blob = await new Promise<Blob>((resolve) => {
+      canvas.toBlob((b) => resolve(b!), 'image/png')
+    })
+
+    // 创建临时 URL
+    const tempUrl = URL.createObjectURL(blob)
+
+    // 使用微信 previewImage API 预览图片
+    // 用户可以在预览界面长按保存到相册
+    await weixin.previewImage(tempUrl, [tempUrl])
     
     ElMessage.success({
-      message: '📱 图片已显示，请长按图片选择「保存到手机」',
-      duration: 5000,
+      message: '📱 图片已打开，可左右滑动查看，长按可保存到相册',
+      duration: 4000,
       showClose: true
     })
+
+    // 延迟释放 URL
+    setTimeout(() => URL.revokeObjectURL(tempUrl), 60000)
   } catch (error: any) {
-    console.error('微信保存图片失败:', error)
-    ElMessage.warning('微信预览失败，正在下载图片')
-    // 降级到浏览器下载
-    downloadImageInBrowser(canvas)
+    console.error('微信预览图片失败:', error)
+    ElMessage.warning('微信预览失败，使用备用方案')
+    // 降级到自定义预览
+    const base64Data = canvas.toDataURL('image/png')
+    showImagePreview(base64Data)
   }
 }
 

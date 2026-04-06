@@ -117,6 +117,26 @@ class WeixinSDK {
       })
     })
   }
+
+  /**
+   * 预览图片（微信环境）
+   * @param current 当前要预览的图片链接
+   * @param urls 图片链接列表
+   */
+  previewImage(current: string, urls: string[]): Promise<void> {
+    return new Promise((resolve, reject) => {
+      this.wx.previewImage({
+        current, // 当前显示的图片链接
+        urls, // 需要预览的图片链接列表
+        success: () => {
+          resolve()
+        },
+        fail: (err: any) => {
+          reject(err)
+        }
+      })
+    })
+  }
 }
 
 const weixin = new WeixinSDK()

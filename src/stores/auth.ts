@@ -2,6 +2,7 @@ import { defineStore } from 'pinia'
 import { useStorage } from '@vueuse/core'
 import { authApi } from '@/api/auth'
 import type { User, LoginForm, RegisterForm } from '@/types/auth'
+import weixin from '@/utils/weixin'
 
 export interface AuthState {
   // 认证状态
@@ -185,15 +186,22 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('user-info')
     },
 
-    // 跳转到登录页
+    // 跳转到登录页或首页（微信环境）
     redirectToLogin() {
       // 避免在非浏览器环境中使用router
       if (typeof window !== 'undefined') {
-        // 使用window.location进行跳转，避免router依赖问题
-        const currentPath = window.location.pathname
-        if (currentPath !== '/login') {
-          console.log('🔄 跳转到登录页...')
-          window.location.href = '/login'
+        // 判断是否在微信环境
+        if (weixin.isWechatEnv()) {
+          // 微信环境：跳转到首页，会自动触发微信授权登录
+          console.log('📱 微信环境，跳转到首页')
+          window.location.href = '/'
+        } else {
+          // 非微信环境：跳转到登录页
+          const currentPath = window.location.pathname
+          if (currentPath !== '/login') {
+            console.log('💻 非微信环境，跳转到登录页')
+            window.location.href = '/login'
+          }
         }
       }
     },
