@@ -145,7 +145,7 @@ class WechatLogin {
       this.clearCodeFromUrl()
 
       console.log('✅ 微信登录成功')
-      ElMessage.success('微信登录成功')
+      // ElMessage.success('微信登录成功')
 
       // 6. 触发成功回调（如果配置了）
       if (this.config?.onSuccess) {
