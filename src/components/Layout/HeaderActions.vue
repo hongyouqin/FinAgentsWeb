@@ -67,6 +67,7 @@ import { useNotificationStore } from '@/stores/notifications'
 import { useAuthStore } from '@/stores/auth'
 import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
+import weixin from '@/utils/weixin'
 import {
   Sunny,
   Moon,
@@ -103,13 +104,26 @@ function typeLabel(t: string) { return t === 'analysis' ? '分析' : t === 'aler
 function tagType(t: string) { return t === 'analysis' ? 'success' : t === 'alert' ? 'warning' : 'info' }
 function toLocal(iso: string) { try { return new Date(iso).toLocaleString() } catch { return iso } }
 function go(n: any) { 
-  if (n.link){
-      console.log(n.link) 
-      window.open(n.link, '_blank') 
+  if (n.link) {
+    console.log('通知链接:', n.link)
+    
+    // 判断是否是内部路由链接
+    if (n.link.startsWith('/') || n.link.startsWith('#/')) {
+      // 内部路由：使用 router.push
+      const path = n.link.replace(/^#/, '')
+      router.push(path)
+    } else {
+      // 外部链接：判断微信环境
+      if (weixin.isWechatEnv()) {
+        // 微信环境：在当前窗口打开，避免新窗口触发登录逻辑
+        window.location.href = n.link
+      } else {
+        // 非微信环境：新窗口打开
+        window.open(n.link, '_blank')
+      }
+    }
   }
- 
-  
-} // Changed from hardcoded URL to use n.link
+}
 
 const godetile = (analysis: any) => {
     router.push({
