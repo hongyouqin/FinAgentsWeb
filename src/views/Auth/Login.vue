@@ -456,6 +456,11 @@ onMounted(() => {
   align-items: center;
   justify-content: center;
   padding: 20px;
+  // iOS 安全区域适配
+  padding-top: max(20px, env(safe-area-inset-top));
+  padding-bottom: max(20px, env(safe-area-inset-bottom));
+  padding-left: max(20px, env(safe-area-inset-left));
+  padding-right: max(20px, env(safe-area-inset-right));
   overflow: hidden;
   background: radial-gradient(ellipse at top, #164e63 0%, #0f172a 50%, #020617 100%);
 }
@@ -715,6 +720,9 @@ onMounted(() => {
     border: 1px solid rgba(6, 182, 212, 0.2);
     box-shadow: none;
     transition: all 0.3s ease;
+    // iOS 修复：确保边框完整显示
+    -webkit-backface-visibility: hidden;
+    backface-visibility: hidden;
 
     &:hover {
       border-color: rgba(6, 182, 212, 0.4);
@@ -728,6 +736,11 @@ onMounted(() => {
 
   :deep(.el-input__inner) {
     color: white;
+    // iOS 修复：禁止自动调整字体大小
+    -webkit-text-size-adjust: 100%;
+    text-size-adjust: 100%;
+    // iOS 修复：确保输入框不会被缩放
+    font-size: 16px !important;
 
     &::placeholder {
       color: rgba(255, 255, 255, 0.3);
@@ -746,6 +759,15 @@ onMounted(() => {
 
   :deep(.el-checkbox__label) {
     color: rgba(255, 255, 255, 0.7);
+  }
+  
+  // iOS 修复：表单项目添加底部间距，防止遮挡
+  :deep(.el-form-item) {
+    margin-bottom: 22px;
+    
+    &:last-child {
+      margin-bottom: 0;
+    }
   }
 }
 
