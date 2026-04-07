@@ -42,15 +42,7 @@
           size="large"
           class="register-form"
         >
-          <!-- 邀请码 -->
-          <el-form-item label="邀请码" prop="inviteCode">
-            <el-input
-              v-model="registerForm.inviteCode"
-              placeholder="请输入邀请码"
-              prefix-icon="Ticket"
-              clearable
-            />
-          </el-form-item>
+          
 
           <!-- 用户名 -->
           <el-form-item label="用户名" prop="username">
@@ -127,6 +119,21 @@
               clearable
               @keyup.enter="handleRegister"
             />
+          </el-form-item>
+
+          <!-- 邀请码 -->
+          <el-form-item label="邀请码" prop="inviteCode">
+            <el-input
+              v-model="registerForm.inviteCode"
+              placeholder="请输入邀请码(选填)"
+              prefix-icon="Ticket"
+              clearable
+            />
+            <div class="invite-code-tip">
+              <el-text size="small" type="warning">
+                提示:邀请码不是必填项,如果没有邀请码请留空,以免影响注册
+              </el-text>
+            </div>
           </el-form-item>
 
           <!-- 用户协议 -->
@@ -735,6 +742,16 @@ onMounted(() => {
       opacity: 0.5;
       cursor: not-allowed;
     }
+  }
+}
+
+// 邀请码提示
+.invite-code-tip {
+  margin-top: 0px;
+  width: 100%;
+  
+  :deep(.el-text) {
+    line-height: 1;
   }
 }
 
