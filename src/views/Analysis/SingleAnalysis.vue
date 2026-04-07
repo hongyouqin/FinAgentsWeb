@@ -1035,7 +1035,7 @@ const submitAnalysis = async () => {
       parameters: {
         market_type: analysisForm.market,
         analysis_date: analysisDate.toISOString().split('T')[0],
-        research_depth: isDeepAnalysis.value ? '深度分析' : '标准分析',
+        research_depth: isDeepAnalysis.value ? '深度分析' : '深度分析',
         selected_analysts: convertAnalystNamesToIds(analysisForm.selectedAnalysts),
         include_sentiment: analysisForm.includeSentiment,
         include_risk: analysisForm.includeRisk,
