@@ -140,14 +140,34 @@ const loadReport = async () => {
   error.value = ''
   htmlContent.value = ''
   try {
-    const html = await analysisApi.getSimplifiedHtml(taskId.value)
+    let html = await analysisApi.getSimplifiedHtml(taskId.value)
     if (typeof html === 'string' && html.trim()) {
+      // 在 HTML 中注入样式,覆盖 .container 的 padding
+      const styleInjection = `
+        <style>
+          /* 覆盖 .container 的 padding */
+          .container {
+            padding: 0 !important;
+          }
+        </style>
+      `
+      
+      // 将样式注入到 <head> 标签中,如果没有 <head> 则添加到最前面
+      if (html.includes('<head>')) {
+        html = html.replace('<head>', '<head>' + styleInjection)
+      } else if (html.includes('<html>')) {
+        html = html.replace('<html>', '<html><head>' + styleInjection + '</head>')
+      } else {
+        // 如果没有完整的 HTML 结构,直接添加到最前面
+        html = styleInjection + html
+      }
+      
       htmlContent.value = html
     } else {
-      error.value = '报告内容为空，请稍后重试'
+      error.value = '报告内容为空,请稍后重试'
     }
   } catch (e: any) {
-    error.value = e?.message || '获取报告失败，请稍后重试'
+    error.value = e?.message || '获取报告失败,请稍后重试'
     ElMessage.error(error.value)
   } finally {
     loading.value = false
@@ -239,6 +259,10 @@ const downloadImage = async () => {
         th {
           background: #f8fafc;
           font-weight: 600;
+        }
+        /* 覆盖 .container 的 padding */
+        .container {
+          padding: 0 !important;
         }
       </style>
     `
