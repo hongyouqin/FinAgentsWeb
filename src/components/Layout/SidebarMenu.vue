@@ -19,10 +19,10 @@
       <el-icon><List /></el-icon>
       <template #title>任务中心</template>
     </el-menu-item>
-    <el-menu-item index="/reports">
+    <!-- <el-menu-item index="/reports">
       <el-icon><TrendCharts /></el-icon>
       <template #title>分析记录</template>
-    </el-menu-item>
+    </el-menu-item> -->
     <el-menu-item index="/recharge">
       <el-icon><Coin /></el-icon>
       <template #title>算力充值</template>
