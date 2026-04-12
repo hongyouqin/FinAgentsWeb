@@ -277,8 +277,8 @@ const loadQrcode = async () => {
   try {
     const res = await inviteApi.getInviteQrcode()
     const data = (res as any)?.data || res
-    if (data.qr_url) {
-      qrcodeUrl.value = data.qr_url
+    if (data.qrcode_url) {
+      qrcodeUrl.value = data.qrcode_url
       qrcodeBase64.value = data.qr_base64 || ''
     } else {
       ElMessage.error('获取二维码失败')
