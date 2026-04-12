@@ -34,161 +34,74 @@
 
       <!-- 登录卡片 -->
       <el-card class="login-card" shadow="never">
-        <!-- 登录方式切换 -->
-        <div class="login-tabs">
-          <div
-            class="tab-item"
-            :class="{ active: loginType === 'password' }"
-            @click="switchLoginType('password')"
-          >
-            <svg class="tab-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M12 2C9.243 2 7 4.243 7 7v3H6c-1.103 0-2 .897-2 2v8c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2v-8c0-1.103-.897-2-2-2h-1V7c0-2.757-2.243-5-5-5zm6 10v8H6v-8h12zm-9-2V7c0-1.654 1.346-3 3-3s3 1.346 3 3v3H9z" fill="currentColor"/>
-            </svg>
-            <span>密码登录</span>
+        <!-- 微信扫码登录 -->
+        <div class="wechat-login-container">
+          <!-- 二维码加载状态 -->
+          <div v-if="qrcodeLoading" class="qrcode-loading">
+            <el-icon class="loading-icon" :size="40">
+              <Loading />
+            </el-icon>
+            <p class="loading-text">正在加载二维码...</p>
           </div>
-          <div
-            class="tab-item"
-            :class="{ active: loginType === 'sms' }"
-            @click="switchLoginType('sms')"
-          >
-            <svg class="tab-icon" viewBox="0 0 24 24" fill="none">
-              <path d="M20 4H4c-1.103 0-2 .897-2 2v12c0 1.103.897 2 2 2h16c1.103 0 2-.897 2-2V6c0-1.103-.897-2-2-2zM4 6h16v.511l-8 5.333-8-5.333V6zm0 12V8.853l7.479 4.987a.997.997 0 001.042 0L20 8.853V18H4z" fill="currentColor"/>
-            </svg>
-            <span>验证码登录</span>
+
+          <!-- 二维码显示 -->
+          <div v-else-if="qrUrl" class="qrcode-display">
+            <div class="qrcode-header">
+              <img :src="wxlogo" alt="微信" class="wechat-icon" />
+              <h3>微信扫码登录</h3>
+            </div>
+            
+            <div class="qrcode-wrapper">
+              <img :src="qrUrl" alt="微信登录二维码" class="qrcode-image" />
+              <div v-if="qrcodeExpired" class="qrcode-expired-mask">
+                <el-icon :size="48" color="#fff">
+                  <RefreshRight />
+                </el-icon>
+                <p class="expired-text">二维码已过期</p>
+                <el-button type="primary" size="small" @click="refreshQrcode">
+                  点击刷新
+                </el-button>
+              </div>
+            </div>
+
+            <div class="qrcode-tips">
+              <p class="tip-text">请使用微信扫一扫</p>
+              <p class="tip-subtext">扫码后关注公众号即可完成登录</p>
+              <p class="tip-agreement">
+                登录即表示同意
+                <router-link to="/user-agreement" class="agreement-link">《用户协议》</router-link>
+                和
+                <router-link to="/privacy-policy" class="agreement-link">《隐私政策》</router-link>
+              </p>
+            </div>
+
+            <div class="qrcode-timer">
+              <el-icon><Clock /></el-icon>
+              <span>二维码剩余有效期: {{ formatTime(qrcodeCountdown) }}</span>
+            </div>
+          </div>
+
+          <!-- 错误状态 -->
+          <div v-else-if="qrcodeError" class="qrcode-error">
+            <el-icon :size="48" color="#ef4444">
+              <CircleClose />
+            </el-icon>
+            <p class="error-text">{{ qrcodeErrorMessage }}</p>
+            <el-button type="primary" @click="initWechatLogin">
+              重新加载
+            </el-button>
           </div>
         </div>
-
-        <!-- 密码登录表单 -->
-        <el-form
-          v-if="loginType === 'password'"
-          :model="passwordForm"
-          :rules="passwordRules"
-          ref="passwordFormRef"
-          label-position="top"
-          size="large"
-          class="login-form"
-        >
-          <el-form-item label="用户名" prop="identifier">
-            <el-input
-              v-model="passwordForm.identifier"
-              placeholder="请输入用户名"
-              prefix-icon="User"
-              clearable
-            />
-          </el-form-item>
-
-          <el-form-item label="密码" prop="password">
-            <el-input
-              v-model="passwordForm.password"
-              type="password"
-              placeholder="请输入密码"
-              prefix-icon="Lock"
-              show-password
-              clearable
-              @keyup.enter="handleLogin"
-            />
-          </el-form-item>
-
-          <el-form-item>
-            <div class="form-options">
-              <el-checkbox v-model="passwordForm.rememberMe">
-                记住我
-              </el-checkbox>
-            </div>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button
-              type="primary"
-              size="large"
-              class="login-button"
-              :loading="loginLoading"
-              @click="handleLogin"
-            >
-              <span v-if="!loginLoading">登录</span>
-              <span v-else>登录中...</span>
-            </el-button>
-          </el-form-item>
-        </el-form>
-
-        <!-- 短信验证码登录表单 -->
-        <el-form
-          v-else
-          :model="smsForm"
-          :rules="smsRules"
-          ref="smsFormRef"
-          label-position="top"
-          size="large"
-          class="login-form"
-        >
-          <el-form-item label="手机号" prop="phone">
-            <el-input
-              v-model="smsForm.phone"
-              placeholder="请输入手机号"
-              prefix-icon="Iphone"
-              maxlength="11"
-              clearable
-            />
-          </el-form-item>
-
-          <el-form-item label="验证码" prop="smsCode">
-            <div class="sms-input-wrapper">
-              <el-input
-                v-model="smsForm.smsCode"
-                placeholder="请输入验证码"
-                prefix-icon="Message"
-                maxlength="6"
-                clearable
-                @keyup.enter="handleLogin"
-              />
-              <el-button
-                class="sms-button"
-                :disabled="smsCountdown > 0 || sendingSms"
-                :loading="sendingSms"
-                @click="handleSendSms"
-              >
-                {{ smsButtonText }}
-              </el-button>
-            </div>
-          </el-form-item>
-
-          <el-form-item>
-            <div class="form-options">
-              <el-checkbox v-model="smsForm.rememberMe">
-                记住我
-              </el-checkbox>
-            </div>
-          </el-form-item>
-
-          <el-form-item>
-            <el-button
-              type="primary"
-              size="large"
-              class="login-button"
-              :loading="loginLoading"
-              @click="handleLogin"
-            >
-              <span v-if="!loginLoading">登录</span>
-              <span v-else>登录中...</span>
-            </el-button>
-          </el-form-item>
-        </el-form>
 
         <!-- 底部提示 -->
-        <div class="login-footer-tip">
+        <!-- <div class="login-footer-tip">
           <el-text type="info" size="small">
-            <template v-if="loginType === 'password'">
-               <div class="register-link">没有账号？
-                <router-link to="/register" class="register-router-link">立即注册</router-link>
-              </div>
-            </template>
-            <template v-else>
-              <div class="register-link">没有账号？
-                <router-link to="/register" class="register-router-link">立即注册</router-link>
-              </div>
-            </template>
+            <div class="register-link">
+              没有账号？
+              <router-link to="/register" class="register-router-link">立即注册</router-link>
+            </div>
           </el-text>
-        </div>
+        </div> -->
       </el-card>
 
       <!-- 免责声明 -->
@@ -208,52 +121,17 @@
 </template>
 
 <script setup lang="ts">
-import { reactive, ref, computed, onMounted } from 'vue'
+import { ref, onMounted, onUnmounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
+import { Loading, RefreshRight, Clock, CircleClose } from '@element-plus/icons-vue'
 import { useAuthStore } from '@/stores/auth'
-import { authApi } from '@/api/auth'
 import Logo from '@/components/Logo.vue'
-import type { LoginForm } from '@/types/auth'
+import { request } from '@/api/request'
+import wxlogo from '../../../assets/wxlogo.png' 
 
 const router = useRouter()
 const authStore = useAuthStore()
-
-// 登录方式
-const loginType = ref<'password' | 'sms'>('password')
-
-// 表单引用
-const passwordFormRef = ref()
-const smsFormRef = ref()
-
-// 加载状态
-const loginLoading = ref(false)
-const sendingSms = ref(false)
-const smsCountdown = ref(0)
-
-// 从 localStorage 恢复倒计时状态（防止刷新页面后重新发送）
-const restoreSmsCountdown = () => {
-  const savedTime = localStorage.getItem('sms_countdown_end')
-  if (savedTime) {
-    const endTime = parseInt(savedTime, 10)
-    const now = Date.now()
-    const remaining = Math.ceil((endTime - now) / 1000)
-    
-    if (remaining > 0) {
-      smsCountdown.value = remaining
-      // 继续倒计时
-      const timer = setInterval(() => {
-        smsCountdown.value--
-        if (smsCountdown.value <= 0) {
-          clearInterval(timer)
-          localStorage.removeItem('sms_countdown_end')
-        }
-      }, 1000)
-    } else {
-      localStorage.removeItem('sms_countdown_end')
-    }
-  }
-}
 
 // 背景粒子
 const particles = ref<Array<{
@@ -262,175 +140,6 @@ const particles = ref<Array<{
   size: number
   opacity: number
 }>>([])
-
-// 密码登录表单
-const passwordForm = reactive({
-  identifier: '',
-  password: '',
-  rememberMe: false
-})
-
-// 短信登录表单
-const smsForm = reactive({
-  phone: '',
-  smsCode: '',
-  rememberMe: false
-})
-
-// 手机号校验规则
-const phoneValidator = (rule: any, value: string, callback: any) => {
-  if (!value) {
-    callback(new Error('请输入手机号'))
-  } else if (!/^1[3-9]\d{9}$/.test(value)) {
-    callback(new Error('请输入正确的手机号'))
-  } else {
-    callback()
-  }
-}
-
-// 密码表单验证规则
-const passwordRules = {
-  identifier: [
-    { required: true, message: '请输入用户名', trigger: 'blur' }
-  ],
-  password: [
-    { required: true, message: '请输入密码', trigger: 'blur' },
-    { min: 6, message: '密码长度不能少于6位', trigger: 'blur' }
-  ]
-}
-
-// 短信表单验证规则
-const smsRules = {
-  phone: [
-    { required: true, validator: phoneValidator, trigger: 'blur' }
-  ],
-  smsCode: [
-    { required: true, message: '请输入验证码', trigger: 'blur' },
-    { len: 6, message: '验证码为6位数字', trigger: 'blur' }
-  ]
-}
-
-// 短信按钮文字
-const smsButtonText = computed(() => {
-  if (sendingSms.value) return '发送中...'
-  if (smsCountdown.value > 0) return `${smsCountdown.value}s`
-  return '获取验证码'
-})
-
-// 切换登录方式
-const switchLoginType = (type: 'password' | 'sms') => {
-  loginType.value = type
-  // 清空表单
-  passwordForm.identifier = ''
-  passwordForm.password = ''
-  smsForm.phone = ''
-  smsForm.smsCode = ''
-}
-
-// 发送短信验证码
-const handleSendSms = async () => {
-  // 如果正在倒计时，不允许再次发送
-  if (smsCountdown.value > 0) {
-    ElMessage.warning(`请等待 ${smsCountdown.value} 秒后再试`)
-    return
-  }
-
-  try {
-    // 验证手机号
-    await smsFormRef.value.validateField('phone')
-
-    sendingSms.value = true
-    console.log('📨 发送短信验证码...', smsForm.phone)
-
-    const response = await authApi.sendSms({
-      phone: smsForm.phone,
-      sms_type: 'login'
-    })
-    console.log('📨 发送短信验证码结果:', response)
-    if (response.success) {
-      ElMessage.success('验证码已发送')
-      // 开始倒计时
-      smsCountdown.value = 60
-      
-      // 保存倒计时结束时间到 localStorage（跨页面/刷新保持）
-      const endTime = Date.now() + 60 * 1000
-      localStorage.setItem('sms_countdown_end', endTime.toString())
-      
-      const timer = setInterval(() => {
-        smsCountdown.value--
-        if (smsCountdown.value <= 0) {
-          clearInterval(timer)
-          localStorage.removeItem('sms_countdown_end')
-        }
-      }, 1000)
-    } else {
-      ElMessage.error(response.message || '验证码发送失败')
-    }
-  } catch (error: any) {
-    console.error('发送短信失败:', error)
-    if (!error.message?.includes('validate')) {
-      ElMessage.error('验证码发送失败，请重试')
-    }
-  } finally {
-    sendingSms.value = false
-  }
-}
-
-// 登录处理
-const handleLogin = async () => {
-  // 防止重复提交
-  if (loginLoading.value) {
-    console.log('⏭️ 登录请求进行中，跳过重复点击')
-    return
-  }
-
-  try {
-    // 验证表单
-    const formRef = loginType.value === 'password' ? passwordFormRef.value : smsFormRef.value
-    await formRef.validate()
-
-    loginLoading.value = true
-    console.log('🔐 开始登录流程...', loginType.value)
-
-    // 构造登录请求数据
-    const loginData: LoginForm = loginType.value === 'password'
-      ? {
-          login_type: 'password',
-          identifier: passwordForm.identifier,
-          password: passwordForm.password,
-          remember_me: passwordForm.rememberMe
-        }
-      : {
-          login_type: 'sms',
-          identifier: smsForm.phone,
-          sms_code: smsForm.smsCode,
-          remember_me: smsForm.rememberMe
-        }
-
-    // 调用登录 API
-    const success = await authStore.login(loginData)
-
-    if (success) {
-      console.log('✅ 登录成功')
-      ElMessage.success('登录成功')
-
-      // 跳转到重定向路径或仪表板
-      const redirectPath = authStore.getAndClearRedirectPath()
-      console.log('🔄 重定向到:', redirectPath)
-      router.push(redirectPath)
-    } else {
-      ElMessage.error(loginType.value === 'password' ? '用户名或密码错误' : '手机号或验证码错误')
-    }
-  } catch (error: any) {
-    console.error('登录失败:', error)
-    // 只有在不是表单验证错误时才显示错误消息
-    if (error.message && !error.message.includes('validate')) {
-      ElMessage.error('登录失败，请重试')
-    }
-  } finally {
-    loginLoading.value = false
-  }
-}
 
 // 初始化粒子
 const initParticles = () => {
@@ -442,9 +151,171 @@ const initParticles = () => {
   }))
 }
 
+// 二维码相关状态
+const qrcodeLoading = ref(false)
+const qrcodeError = ref(false)
+const qrcodeErrorMessage = ref('')
+const qrUrl = ref('')
+const scene = ref('')
+const qrcodeCountdown = ref(300) // 5分钟 = 300秒
+const qrcodeExpired = ref(false)
+let countdownTimer: number | null = null
+let pollingTimer: number | null = null
+
+// 获取微信登录二维码
+const fetchWechatQrcode = async () => {
+  try {
+    qrcodeLoading.value = true
+    qrcodeError.value = false
+    qrcodeExpired.value = false
+    
+    const response = await request.get('/api/auth/wechat/login-qrcode')
+    console.log(response);
+    
+    if (response.data && response.code === 0) {
+      qrUrl.value = response.data.qr_url
+      scene.value = response.data.scene
+      qrcodeCountdown.value = 300 // 重置倒计时
+      
+      // 开始倒计时
+      startCountdown()
+      // 开始轮询登录状态
+      startPolling()
+    } else {
+      throw new Error(response.data?.message || '获取二维码失败')
+    }
+  } catch (error: any) {
+    console.error('获取微信二维码失败:', error)
+    qrcodeError.value = true
+    qrcodeErrorMessage.value = error.message || '获取二维码失败，请重试'
+  } finally {
+    qrcodeLoading.value = false
+  }
+}
+
+// 倒计时
+const startCountdown = () => {
+  // 清除旧定时器
+  if (countdownTimer) {
+    clearInterval(countdownTimer)
+  }
+  
+  countdownTimer = window.setInterval(() => {
+    qrcodeCountdown.value--
+    
+    if (qrcodeCountdown.value <= 0) {
+      // 二维码过期
+      qrcodeExpired.value = true
+      stopCountdown()
+      stopPolling()
+      ElMessage.warning('二维码已过期，请刷新后重新扫码')
+    }
+  }, 1000)
+}
+
+const stopCountdown = () => {
+  if (countdownTimer) {
+    clearInterval(countdownTimer)
+    countdownTimer = null
+  }
+}
+
+// 格式化时间
+const formatTime = (seconds: number): string => {
+  const minutes = Math.floor(seconds / 60)
+  const secs = seconds % 60
+  return `${minutes}:${secs.toString().padStart(2, '0')}`
+}
+
+// 轮询登录状态
+const startPolling = () => {
+  // 清除旧定时器
+  if (pollingTimer) {
+    clearInterval(pollingTimer)
+  }
+  
+  pollingTimer = window.setInterval(async () => {
+    if (!scene.value || qrcodeExpired.value) {
+      stopPolling()
+      return
+    }
+    
+    try {
+      const response = await request.get('/api/auth/wechat/login-status', {
+        params: { scene: scene.value }
+      })
+      
+      if (response.code === 0) {
+        // const status = response.data.data.status
+        
+        if (response.data.access_token ) {
+          // 登录成功
+          stopPolling()
+          stopCountdown()
+          
+          ElMessage.success('登录成功')
+          
+          // 保存token等信息
+          const loginData = response.data
+          if (loginData.access_token) {
+            authStore.loginWithQRCode(loginData)
+            // authStore.setAuthInfo(
+            //   loginData.access_token,
+            //   loginData.refresh_token,
+            //   loginData.user
+            // )
+          }
+          
+          // 跳转到重定向路径或仪表板
+          const redirectPath = authStore.getAndClearRedirectPath()
+          router.push(redirectPath)
+        } 
+          // else if (status === 'expired') {
+          //   // 二维码过期
+          //   qrcodeExpired.value = true
+          //   stopPolling()
+          //   stopCountdown()
+          //   ElMessage.warning('二维码已过期，请刷新')
+          // }
+        // status === 'waiting' 时继续轮询
+      }
+    } catch (error: any) {
+      console.error('轮询登录状态失败:', error)
+      // 轮询失败不停止，继续尝试
+    }
+  }, 2000) // 每2秒轮询一次
+}
+
+const stopPolling = () => {
+  if (pollingTimer) {
+    clearInterval(pollingTimer)
+    pollingTimer = null
+  }
+}
+
+// 刷新二维码
+const refreshQrcode = () => {
+  stopPolling()
+  stopCountdown()
+  qrUrl.value = ''
+  scene.value = ''
+  fetchWechatQrcode()
+}
+
+// 初始化微信登录
+const initWechatLogin = () => {
+  fetchWechatQrcode()
+}
+
+// 组件卸载时清理定时器
+onUnmounted(() => {
+  stopPolling()
+  stopCountdown()
+})
+
 onMounted(() => {
   initParticles()
-  restoreSmsCountdown() // 恢复倒计时状态
+  initWechatLogin()
 })
 </script>
 
@@ -659,7 +530,7 @@ onMounted(() => {
   background: rgba(30, 41, 59, 0.6);
   border: 1px solid rgba(6, 182, 212, 0.2);
   border-radius: 16px;
-  padding: 2rem;
+  padding: 1.5rem;
   box-shadow: 0 20px 60px rgba(0, 0, 0, 0.4);
 
   :deep(.el-card__body) {
@@ -667,165 +538,163 @@ onMounted(() => {
   }
 }
 
-// ========== 登录方式切换 ==========
-.login-tabs {
-  display: flex;
-  gap: 0.5rem;
-  margin-bottom: 2rem;
-  padding: 0.5rem;
-  background: rgba(15, 23, 42, 0.5);
-  border-radius: 12px;
+// ========== 微信扫码登录 ==========
+.wechat-login-container {
+  padding: 1rem 0;
 }
 
-.tab-item {
-  flex: 1;
+.qrcode-loading {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  
+  .loading-icon {
+    color: #06b6d4;
+    animation: rotate 1.5s linear infinite;
+    margin-bottom: 1rem;
+  }
+  
+  .loading-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin: 0;
+  }
+}
+
+@keyframes rotate {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.qrcode-display {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.qrcode-header {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 0.5rem;
-  padding: 0.75rem 1rem;
-  border-radius: 8px;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  color: rgba(255, 255, 255, 0.5);
-  font-weight: 500;
-  font-size: 0.9rem;
-
-  .tab-icon {
-    width: 18px;
-    height: 18px;
-  }
-
-  &:hover {
-    color: rgba(255, 255, 255, 0.8);
-    background: rgba(6, 182, 212, 0.1);
-  }
-
-  &.active {
-    color: white;
-    background: linear-gradient(135deg, #059669 0%, #06b6d4 100%);
-    box-shadow: 0 4px 12px rgba(6, 182, 212, 0.3);
-  }
-}
-
-// ========== 表单样式 ==========
-.login-form {
-  :deep(.el-form-item__label) {
-    color: rgba(255, 255, 255, 0.9);
-    font-weight: 500;
-  }
-
-  :deep(.el-input__wrapper) {
-    background: rgba(15, 23, 42, 0.5);
-    border: 1px solid rgba(6, 182, 212, 0.2);
-    box-shadow: none;
-    transition: all 0.3s ease;
-    // iOS 修复：确保边框完整显示
-    -webkit-backface-visibility: hidden;
-    backface-visibility: hidden;
-
-    &:hover {
-      border-color: rgba(6, 182, 212, 0.4);
-    }
-
-    &.is-focus {
-      border-color: #06b6d4;
-      box-shadow: 0 0 0 2px rgba(6, 182, 212, 0.1);
-    }
-  }
-
-  :deep(.el-input__inner) {
-    color: white;
-    // iOS 修复：禁止自动调整字体大小
-    -webkit-text-size-adjust: 100%;
-    text-size-adjust: 100%;
-    // iOS 修复：确保输入框不会被缩放
-    font-size: 16px !important;
-
-    &::placeholder {
-      color: rgba(255, 255, 255, 0.3);
-    }
-
-    // 修复浏览器自动填充时的白底问题
-    &:-webkit-autofill,
-    &:-webkit-autofill:hover,
-    &:-webkit-autofill:focus,
-    &:-webkit-autofill:active {
-      -webkit-box-shadow: 0 0 0 1000px rgba(15, 23, 42, 0.5) inset !important;
-      -webkit-text-fill-color: white !important;
-      transition: background-color 5000s ease-in-out 0s;
-    }
-  }
-
-  :deep(.el-checkbox__label) {
-    color: rgba(255, 255, 255, 0.7);
+  margin-bottom: 1rem;
+  
+  .wechat-icon {
+    width: 28px;
+    height: 28px;
   }
   
-  // iOS 修复：表单项目添加底部间距，防止遮挡
-  :deep(.el-form-item) {
-    margin-bottom: 22px;
-    
-    &:last-child {
-      margin-bottom: 0;
-    }
+  h3 {
+    color: white;
+    font-size: 1.1rem;
+    font-weight: 600;
+    margin: 0;
   }
 }
 
-.form-options {
+.qrcode-wrapper {
+  position: relative;
+  width: 200px;
+  height: 200px;
+  background: white;
+  border-radius: 12px;
+  padding: 10px;
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3);
+  margin-bottom: 1rem;
+  
+  .qrcode-image {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+  }
+}
+
+.qrcode-expired-mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.85);
+  border-radius: 12px;
   display: flex;
-  justify-content: space-between;
+  flex-direction: column;
   align-items: center;
-  width: 100%;
+  justify-content: center;
+  gap: 0.5rem;
+  
+  .expired-text {
+    color: white;
+    font-size: 0.85rem;
+    margin: 0;
+  }
 }
 
-// 短信验证码输入框
-.sms-input-wrapper {
+.qrcode-tips {
+  text-align: center;
+  margin-bottom: 0.75rem;
+  
+  .tip-text {
+    color: rgba(255, 255, 255, 0.9);
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin: 0 0 0.35rem 0;
+  }
+  
+  .tip-subtext {
+    color: rgba(255, 255, 255, 0.6);
+    font-size: 0.8rem;
+    margin: 0 0 0.4rem 0;
+  }
+  
+  .tip-agreement {
+    color: rgba(255, 255, 255, 0.5);
+    font-size: 0.7rem;
+    margin: 0;
+    line-height: 1.5;
+    
+    .agreement-link {
+      color: #06b6d4;
+      font-size: 0.7rem;
+      
+      &:hover {
+        color: #22d3ee;
+      }
+    }
+  }
+}
+
+.qrcode-timer {
   display: flex;
-  gap: 0.75rem;
-  width: 100%;
-
-  :deep(.el-input) {
-    flex: 1;
-  }
-
-  .sms-button {
-    flex-shrink: 0;
-    min-width: 110px;
-    background: rgba(6, 182, 212, 0.1);
-    border: 1px solid rgba(6, 182, 212, 0.3);
-    color: #06b6d4;
-    transition: all 0.3s ease;
-
-    &:hover:not(:disabled) {
-      background: rgba(6, 182, 212, 0.2);
-      border-color: #06b6d4;
-    }
-
-    &:disabled {
-      opacity: 0.5;
-      cursor: not-allowed;
-    }
+  align-items: center;
+  justify-content: center;
+  gap: 0.4rem;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 0.8rem;
+  
+  .el-icon {
+    font-size: 0.9rem;
   }
 }
 
-// 登录按钮
-.login-button {
-  width: 100%;
-  background: linear-gradient(135deg, #059669 0%, #06b6d4 100%);
-  border: none;
-  font-weight: 600;
-  font-size: 1rem;
-  padding: 0.75rem;
-  transition: all 0.3s ease;
-  box-shadow: 0 4px 20px rgba(6, 182, 212, 0.3);
-
-  &:hover:not(:disabled) {
-    transform: translateY(-2px);
-    box-shadow: 0 8px 30px rgba(6, 182, 212, 0.5);
-  }
-
-  &:active:not(:disabled) {
-    transform: translateY(0);
+.qrcode-error {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 3rem 0;
+  gap: 1rem;
+  
+  .error-text {
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 0.9rem;
+    margin: 0;
   }
 }
 
@@ -881,34 +750,39 @@ onMounted(() => {
   }
 
   .login-card {
-    padding: 1.2rem;
+    padding: 1rem;
   }
 
-  .login-header .title {
-    font-size: 1.6rem;
-  }
-  .login-form{
-    :deep(.el-form-item__label) {
-      font-size: 0.75rem !important;
+  .login-header {
+    margin-bottom: 1.5rem;
+    
+    .title {
+      font-size: 1.8rem;
     }
-    :deep(.el-input__inner) {
-      font-size: 0.75rem !important;
-    }
-
-
-  } 
-
-  .sms-input-wrapper {
-    .sms-button {
-      width: 70px;
-      min-width: 70px;
-      font-size: 0.675rem;
-      padding: 4px 6px;
+    
+    .subtitle {
+      font-size: 0.9rem;
     }
   }
-  .tab-item {
-    font-size: 0.65rem;
-    padding: 0.75rem 0.4rem;
+  .qrcode-wrapper {
+    width: 180px;
+    height: 180px;
+  }
+  
+  .qrcode-header h3 {
+    font-size: 1rem;
+  }
+  
+  .tip-text {
+    font-size: 0.9rem !important;
+  }
+  
+  .tip-subtext {
+    font-size: 0.75rem !important;
+  }
+  
+  .qrcode-timer {
+    font-size: 0.75rem;
   }
 }
 .register-link {

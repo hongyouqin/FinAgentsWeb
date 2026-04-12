@@ -58,6 +58,10 @@
                 <el-icon><Lock /></el-icon>
                 <span>安全设置</span>
               </el-menu-item>
+              <el-menu-item index="agreements">
+                <el-icon><Document /></el-icon>
+                <span>协议与条款</span>
+              </el-menu-item>
              
             </template>
 
@@ -269,6 +273,33 @@
               </el-button>
             </el-form-item>
           </el-form>
+        </el-card>
+
+        <!-- 协议与条款 -->
+        <el-card v-show="activeTab === 'agreements'" class="settings-content" shadow="never">
+          <template #header>
+            <h3>协议与条款</h3>
+          </template>
+
+          <div class="agreements-content">
+            <el-alert
+              title="法律协议"
+              type="info"
+              description="查看用户协议和隐私政策"
+              :closable="false"
+              style="margin-bottom: 20px;"
+            />
+            <div class="agreement-links">
+              <router-link to="/user-agreement" class="agreement-link" target="_blank">
+                <el-icon><Document /></el-icon>
+                <span>《用户协议》</span>
+              </router-link>
+              <router-link to="/privacy-policy" class="agreement-link" target="_blank">
+                <el-icon><Document /></el-icon>
+                <span>《隐私政策》</span>
+              </router-link>
+            </div>
+          </div>
         </el-card>
 
 
@@ -1057,6 +1088,46 @@ onMounted(() => {
     margin-left: 8px;
     font-size: 12px;
     color: var(--el-text-color-placeholder);
+  }
+
+  .agreements-content {
+    .agreement-links {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 16px;
+
+      .agreement-link {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 16px 20px;
+        background: linear-gradient(135deg, rgba(5, 150, 105, 0.06), rgba(6, 182, 212, 0.06));
+        border: 1px solid rgba(6, 182, 212, 0.15);
+        border-radius: 12px;
+        text-decoration: none;
+        color: #1e293b;
+        font-size: 15px;
+        font-weight: 500;
+        transition: all 0.25s ease;
+
+        .el-icon {
+          font-size: 20px;
+          color: #06b6d4;
+        }
+
+        &:hover {
+          background: linear-gradient(135deg, rgba(5, 150, 105, 0.10), rgba(6, 182, 212, 0.10));
+          border-color: rgba(6, 182, 212, 0.3);
+          transform: translateX(4px);
+          box-shadow: 0 4px 12px rgba(6, 182, 212, 0.15);
+        }
+
+        &:active {
+          transform: translateX(2px);
+        }
+      }
+    }
   }
 }
 

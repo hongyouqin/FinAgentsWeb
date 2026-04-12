@@ -18,49 +18,72 @@
       </div>
       <div class="hero-content">
         <div class="hero-badge">
-          <el-icon><Ticket /></el-icon>
-          <span>邀请码管理</span>
+          <el-icon><Share /></el-icon>
+          <span>邀请好友</span>
         </div>
-        <h1 class="hero-title">我的邀请码</h1>
-        <p class="hero-subtitle">生成邀请码，邀请好友加入</p>
+        <h1 class="hero-title">邀请有礼</h1>
+        <p class="hero-subtitle">分享二维码，邀请好友加入</p>
       </div>
     </div>
 
     <div class="content-wrapper">
-      <!-- Tab 切换 -->
-      <div class="tab-container">
-        <div
-          v-for="tab in tabs"
-          :key="tab.name"
-          class="tab-item"
-          :class="{ active: activeTab === tab.name }"
-          @click="activeTab = tab.name; loadData()"
-        >
-          <el-icon :size="16">
-            <component :is="tab.icon" />
-          </el-icon>
-          <span>{{ tab.label }}</span>
+      <!-- 二维码展示区 -->
+      <div class="qrcode-section">
+        <div class="qrcode-card">
+          <div class="qrcode-header">
+            <el-icon class="header-icon"><Share /></el-icon>
+            <h3>我的邀请二维码</h3>
+          </div>
+          
+          <!-- 加载状态 -->
+          <div v-if="qrcodeLoading" class="qrcode-loading">
+            <el-icon class="rotating"><Loading /></el-icon>
+            <p>正在生成二维码...</p>
+          </div>
+          
+          <!-- 二维码展示 -->
+          <div v-else-if="qrcodeUrl" class="qrcode-display">
+            <img :src="qrcodeUrl" alt="邀请二维码" class="qrcode-image" />
+            <div class="qrcode-actions">
+              <el-button type="primary" size="large" @click="downloadQrcode" :loading="downloading">
+                <el-icon><Download /></el-icon>
+                <span>下载二维码</span>
+              </el-button>
+            </div>
+            <p class="qrcode-tip">扫描二维码下载或分享给好友</p>
+          </div>
+          
+          <!-- 错误状态 -->
+          <div v-else class="qrcode-error">
+            <el-icon class="error-icon"><CircleClose /></el-icon>
+            <p>二维码加载失败</p>
+            <el-button type="primary" size="small" @click="loadQrcode">重试</el-button>
+          </div>
         </div>
       </div>
-      <!-- 警告提示 -->
-      <el-alert
-        v-if="activeTab === 'codes'"
-        type="warning"
-        :closable="false"
-        show-icon
-        class="warning-alert"
-      >
-        <template #title>
-          <span class="alert-title">重要提示</span>
-        </template>
-        <div class="alert-content">
-          <p>当邀请码被使用后才可以再次生成新的邀请码。</p>
-          <!-- <p class="warning-text">
-            <el-icon><Warning /></el-icon>
-            请不要在公开的论坛、聊天群发送邀请码或网址。我们禁止买卖邀请码，一经发现将会导致您的账号被注销。
-          </p> -->
+
+      <!-- 统计卡片 -->
+      <div class="stats-section">
+        <div class="stat-card">
+          <div class="stat-icon total">
+            <el-icon><UserFilled /></el-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats.total_invites || 0 }}</div>
+            <div class="stat-label">总邀请人数</div>
+          </div>
         </div>
-      </el-alert>
+        <div class="stat-card">
+          <div class="stat-icon today">
+            <el-icon><Calendar /></el-icon>
+          </div>
+          <div class="stat-info">
+            <div class="stat-value">{{ stats.today_invites || 0 }}</div>
+            <div class="stat-label">今日邀请</div>
+          </div>
+        </div>
+      </div>
+
       <!-- 奖励规则 -->
       <div class="reward-section">
         <el-button
@@ -95,346 +118,147 @@
         </div>
       </el-dialog>
 
-      <!-- 操作区域 -->
-      <div class="action-section" v-if="activeTab === 'codes'" >
-        <div class="action-left">
-          <el-button
-            type="primary"
-            size="large"
-            :loading="generating"
-            :disabled="!canGenerate"
-            @click="handleGenerate"
+      <!-- 邀请明细列表 -->
+      <div class="list-section">
+        <div class="list-header">
+          <span class="section-title">邀请明细</span>
+          <el-tag type="info" size="small" effect="plain">共 {{ inviteList.length }} 人</el-tag>
+        </div>
+
+        <!-- 加载状态 -->
+        <div v-if="loading" class="loading-container">
+          <el-icon class="rotating"><Loading /></el-icon>
+          <span>加载中...</span>
+        </div>
+
+        <!-- 空状态 -->
+        <div v-else-if="inviteList.length === 0" class="empty-state">
+          <el-icon class="empty-icon"><User /></el-icon>
+          <h3>暂无邀请记录</h3>
+          <p>分享您的邀请二维码，邀请好友加入</p>
+        </div>
+
+        <!-- 桌面端表格 -->
+        <div v-else class="desktop-table">
+          <el-table :data="inviteList" style="width: 100%">
+            <el-table-column label="序号" width="70" align="center">
+              <template #default="{ $index }">
+                <span class="index-badge">{{ $index + 1 }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="用户名" min-width="150">
+              <template #default="{ row }">
+                <span class="username-text">{{ row.username }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="手机号" min-width="150">
+              <template #default="{ row }">
+                <span class="phone-text">{{ row.phone }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="邀请时间" width="180">
+              <template #default="{ row }">
+                <span class="time-text">{{ formatTime(row.invited_at) }}</span>
+              </template>
+            </el-table-column>
+
+            <el-table-column label="状态" width="120" align="center">
+              <template #default="{ row }">
+                <el-tag
+                  :type="row.status === 'active' ? 'success' : 'warning'"
+                  size="small"
+                  effect="light"
+                >
+                  {{ row.status === 'active' ? '活跃' : '未激活' }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
+
+        <!-- 移动端卡片 -->
+        <div v-if="inviteList.length > 0" class="mobile-list">
+          <div
+            v-for="(item, index) in inviteList"
+            :key="item.user_id"
+            class="user-card"
           >
-            <el-icon><Plus /></el-icon>
-            <span>生成邀请码</span>
-          </el-button>
-          <!-- <span v-if="!canGenerate && codeList.length > 0" class="generate-tip">
-            <el-icon><InfoFilled /></el-icon>
-            当前邀请码未被使用，无法生成新邀请码
-          </span> -->
-        </div>
-        <el-button
-    :loading="loading"
-    @click="loadData"
-    circle
-    class="refresh-btn"
-  >
-    <el-icon><Refresh /></el-icon>
-  </el-button>
-</div>
-
-<!-- 邀请码列表 -->
-<div v-if="activeTab === 'codes'" class="list-section">
-  <div class="list-header">
-    <span class="section-title">邀请码列表</span>
-    <el-tag type="info" size="small" effect="plain">共 {{ codeList.length }} 个</el-tag>
-  </div>
-
-  <!-- 加载状态 -->
-  <div v-if="loading" class="loading-container">
-    <el-icon class="rotating"><Loading /></el-icon>
-    <span>加载中...</span>
-  </div>
-
-  <!-- 空状态 -->
-  <div v-else-if="codeList.length === 0" class="empty-state">
-    <el-icon class="empty-icon"><Ticket /></el-icon>
-    <h3>暂无邀请码</h3>
-    <p>点击上方按钮生成您的第一个邀请码</p>
-  </div>
-
-  <!-- 桌面端表格 -->
-  <div v-else class="desktop-table">
-    <el-table :data="codeList" style="width: 100%">
-      <el-table-column label="序号" width="70" align="center">
-        <template #default="{ $index }">
-          <span class="index-badge">{{ $index + 1 }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="邀请码" min-width="200">
-        <template #default="{ row }">
-          <div class="code-cell">
-            <span class="code-text">{{ row.code }}</span>
-            <el-button size="small" text type="primary" @click="copyCode(row.code)">
-              <el-icon><CopyDocument /></el-icon>
-            </el-button>
-          </div>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="生成时间" width="180">
-        <template #default="{ row }">
-          <span class="time-text">{{ formatTime(row.created_at_datetime) }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="过期时间" width="180">
-        <template #default="{ row }">
-          <span class="time-text">{{ formatTime(row.expire_at_datetime) }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="状态" width="120" align="center">
-        <template #default="{ row }">
-          <el-tag
-            :type="getStatusType(row)"
-            size="small"
-            effect="light"
-          >
-            {{ getStatusText(row) }}
-          </el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="使用情况" width="120" align="center">
-        <template #default="{ row }">
-          <span class="usage-text">{{ row.used_count }} / {{ row.max_uses }}</span>
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
-
-  <!-- 分页 -->
-  <div v-if="pagination.total > 0" class="pagination-wrapper desktop-pagination">
-    <el-pagination
-      v-model:current-page="pagination.page"
-      v-model:page-size="pagination.pageSize"
-      :total="pagination.total"
-      :page-sizes="[10, 20, 50]"
-      layout="total, sizes, prev, pager, next"
-      @size-change="handleSizeChange"
-      @current-change="handlePageChange"
-    />
-  </div>
-
-  <!-- 移动端卡片 -->
-  <div v-if="codeList.length > 0" class="mobile-list">
-    <div
-      v-for="(item, index) in codeList"
-      :key="item.code"
-      class="code-card"
-      :class="{ 'is-valid': item.is_valid, 'is-invalid': !item.is_valid }"
-    >
-      <div class="card-header">
-        <span class="card-index">#{{ index + 1 }}</span>
-        <el-tag
-          :type="getStatusType(item)"
-          size="small"
-          effect="light"
-        >
-          {{ getStatusText(item) }}
-        </el-tag>
-      </div>
-      <div class="card-body">
-        <div class="code-row">
-          <span class="code-value">{{ item.code }}</span>
-          <el-button size="small" text type="primary" @click="copyCode(item.code)">
-            <el-icon><CopyDocument /></el-icon>
-          </el-button>
-        </div>
-        <div class="info-row">
-          <span class="info-label">生成时间</span>
-          <span class="info-value">{{ formatTime(item.created_at_datetime) }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">过期时间</span>
-          <span class="info-value">{{ formatTime(item.expire_at_datetime) }}</span>
-        </div>
-        <div class="info-row">
-          <span class="info-label">使用情况</span>
-          <span class="info-value">{{ item.used_count }} / {{ item.max_uses }}</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- 移动端分页 -->
-  <div v-if="pagination.total > 0" class="pagination-wrapper mobile-pagination">
-    <el-pagination
-      v-model:current-page="pagination.page"
-      :total="pagination.total"
-      :page-size="pagination.pageSize"
-      layout="prev, pager, next"
-      small
-      @current-change="handlePageChange"
-    />
-  </div>
-</div>
-
-<!-- 已邀请用户列表 -->
-<div v-if="activeTab === 'invited'" class="list-section">
-  <div class="list-header">
-    <span class="section-title">已邀请用户</span>
-    <el-tag type="info" size="small" effect="plain">共 {{ invitedUsers.length }} 人</el-tag>
-  </div>
-
-  <!-- 加载状态 -->
-  <div v-if="loading" class="loading-container">
-    <el-icon class="rotating"><Loading /></el-icon>
-    <span>加载中...</span>
-  </div>
-
-  <!-- 空状态 -->
-  <div v-else-if="invitedUsers.length === 0" class="empty-state">
-    <el-icon class="empty-icon"><User /></el-icon>
-    <h3>暂无邀请用户</h3>
-    <p>生成邀请码并分享给好友，邀请他们加入</p>
-  </div>
-
-  <!-- 桌面端表格 -->
-  <div v-else class="desktop-table">
-    <el-table :data="invitedUsers" style="width: 100%">
-      <el-table-column label="序号" width="70" align="center">
-        <template #default="{ $index }">
-          <span class="index-badge">{{ $index + 1 }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="用户名" min-width="150">
-        <template #default="{ row }">
-          <span class="username-text">{{ row.username }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="手机号" min-width="150">
-        <template #default="{ row }">
-          <span class="phone-text">{{ row.phone }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="邀请时间" width="180">
-        <template #default="{ row }">
-          <span class="time-text">{{ formatTime(row.invited_at) }}</span>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="奖励算力" width="120" align="center">
-        <template #default="{ row }">
-          <el-tag type="primary" size="small" effect="light">
-            {{ row.reward_granted }} ⚡
-          </el-tag>
-        </template>
-      </el-table-column>
-
-      <el-table-column label="状态" width="120" align="center">
-        <template #default="{ row }">
-          <el-tag
-            :type="row.status === 'active' ? 'success' : 'warning'"
-            size="small"
-            effect="light"
-          >
-            {{ row.status === 'active' ? '活跃' : '未激活' }}
-          </el-tag>
-        </template>
-      </el-table-column>
-    </el-table>
-  </div>
-
-  <!-- 分页 -->
-  <div v-if="pagination.total > 0" class="pagination-wrapper desktop-pagination">
-    <el-pagination
-      v-model:current-page="pagination.page"
-      v-model:page-size="pagination.pageSize"
-      :total="pagination.total"
-      :page-sizes="[10, 20, 50]"
-      layout="total, sizes, prev, pager, next"
-      @size-change="handleSizeChange"
-      @current-change="handlePageChange"
-    />
-  </div>
-
-  <!-- 移动端卡片 -->
-  <div v-if="invitedUsers.length > 0" class="mobile-list">
-    <div
-      v-for="(item, index) in invitedUsers"
-      :key="item.user_id"
-      class="user-card"
-    >
-      <div class="card-header">
-        <span class="card-index">#{{ index + 1 }}</span>
-        <el-tag
-          :type="item.status === 'active' ? 'success' : 'warning'"
-          size="small"
-          effect="light"
-        >
-          {{ item.status === 'active' ? '活跃' : '未激活' }}
-        </el-tag>
-      </div>
-      <div class="card-body">
-        <div class="user-info">
-          <div class="user-row">
-            <span class="info-label">用户名</span>
-            <span class="info-value">{{ item.username }}</span>
-          </div>
-          <div class="user-row">
-            <span class="info-label">手机号</span>
-            <span class="info-value">{{ item.phone }}</span>
-          </div>
-          <div class="user-row">
-            <span class="info-label">邀请时间</span>
-            <span class="info-value">{{ formatTime(item.invited_at) }}</span>
-          </div>
-          <div class="user-row">
-            <span class="info-label">奖励算力</span>
-            <span class="info-value">{{ item.reward_granted }} ⚡</span>
+            <div class="card-header">
+              <span class="card-index">#{{ index + 1 }}</span>
+              <el-tag
+                :type="item.status === 'active' ? 'success' : 'warning'"
+                size="small"
+                effect="light"
+              >
+                {{ item.status === 'active' ? '活跃' : '未激活' }}
+              </el-tag>
+            </div>
+            <div class="card-body">
+              <div class="user-info">
+                <div class="user-row">
+                  <span class="info-label">用户名</span>
+                  <span class="info-value">{{ item.username }}</span>
+                </div>
+                <div class="user-row">
+                  <span class="info-label">手机号</span>
+                  <span class="info-value">{{ item.phone }}</span>
+                </div>
+                <div class="user-row">
+                  <span class="info-label">邀请时间</span>
+                  <span class="info-value">{{ formatTime(item.invited_at) }}</span>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
     </div>
   </div>
-
-  <!-- 移动端分页 -->
-  <div v-if="pagination.total > 0" class="pagination-wrapper mobile-pagination">
-    <el-pagination
-      v-model:current-page="pagination.page"
-      :total="pagination.total"
-      :page-size="pagination.pageSize"
-      layout="prev, pager, next"
-      small
-      @current-change="handlePageChange"
-    />
-  </div>
-</div>
-</div>
-</div>
 </template>
 
 <script setup lang="ts">
-import { ref, computed, onMounted } from 'vue'
+import { ref, onMounted } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
-  Ticket,
+  Share,
   User,
-  Warning,
-  Plus,
+  UserFilled,
+  Calendar,
   InfoFilled,
   Loading,
-  CopyDocument,
-  Refresh
+  CircleClose,
+  Download
 } from '@element-plus/icons-vue'
-import { inviteApi, type InviteCode } from '@/api/invite'
+import { inviteApi } from '@/api/invite'
+import html2canvas from 'html2canvas'
+import weixin from '@/utils/weixin'
 
 defineOptions({ name: 'InviteCodes' })
 
-const activeTab = ref<'codes'|'invited'>('codes')
 const loading = ref(false)
-const generating = ref(false)
-const codeList = ref<InviteCode[]>([])
-const invitedUsers = ref<any[]>([])
+const qrcodeLoading = ref(false)
+const downloading = ref(false)
+const qrcodeUrl = ref('')
+const qrcodeBase64 = ref('')
 const showRewardDialog = ref(false)
 
-const tabs = ref([
-  { name: 'codes', label: '邀请码', icon: Ticket },
-  { name: 'invited', label: '已邀请用户', icon: User }
-])
-
-// 分页
-const pagination = ref({
-  page: 1,
-  pageSize: 10,
-  total: 0
+// 统计数据
+const stats = ref({
+  total_invites: 0,
+  today_invites: 0
 })
+
+// 邀请列表
+const inviteList = ref<Array<{
+  user_id: number
+  username: string
+  phone: string
+  invited_at: string
+  status: string
+}>>([])
 
 // 背景粒子
 const particles = ref<Array<{ x: number; y: number; size: number; opacity: number }>>([])
@@ -447,104 +271,302 @@ const initParticles = () => {
   }))
 }
 
-// 是否可以生成新邀请码（所有邀请码都已使用或没有邀请码）
-const canGenerate = computed(() => {
-  if (codeList.value.length === 0) return true
-  // 检查是否所有有效邀请码都已被使用
-  return codeList.value.every(code => code.is_used_up || code.is_expired || !code.is_valid)
-})
-
-// 加载数据
-const loadData = async () => {
-  if (activeTab.value === 'codes') {
-    await loadCodes()
-  } else {
-    await loadInvitedUsers()
+// 加载二维码
+const loadQrcode = async () => {
+  qrcodeLoading.value = true
+  try {
+    const res = await inviteApi.getInviteQrcode()
+    const data = (res as any)?.data || res
+    if (data.qr_url) {
+      qrcodeUrl.value = data.qr_url
+      qrcodeBase64.value = data.qr_base64 || ''
+    } else {
+      ElMessage.error('获取二维码失败')
+    }
+  } catch (error: any) {
+    console.error('加载二维码失败:', error)
+    ElMessage.error(error.message || '加载二维码失败')
+  } finally {
+    qrcodeLoading.value = false
   }
 }
 
-// 加载邀请码列表
-const loadCodes = async () => {
+// 加载统计数据
+const loadStats = async () => {
   loading.value = true
   try {
-    const res = await inviteApi.getMyCodes({ 
-      page: pagination.value.page, 
-      page_size: pagination.value.pageSize 
-    })
-    const data = (res as any)?.data?.data || (res as any)?.data || {}
-    codeList.value = data.items || []
-    pagination.value.total = data.total || 0
+    const res = await inviteApi.getInviteStats()
+    const data = (res as any)?.data || res
+    if (data) {
+      stats.value = {
+        total_invites: data.total_invites || 0,
+        today_invites: data.today_invites || 0
+      }
+      inviteList.value = data.invite_list || []
+    }
   } catch (error: any) {
-    console.error('加载邀请码失败:', error)
-    ElMessage.error(error.message || '加载邀请码失败')
+    console.error('加载统计数据失败:', error)
+    ElMessage.error(error.message || '加载统计数据失败')
   } finally {
     loading.value = false
   }
 }
 
-// 加载已邀请用户列表
-const loadInvitedUsers = async () => {
-  loading.value = true
-  try {
-    const res = await inviteApi.getInvitedUsers({ 
-      page: pagination.value.page, 
-      page_size: pagination.value.pageSize 
-    })
-    const data = (res as any)?.data?.data || (res as any)?.data || {}
-    invitedUsers.value = data.items || []
-    pagination.value.total = data.total || 0
-  } catch (error: any) {
-    console.error('加载已邀请用户失败:', error)
-    ElMessage.error(error.message || '加载已邀请用户失败')
-  } finally {
-    loading.value = false
-  }
-}
-
-// 分页变化
-const handlePageChange = (page: number) => {
-  pagination.value.page = page
-  loadData()
-}
-
-const handleSizeChange = (size: number) => {
-  pagination.value.pageSize = size
-  pagination.value.page = 1
-  loadData()
-}
-
-// 生成邀请码
-const handleGenerate = async () => {
-  if (!canGenerate.value) {
-    ElMessage.warning('当前邀请码未被使用，无法生成新邀请码')
+// 下载二维码
+const downloadQrcode = async () => {
+  if (!qrcodeUrl.value) {
+    ElMessage.warning('二维码尚未加载')
     return
   }
 
-  generating.value = true
+  downloading.value = true
   try {
-    const res = await inviteApi.create()
-    if ((res as any).success) {
-      ElMessage.success('邀请码生成成功')
-      await loadCodes()
+    // 创建一个临时容器来渲染二维码
+    const container = document.createElement('div')
+    container.style.position = 'fixed'
+    container.style.left = '-9999px'
+    container.style.top = '0'
+    container.style.width = '375px'
+    container.style.background = 'white'
+    container.style.padding = '40px'
+    container.style.display = 'flex'
+    container.style.flexDirection = 'column'
+    container.style.alignItems = 'center'
+    container.style.justifyContent = 'center'
+
+    // 添加标题
+    const title = document.createElement('div')
+    title.style.cssText = `
+      font-size: 24px;
+      font-weight: bold;
+      color: #1e293b;
+      margin-bottom: 20px;
+      text-align: center;
+    `
+    title.textContent = 'NB.STOCK 邀请二维码'
+    container.appendChild(title)
+
+    // 添加副标题
+    const subtitle = document.createElement('div')
+    subtitle.style.cssText = `
+      font-size: 14px;
+      color: #64748b;
+      margin-bottom: 30px;
+      text-align: center;
+    `
+    subtitle.textContent = '扫码注册，共享福利'
+    container.appendChild(subtitle)
+
+    // 添加二维码图片
+    const img = document.createElement('img')
+    img.src = qrcodeUrl.value
+    img.crossOrigin = 'anonymous'
+    img.style.cssText = `
+      width: 250px;
+      height: 250px;
+      object-fit: contain;
+    `
+    container.appendChild(img)
+
+    // 添加提示文字
+    const tip = document.createElement('div')
+    tip.style.cssText = `
+      font-size: 12px;
+      color: #94a3b8;
+      margin-top: 20px;
+      text-align: center;
+    `
+    tip.textContent = '长按识别二维码注册'
+    container.appendChild(tip)
+
+    document.body.appendChild(container)
+
+    // 等待图片加载
+    await new Promise(resolve => setTimeout(resolve, 300))
+
+    // 使用 html2canvas 生成图片
+    const canvas = await html2canvas(container, {
+      width: 375,
+      windowWidth: 375,
+      scale: 2,
+      useCORS: true,
+      allowTaint: true,
+      backgroundColor: '#ffffff',
+      logging: false
+    })
+
+    // 移除临时容器
+    document.body.removeChild(container)
+
+    // 判断是否在微信环境
+    if (weixin.isWechatEnv()) {
+      // 微信环境：显示预览
+      const base64Data = canvas.toDataURL('image/png')
+      showImagePreview(base64Data)
     } else {
-      ElMessage.error((res as any).message || '生成失败')
+      // 非微信环境：直接下载
+      downloadImageInBrowser(canvas)
     }
   } catch (error: any) {
-    console.error('生成邀请码失败:', error)
-    ElMessage.error(error.message || '生成邀请码失败')
+    console.error('下载失败:', error)
+    ElMessage.error(error.message || '下载图片失败，请重试')
   } finally {
-    generating.value = false
+    downloading.value = false
   }
 }
 
-// 复制邀请码
-const copyCode = async (code: string) => {
-  try {
-    await navigator.clipboard.writeText(code)
-    ElMessage.success('邀请码已复制到剪贴板')
-  } catch {
-    ElMessage.error('复制失败，请手动复制')
+/**
+ * 显示图片预览（全屏弹框）
+ */
+const showImagePreview = (base64Data: string) => {
+  // 创建全屏预览容器
+  const overlay = document.createElement('div')
+  overlay.style.cssText = `
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: rgba(0, 0, 0, 0.95);
+    z-index: 10000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    animation: fadeIn 0.3s ease;
+  `
+
+  // 添加动画样式
+  const styleEl = document.createElement('style')
+  styleEl.textContent = `
+    @keyframes fadeIn {
+      from { opacity: 0; }
+      to { opacity: 1; }
+    }
+  `
+  document.head.appendChild(styleEl)
+
+  // 顶部提示区域
+  const tipContainer = document.createElement('div')
+  tipContainer.style.cssText = `
+    position: absolute;
+    top: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    text-align: center;
+    z-index: 10001;
+  `
+
+  // 主提示文字
+  const tip = document.createElement('div')
+  tip.style.cssText = `
+    color: white;
+    font-size: 18px;
+    margin-bottom: 8px;
+    font-weight: 600;
+    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+  `
+  tip.innerHTML = '💾 长按图片保存到相册'
+  tipContainer.appendChild(tip)
+
+  // 副提示文字
+  const subTip = document.createElement('div')
+  subTip.style.cssText = `
+    color: rgba(255, 255, 255, 0.7);
+    font-size: 13px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
+  `
+  subTip.textContent = '保存后可分享给好友或朋友圈'
+  tipContainer.appendChild(subTip)
+
+  overlay.appendChild(tipContainer)
+
+  // 图片容器
+  const imgContainer = document.createElement('div')
+  imgContainer.style.cssText = `
+    max-width: 90%;
+    max-height: 75vh;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+    background: white;
+    padding: 8px;
+  `
+
+  // 图片
+  const img = document.createElement('img')
+  img.src = base64Data
+  img.style.cssText = `
+    display: block;
+    max-width: 100%;
+    max-height: 75vh;
+    object-fit: contain;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: default;
+  `
+  imgContainer.appendChild(img)
+  overlay.appendChild(imgContainer)
+
+  // 底部关闭按钮
+  const closeBtn = document.createElement('div')
+  closeBtn.style.cssText = `
+    position: absolute;
+    bottom: 40px;
+    left: 50%;
+    transform: translateX(-50%);
+    color: white;
+    font-size: 14px;
+    padding: 12px 40px;
+    background: rgba(255, 255, 255, 0.15);
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 25px;
+    cursor: pointer;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s ease;
+    user-select: none;
+  `
+  closeBtn.textContent = '✕ 关闭预览'
+  closeBtn.onclick = () => {
+    document.body.removeChild(overlay)
+    document.head.removeChild(styleEl)
   }
+  overlay.appendChild(closeBtn)
+
+  // 点击背景关闭
+  overlay.onclick = (e) => {
+    if (e.target === overlay) {
+      document.body.removeChild(overlay)
+      document.head.removeChild(styleEl)
+    }
+  }
+
+  document.body.appendChild(overlay)
+}
+
+/**
+ * 浏览器环境下载图片
+ */
+const downloadImageInBrowser = (canvas: HTMLCanvasElement) => {
+  canvas.toBlob((blob: Blob | null) => {
+    if (blob) {
+      const url = URL.createObjectURL(blob)
+      const link = document.createElement('a')
+      link.href = url
+      
+      // 生成文件名
+      const timestamp = new Date().getTime()
+      const fileName = `邀请二维码_${timestamp}.png`
+      
+      link.download = fileName
+      document.body.appendChild(link)
+      link.click()
+      document.body.removeChild(link)
+      URL.revokeObjectURL(url)
+      ElMessage.success('二维码下载成功')
+    }
+  }, 'image/png')
 }
 
 // 格式化时间
@@ -564,25 +586,10 @@ const formatTime = (dateStr: string) => {
   }
 }
 
-// 获取状态类型
-const getStatusType = (item: InviteCode): 'success' | 'warning' | 'danger' | 'info' => {
-  if (item.is_used_up) return 'info'
-  if (item.is_expired) return 'danger'
-  if (item.is_valid) return 'success'
-  return 'warning'
-}
-
-// 获取状态文字
-const getStatusText = (item: InviteCode): string => {
-  if (item.is_used_up) return '已用完'
-  if (item.is_expired) return '已过期'
-  if (item.is_valid) return '有效'
-  return '无效'
-}
-
 onMounted(() => {
   initParticles()
-  loadData()
+  loadQrcode()
+  loadStats()
 })
 </script>
 
@@ -765,6 +772,161 @@ onMounted(() => {
   z-index: 2;
 }
 
+// 二维码区域
+.qrcode-section {
+  margin-bottom: 24px;
+}
+
+.qrcode-card {
+  background: white;
+  border-radius: 16px;
+  padding: 24px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid rgba(6, 182, 212, 0.1);
+
+  .qrcode-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 20px;
+
+    .header-icon {
+      font-size: 24px;
+      color: #06b6d4;
+    }
+
+    h3 {
+      margin: 0;
+      font-size: 18px;
+      font-weight: 600;
+      color: #1e293b;
+    }
+  }
+
+  .qrcode-loading {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 60px 20px;
+    color: #64748b;
+    gap: 12px;
+
+    .el-icon {
+      font-size: 32px;
+      color: #06b6d4;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+
+  .qrcode-display {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 16px;
+
+    .qrcode-image {
+      width: 250px;
+      height: 250px;
+      object-fit: contain;
+      border-radius: 12px;
+      box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
+    }
+
+    .qrcode-actions {
+      display: flex;
+      gap: 12px;
+    }
+
+    .qrcode-tip {
+      margin: 0;
+      font-size: 13px;
+      color: #94a3b8;
+      text-align: center;
+    }
+  }
+
+  .qrcode-error {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 40px 20px;
+    gap: 12px;
+    color: #64748b;
+
+    .error-icon {
+      font-size: 48px;
+      color: #ef4444;
+    }
+
+    p {
+      margin: 0;
+      font-size: 14px;
+    }
+  }
+}
+
+// 统计卡片
+.stats-section {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 20px;
+}
+
+.stat-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border: 1px solid rgba(6, 182, 212, 0.1);
+
+  .stat-icon {
+    width: 48px;
+    height: 48px;
+    border-radius: 12px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+
+    &.total {
+      background: linear-gradient(135deg, rgba(5, 150, 105, 0.1), rgba(6, 182, 212, 0.12));
+      color: #06b6d4;
+    }
+
+    &.today {
+      background: linear-gradient(135deg, rgba(59, 130, 246, 0.1), rgba(99, 102, 241, 0.12));
+      color: #3b82f6;
+    }
+  }
+
+  .stat-info {
+    flex: 1;
+
+    .stat-value {
+      font-size: 28px;
+      font-weight: 700;
+      color: #1e293b;
+      line-height: 1.2;
+    }
+
+    .stat-label {
+      font-size: 13px;
+      color: #64748b;
+      margin-top: 4px;
+    }
+  }
+}
+
 // 奖励规则
 .reward-section {
   margin-bottom: 20px;
@@ -783,124 +945,6 @@ onMounted(() => {
     font-size: 14px;
     color: #475569;
     margin: 4px 0;
-  }
-}
-
-// Tab 切换
-.tab-container {
-  display: flex;
-  gap: 8px;
-  margin-bottom: 20px;
-  background: white;
-  border-radius: 12px;
-  padding: 4px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-
-  .tab-item {
-    flex: 1;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 8px;
-    padding: 12px 20px;
-    border-radius: 8px;
-    cursor: pointer;
-    color: #64748b;
-    font-size: 14px;
-    font-weight: 500;
-    transition: all 0.3s ease;
-
-    &:hover {
-      background: #f1f5f9;
-      color: #334155;
-    }
-
-    &.active {
-      background: linear-gradient(135deg, #06b6d4 0%, #0891b2 100%);
-      color: white;
-      box-shadow: 0 2px 8px rgba(6, 182, 212, 0.3);
-    }
-
-    .el-icon {
-      font-size: 16px;
-    }
-  }
-}
-
-// 警告提示
-.warning-alert {
-  border-radius: 16px;
-  margin-bottom: 20px;
-  border: 1px solid rgba(245, 158, 11, 0.3);
-
-  :deep(.el-alert__content) {
-    width: 100%;
-  }
-
-  .alert-title {
-    font-weight: 600;
-    font-size: 15px;
-  }
-
-  .alert-content {
-    margin-top: 8px;
-    
-    p {
-      margin: 0 0 8px 0;
-      font-size: 14px;
-      color: #92400e;
-      line-height: 1.6;
-    }
-
-    .warning-text {
-      display: flex;
-      align-items: flex-start;
-      gap: 6px;
-      color: #b45309;
-      font-weight: 500;
-
-      .el-icon {
-        margin-top: 3px;
-        flex-shrink: 0;
-      }
-    }
-  }
-}
-
-// 操作区域
-.action-section {
-  background: white;
-  border-radius: 16px;
-  padding: 20px 24px;
-  margin-bottom: 16px;
-  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-
-  .action-left {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    flex-wrap: wrap;
-    flex: 1;
-  }
-
-  .generate-tip {
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    font-size: 13px;
-    color: #94a3b8;
-
-    .el-icon {
-      color: #f59e0b;
-    }
-  }
-
-  .refresh-btn {
-    flex-shrink: 0;
   }
 }
 
@@ -999,28 +1043,9 @@ onMounted(() => {
   font-weight: 600;
 }
 
-.code-cell {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-
-  .code-text {
-    font-family: 'SF Mono', 'Monaco', monospace;
-    font-weight: 600;
-    color: #0891b2;
-    font-size: 14px;
-  }
-}
-
 .time-text {
   font-size: 13px;
   color: #64748b;
-}
-
-.usage-text {
-  font-size: 13px;
-  font-weight: 600;
-  color: #475569;
 }
 
 .username-text {
@@ -1034,92 +1059,9 @@ onMounted(() => {
   color: #64748b;
 }
 
-// 分页
-.pagination-wrapper {
-  margin-top: 20px;
-  display: flex;
-  justify-content: center;
-}
-
-.desktop-pagination {
-  display: flex;
-}
-
-.mobile-pagination {
-  display: none;
-}
-
 // 移动端卡片
 .mobile-list {
   display: none;
-}
-
-.code-card {
-  background: #f8fafc;
-  border-radius: 12px;
-  padding: 16px;
-  margin-bottom: 12px;
-  border: 2px solid #e2e8f0;
-
-  &.is-valid {
-    border-color: #10b981;
-    background: linear-gradient(135deg, #ecfdf5 0%, #f8fafc 100%);
-  }
-
-  &.is-invalid {
-    border-color: #94a3b8;
-  }
-
-  .card-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 12px;
-
-    .card-index {
-      font-size: 13px;
-      font-weight: 600;
-      color: #64748b;
-    }
-  }
-
-  .card-body {
-    .code-row {
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      margin-bottom: 12px;
-      padding-bottom: 12px;
-      border-bottom: 1px solid #e2e8f0;
-
-      .code-value {
-        font-family: 'SF Mono', 'Monaco', monospace;
-        font-weight: 600;
-        color: #0891b2;
-        font-size: 15px;
-        flex: 1;
-        word-break: break-all;
-      }
-    }
-
-    .info-row {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      padding: 6px 0;
-
-      .info-label {
-        font-size: 13px;
-        color: #64748b;
-      }
-
-      .info-value {
-        font-size: 13px;
-        color: #1e293b;
-        font-weight: 500;
-      }
-    }
-  }
 }
 
 .user-card {
@@ -1184,60 +1126,20 @@ onMounted(() => {
     padding: 0 12px;
   }
 
-  .tab-container {
-    margin-bottom: 16px;
+  .qrcode-card {
+    padding: 20px;
 
-    .tab-item {
-      padding: 10px 16px;
-      font-size: 13px;
-
-      .el-icon {
-        font-size: 14px;
+    .qrcode-display {
+      .qrcode-image {
+        width: 200px;
+        height: 200px;
       }
     }
   }
 
-  .warning-alert {
-    border-radius: 12px;
-
-    .alert-content p {
-      font-size: 13px;
-    }
-  }
-
-  .action-section {
-    padding: 16px;
-    position: relative;
-
-    .action-left {
-      flex-direction: column;
-      align-items: stretch;
-      gap: 12px;
-      padding-right: 50px;
-
-      .el-button {
-        width: 100%;
-      }
-
-      .generate-tip {
-        text-align: center;
-        justify-content: center;
-      }
-    }
-
-    .refresh-btn {
-      position: absolute;
-      top: 16px;
-      right: 16px;
-    }
-  }
-
-  .desktop-pagination {
-    display: none;
-  }
-
-  .mobile-pagination {
-    display: flex;
+  .stats-section {
+    grid-template-columns: 1fr;
+    gap: 12px;
   }
 
   .list-section {
@@ -1262,11 +1164,28 @@ onMounted(() => {
     padding: 0 10px;
   }
 
-  .code-card {
-    padding: 14px;
+  .stat-card {
+    padding: 16px;
 
-    .card-body .code-value {
-      font-size: 13px;
+    .stat-icon {
+      width: 40px;
+      height: 40px;
+      font-size: 20px;
+    }
+
+    .stat-info {
+      .stat-value {
+        font-size: 24px;
+      }
+    }
+  }
+
+  .qrcode-card {
+    .qrcode-display {
+      .qrcode-image {
+        width: 180px;
+        height: 180px;
+      }
     }
   }
 }

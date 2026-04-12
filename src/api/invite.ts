@@ -69,5 +69,32 @@ export const inviteApi = {
     page_size?: number
   }): Promise<{ success: boolean; data: any }> {
     return request.get('/api/invite/invited-users', { params })
+  },
+
+  /**
+   * 获取邀请二维码
+   */
+  getInviteQrcode(): Promise<{ success: boolean; data: { qr_url: string; qr_base64?: string } }> {
+    return request.get('/api/wechat_qrcode/invite-qrcode')
+  },
+
+  /**
+   * 获取邀请统计
+   */
+  getInviteStats(): Promise<{ 
+    success: boolean 
+    data: { 
+      total_invites: number
+      today_invites: number
+      invite_list: Array<{
+        user_id: number
+        username: string
+        phone: string
+        invited_at: string
+        status: string
+      }>
+    } 
+  }> {
+    return request.get('/api/wechat_qrcode/invite-stats')
   }
 }

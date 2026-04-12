@@ -235,6 +235,7 @@ watch(() => route.fullPath, () => {
   .sidebar-nav {
     flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
     padding: 8px 0;
   }
 

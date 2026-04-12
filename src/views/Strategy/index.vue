@@ -68,12 +68,12 @@
               <div class="indicator-info">
                 <span class="indicator-desc">
                   <el-icon class="tip-icon"><Warning /></el-icon>
-                  数值越低，股票上涨概率越高
+                  数值越低，股票上涨概率越高（范围 -1 到 1）
                 </span>
                 <div class="color-legend">
-                  <span class="legend-item"><i class="dot emotion-low"></i>&lt; 30 低(看涨)</span>
-                  <span class="legend-item"><i class="dot emotion-medium"></i>30-60 中等</span>
-                  <span class="legend-item"><i class="dot emotion-high"></i>≥ 60 高(谨慎)</span>
+                  <span class="legend-item"><i class="dot emotion-low"></i>≤ -0.3 低(看涨)</span>
+                  <span class="legend-item"><i class="dot emotion-medium"></i>-0.3~0.3 中等</span>
+                  <span class="legend-item"><i class="dot emotion-high"></i>≥ 0.3 高(谨慎)</span>
                 </div>
               </div>
             </div>
@@ -221,7 +221,7 @@
               <template #header>
                 <div class="column-header">
                   <span>情绪指数</span>
-                  <el-tooltip content="数值越低，股票上涨概率越高" placement="top">
+                  <el-tooltip content="数值越低，股票上涨概率越高（范围 -1 到 1）" placement="top">
                     <el-icon class="help-icon warning"><QuestionFilled /></el-icon>
                   </el-tooltip>
                 </div>
@@ -487,12 +487,13 @@ const normalizeTrendScore = (value: number | null | undefined): number => {
   return Math.min(100, Math.max(0, value * 100))
 }
 
-// 归一化情绪指数（反向，值越低越好）
+// 归一化情绪指数（反向，值越低越好，范围-1到1）
 const normalizeEmotionScore = (value: number | null | undefined): number => {
   if (value === null || value === undefined) return 0
-  // 假设范围 0-100，反向显示
-  const clamped = Math.min(100, Math.max(0, value))
-  return 100 - clamped
+  // 范围 -1 到 1，转换为 0-100 的百分比
+  // -1 -> 100% (最好), 0 -> 50%, 1 -> 0% (最差)
+  const clamped = Math.min(1, Math.max(-1, value))
+  return ((1 - clamped) / 2) * 100
 }
 
 // 获取最佳时机指标样式类（绝对值 >= 1.0 为信号）
@@ -512,12 +513,12 @@ const getTrendClass = (value: number | null | undefined): string => {
   return 'weak'
 }
 
-// 获取情绪指数样式类（值越低越好）
+// 获取情绪指数样式类（值越低越好，范围-1到1）
 const getEmotionClass = (value: number | null | undefined): string => {
   if (value === null || value === undefined) return ''
-  if (value < 30) return 'low'      // 低=好=绿色
-  if (value < 60) return 'medium'   // 中=橙色
-  return 'high'                      // 高=不好=红色
+  if (value <= -0.3) return 'low'      // 低=好=绿色
+  if (value < 0.3) return 'medium'     // 中=橙色
+  return 'high'                         // 高=不好=红色
 }
 
 // 获取最佳时机指标颜色
@@ -537,12 +538,12 @@ const getTrendColor = (value: number | null | undefined): string => {
   return '#94a3b8'                    // 弱=灰色
 }
 
-// 获取情绪指数颜色（值越低越好）
+// 获取情绪指数颜色（值越低越好，范围-1到1）
 const getEmotionColor = (value: number | null | undefined): string => {
   if (value === null || value === undefined) return '#94a3b8'
-  if (value < 30) return '#10b981'   // 低=好=绿色
-  if (value < 60) return '#f59e0b'   // 中=橙色
-  return '#ef4444'                    // 高=不好=红色
+  if (value <= -0.3) return '#10b981'   // 低=好=绿色
+  if (value < 0.3) return '#f59e0b'    // 中=橙色
+  return '#ef4444'                      // 高=不好=红色
 }
 
 // 跳转到分析页面

@@ -2,7 +2,7 @@
   <div class="app-footer">
     <div class="footer-content">
       <div class="copyright">
-        <span>© 2026 NB.STOCK rights reserved.</span>
+        <span style="font-size: 12px;">© 2026 NB.STOCK 版权所有。</span>
         <!-- <span class="rights">All rights reserved.</span> -->
       </div>
       <div class="icp-info">
@@ -18,6 +18,11 @@
 
 市场有风险，投资需谨慎。
        </div>
+      <div class="agreement-links">
+        <router-link to="/user-agreement" class="agreement-link">《用户协议》</router-link>
+        <span class="separator">|</span>
+        <router-link to="/privacy-policy" class="agreement-link">《隐私政策》</router-link>
+      </div>
     </div>
   </div>
 </template>
@@ -59,9 +64,33 @@
 
   .disclaimer-text {
     color: var(--el-text-color-secondary);
-    font-size: 12px;
+    font-size: 10px;
     line-height: 1.6;
     max-width: 1100px;
+  }
+
+  .agreement-links {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-top: 8px;
+
+    .agreement-link {
+      color: var(--el-text-color-secondary);
+      font-size: 12px;
+      text-decoration: none;
+      transition: color 0.2s ease;
+
+      &:hover {
+        color: var(--el-color-primary);
+        text-decoration: underline;
+      }
+    }
+
+    .separator {
+      color: var(--el-text-color-placeholder);
+      font-size: 12px;
+    }
   }
 }
 </style>

@@ -377,6 +377,28 @@ const routes: RouteRecordRaw[] = [
       transition: 'fade'
     }
   },
+  {
+    path: '/user-agreement',
+    name: 'UserAgreement',
+    component: () => import('@/views/Auth/UserAgreement.vue'),
+    meta: {
+      title: '用户协议',
+      hideInMenu: true,
+      requiresAuth: false,
+      transition: 'fade'
+    }
+  },
+  {
+    path: '/privacy-policy',
+    name: 'PrivacyPolicy',
+    component: () => import('@/views/Auth/PrivacyPolicy.vue'),
+    meta: {
+      title: '隐私政策',
+      hideInMenu: true,
+      requiresAuth: false,
+      transition: 'fade'
+    }
+  },
 
   {
     path: '/about',

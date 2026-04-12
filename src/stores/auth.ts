@@ -212,6 +212,39 @@ export const useAuthStore = defineStore('auth', {
       // 具体实现在api/request.ts中
     },
     
+    // 二维码登录
+    async loginWithQRCode(data: any) {
+      try {
+        const { access_token, refresh_token, user } = data
+
+        // 设置认证信息
+        this.setAuthInfo(access_token, refresh_token, user)
+
+        // 开源版admin用户拥有所有权限
+        this.permissions = ['*']
+        this.roles = ['admin']
+
+        // 同步用户偏好设置到 appStore
+        this.syncUserPreferencesToAppStore()
+
+        // 获取积分余额
+        this.fetchUserBalance()
+
+        // 启动积分自动刷新定时器（每60秒刷新一次）
+        this.startBalanceAutoRefresh(30000)
+
+        // 启动 token 自动刷新定时器
+        const { setupTokenRefreshTimer } = await import('@/utils/auth')
+        setupTokenRefreshTimer()
+
+
+      } catch (error) {
+        console.error('二维码登录失败:', error)
+        return false
+      }
+    },
+
+
     // 登录（支持密码和短信验证码）
     async login(loginForm: LoginForm) {
       // 防止重复登录请求
