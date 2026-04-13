@@ -44,13 +44,10 @@
           <!-- 二维码展示 -->
           <div v-else-if="qrcodeUrl" class="qrcode-display">
             <img :src="qrcodeUrl" alt="邀请二维码" class="qrcode-image" />
-            <div class="qrcode-actions">
-              <el-button type="primary" size="large" @click="downloadQrcode" :loading="downloading">
-                <el-icon><Download /></el-icon>
-                <span>下载二维码</span>
-              </el-button>
+            <div class="qrcode-tip">
+              <p v-if="isMobile">💾 长按图片保存到相册</p>
+              <p v-else>💾 右键点击图片，选择“另存为”保存图片</p>
             </div>
-            <p class="qrcode-tip">扫描二维码下载或分享给好友</p>
           </div>
           
           <!-- 错误状态 -->
@@ -105,7 +102,7 @@
       >
         <div class="reward-rules">
           <h4>新用户注册奖励</h4>
-          <p>新用户注册送5算力</p>
+          <p>新用户注册送20算力</p>
 
           <h4>邀请奖励</h4>
           <p>邀请人获得10算力</p>
@@ -147,33 +144,32 @@
               </template>
             </el-table-column>
 
-            <el-table-column label="用户名" min-width="150">
+            <el-table-column label="用户" min-width="180">
               <template #default="{ row }">
-                <span class="username-text">{{ row.username }}</span>
+                <div class="user-cell">
+                  <el-avatar :size="32" :src="row.avatar || undefined" class="user-avatar">
+                    {{ row.nickname?.charAt(0) || '?' }}
+                  </el-avatar>
+                  <div class="user-info">
+                    <span class="username-text">{{ row.nickname }}</span>
+                    <span class="user-id">ID: {{ row.user_id }}</span>
+                  </div>
+                </div>
               </template>
             </el-table-column>
 
-            <el-table-column label="手机号" min-width="150">
+            <el-table-column label="邀请来源" min-width="120">
               <template #default="{ row }">
-                <span class="phone-text">{{ row.phone }}</span>
+                <el-tag v-if="row.invite_source" size="small" type="info" effect="plain">
+                  {{ row.invite_source }}
+                </el-tag>
+                <span v-else class="text-muted">—</span>
               </template>
             </el-table-column>
 
             <el-table-column label="邀请时间" width="180">
               <template #default="{ row }">
-                <span class="time-text">{{ formatTime(row.invited_at) }}</span>
-              </template>
-            </el-table-column>
-
-            <el-table-column label="状态" width="120" align="center">
-              <template #default="{ row }">
-                <el-tag
-                  :type="row.status === 'active' ? 'success' : 'warning'"
-                  size="small"
-                  effect="light"
-                >
-                  {{ row.status === 'active' ? '活跃' : '未激活' }}
-                </el-tag>
+                <span class="time-text">{{ formatTime(row.created_at) }}</span>
               </template>
             </el-table-column>
           </el-table>
@@ -187,28 +183,26 @@
             class="user-card"
           >
             <div class="card-header">
+              <div class="user-info-header">
+                <el-avatar :size="40" :src="item.avatar || undefined" class="user-avatar-mobile">
+                  {{ item.nickname?.charAt(0) || '?' }}
+                </el-avatar>
+                <div class="user-details">
+                  <span class="nickname">{{ item.nickname }}</span>
+                  <span class="user-id-mobile">ID: {{ item.user_id }}</span>
+                </div>
+              </div>
               <span class="card-index">#{{ index + 1 }}</span>
-              <el-tag
-                :type="item.status === 'active' ? 'success' : 'warning'"
-                size="small"
-                effect="light"
-              >
-                {{ item.status === 'active' ? '活跃' : '未激活' }}
-              </el-tag>
             </div>
             <div class="card-body">
               <div class="user-info">
                 <div class="user-row">
-                  <span class="info-label">用户名</span>
-                  <span class="info-value">{{ item.username }}</span>
-                </div>
-                <div class="user-row">
-                  <span class="info-label">手机号</span>
-                  <span class="info-value">{{ item.phone }}</span>
+                  <span class="info-label">邀请来源</span>
+                  <span class="info-value">{{ item.invite_source || '—' }}</span>
                 </div>
                 <div class="user-row">
                   <span class="info-label">邀请时间</span>
-                  <span class="info-value">{{ formatTime(item.invited_at) }}</span>
+                  <span class="info-value">{{ formatTime(item.created_at) }}</span>
                 </div>
               </div>
             </div>
@@ -220,7 +214,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, computed } from 'vue'
 import { ElMessage } from 'element-plus'
 import {
   Share,
@@ -229,21 +223,25 @@ import {
   Calendar,
   InfoFilled,
   Loading,
-  CircleClose,
-  Download
+  CircleClose
 } from '@element-plus/icons-vue'
 import { inviteApi } from '@/api/invite'
-import html2canvas from 'html2canvas'
 import weixin from '@/utils/weixin'
 
 defineOptions({ name: 'InviteCodes' })
 
 const loading = ref(false)
 const qrcodeLoading = ref(false)
-const downloading = ref(false)
 const qrcodeUrl = ref('')
-const qrcodeBase64 = ref('')
 const showRewardDialog = ref(false)
+
+// 判断是否在微信环境
+const isWechat = computed(() => weixin.isWechatEnv())
+
+// 判断是否是移动端
+const isMobile = computed(() => {
+  return /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent) || window.innerWidth <= 768
+})
 
 // 统计数据
 const stats = ref({
@@ -253,11 +251,11 @@ const stats = ref({
 
 // 邀请列表
 const inviteList = ref<Array<{
-  user_id: number
-  username: string
-  phone: string
-  invited_at: string
-  status: string
+  user_id: string
+  created_at: string
+  nickname: string
+  avatar: string
+  invite_source: string
 }>>([])
 
 // 背景粒子
@@ -279,7 +277,6 @@ const loadQrcode = async () => {
     const data = (res as any)?.data || res
     if (data.qrcode_url) {
       qrcodeUrl.value = data.qrcode_url
-      qrcodeBase64.value = data.qr_base64 || ''
     } else {
       ElMessage.error('获取二维码失败')
     }
@@ -298,11 +295,13 @@ const loadStats = async () => {
     const res = await inviteApi.getInviteStats()
     const data = (res as any)?.data || res
     if (data) {
+      inviteList.value = data.list || []
+      
+      // 更新统计数据
       stats.value = {
-        total_invites: data.total_invites || 0,
-        today_invites: data.today_invites || 0
+        total_invites: data.total || data.list?.length || 0,
+        today_invites: data.today_count || 0
       }
-      inviteList.value = data.invite_list || []
     }
   } catch (error: any) {
     console.error('加载统计数据失败:', error)
@@ -310,263 +309,6 @@ const loadStats = async () => {
   } finally {
     loading.value = false
   }
-}
-
-// 下载二维码
-const downloadQrcode = async () => {
-  if (!qrcodeUrl.value) {
-    ElMessage.warning('二维码尚未加载')
-    return
-  }
-
-  downloading.value = true
-  try {
-    // 创建一个临时容器来渲染二维码
-    const container = document.createElement('div')
-    container.style.position = 'fixed'
-    container.style.left = '-9999px'
-    container.style.top = '0'
-    container.style.width = '375px'
-    container.style.background = 'white'
-    container.style.padding = '40px'
-    container.style.display = 'flex'
-    container.style.flexDirection = 'column'
-    container.style.alignItems = 'center'
-    container.style.justifyContent = 'center'
-
-    // 添加标题
-    const title = document.createElement('div')
-    title.style.cssText = `
-      font-size: 24px;
-      font-weight: bold;
-      color: #1e293b;
-      margin-bottom: 20px;
-      text-align: center;
-    `
-    title.textContent = 'NB.STOCK 邀请二维码'
-    container.appendChild(title)
-
-    // 添加副标题
-    const subtitle = document.createElement('div')
-    subtitle.style.cssText = `
-      font-size: 14px;
-      color: #64748b;
-      margin-bottom: 30px;
-      text-align: center;
-    `
-    subtitle.textContent = '扫码注册，共享福利'
-    container.appendChild(subtitle)
-
-    // 添加二维码图片
-    const img = document.createElement('img')
-    img.src = qrcodeUrl.value
-    img.crossOrigin = 'anonymous'
-    img.style.cssText = `
-      width: 250px;
-      height: 250px;
-      object-fit: contain;
-    `
-    container.appendChild(img)
-
-    // 添加提示文字
-    const tip = document.createElement('div')
-    tip.style.cssText = `
-      font-size: 12px;
-      color: #94a3b8;
-      margin-top: 20px;
-      text-align: center;
-    `
-    tip.textContent = '长按识别二维码注册'
-    container.appendChild(tip)
-
-    document.body.appendChild(container)
-
-    // 等待图片加载
-    await new Promise(resolve => setTimeout(resolve, 300))
-
-    // 使用 html2canvas 生成图片
-    const canvas = await html2canvas(container, {
-      width: 375,
-      windowWidth: 375,
-      scale: 2,
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false
-    })
-
-    // 移除临时容器
-    document.body.removeChild(container)
-
-    // 判断是否在微信环境
-    if (weixin.isWechatEnv()) {
-      // 微信环境：显示预览
-      const base64Data = canvas.toDataURL('image/png')
-      showImagePreview(base64Data)
-    } else {
-      // 非微信环境：直接下载
-      downloadImageInBrowser(canvas)
-    }
-  } catch (error: any) {
-    console.error('下载失败:', error)
-    ElMessage.error(error.message || '下载图片失败，请重试')
-  } finally {
-    downloading.value = false
-  }
-}
-
-/**
- * 显示图片预览（全屏弹框）
- */
-const showImagePreview = (base64Data: string) => {
-  // 创建全屏预览容器
-  const overlay = document.createElement('div')
-  overlay.style.cssText = `
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    bottom: 0;
-    background: rgba(0, 0, 0, 0.95);
-    z-index: 10000;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 20px;
-    animation: fadeIn 0.3s ease;
-  `
-
-  // 添加动画样式
-  const styleEl = document.createElement('style')
-  styleEl.textContent = `
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-  `
-  document.head.appendChild(styleEl)
-
-  // 顶部提示区域
-  const tipContainer = document.createElement('div')
-  tipContainer.style.cssText = `
-    position: absolute;
-    top: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    text-align: center;
-    z-index: 10001;
-  `
-
-  // 主提示文字
-  const tip = document.createElement('div')
-  tip.style.cssText = `
-    color: white;
-    font-size: 18px;
-    margin-bottom: 8px;
-    font-weight: 600;
-    text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
-  `
-  tip.innerHTML = '💾 长按图片保存到相册'
-  tipContainer.appendChild(tip)
-
-  // 副提示文字
-  const subTip = document.createElement('div')
-  subTip.style.cssText = `
-    color: rgba(255, 255, 255, 0.7);
-    font-size: 13px;
-    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
-  `
-  subTip.textContent = '保存后可分享给好友或朋友圈'
-  tipContainer.appendChild(subTip)
-
-  overlay.appendChild(tipContainer)
-
-  // 图片容器
-  const imgContainer = document.createElement('div')
-  imgContainer.style.cssText = `
-    max-width: 90%;
-    max-height: 75vh;
-    border-radius: 12px;
-    overflow: hidden;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
-    background: white;
-    padding: 8px;
-  `
-
-  // 图片
-  const img = document.createElement('img')
-  img.src = base64Data
-  img.style.cssText = `
-    display: block;
-    max-width: 100%;
-    max-height: 75vh;
-    object-fit: contain;
-    user-select: none;
-    -webkit-user-select: none;
-    -webkit-touch-callout: default;
-  `
-  imgContainer.appendChild(img)
-  overlay.appendChild(imgContainer)
-
-  // 底部关闭按钮
-  const closeBtn = document.createElement('div')
-  closeBtn.style.cssText = `
-    position: absolute;
-    bottom: 40px;
-    left: 50%;
-    transform: translateX(-50%);
-    color: white;
-    font-size: 14px;
-    padding: 12px 40px;
-    background: rgba(255, 255, 255, 0.15);
-    border: 1px solid rgba(255, 255, 255, 0.3);
-    border-radius: 25px;
-    cursor: pointer;
-    backdrop-filter: blur(10px);
-    transition: all 0.3s ease;
-    user-select: none;
-  `
-  closeBtn.textContent = '✕ 关闭预览'
-  closeBtn.onclick = () => {
-    document.body.removeChild(overlay)
-    document.head.removeChild(styleEl)
-  }
-  overlay.appendChild(closeBtn)
-
-  // 点击背景关闭
-  overlay.onclick = (e) => {
-    if (e.target === overlay) {
-      document.body.removeChild(overlay)
-      document.head.removeChild(styleEl)
-    }
-  }
-
-  document.body.appendChild(overlay)
-}
-
-/**
- * 浏览器环境下载图片
- */
-const downloadImageInBrowser = (canvas: HTMLCanvasElement) => {
-  canvas.toBlob((blob: Blob | null) => {
-    if (blob) {
-      const url = URL.createObjectURL(blob)
-      const link = document.createElement('a')
-      link.href = url
-      
-      // 生成文件名
-      const timestamp = new Date().getTime()
-      const fileName = `邀请二维码_${timestamp}.png`
-      
-      link.download = fileName
-      document.body.appendChild(link)
-      link.click()
-      document.body.removeChild(link)
-      URL.revokeObjectURL(url)
-      ElMessage.success('二维码下载成功')
-    }
-  }, 'image/png')
 }
 
 // 格式化时间
@@ -835,18 +577,25 @@ onMounted(() => {
       object-fit: contain;
       border-radius: 12px;
       box-shadow: 0 4px 16px rgba(0, 0, 0, 0.1);
-    }
-
-    .qrcode-actions {
-      display: flex;
-      gap: 12px;
+      user-select: none;
+      -webkit-user-select: none;
+      -webkit-touch-callout: default;
     }
 
     .qrcode-tip {
       margin: 0;
-      font-size: 13px;
-      color: #94a3b8;
+      font-size: 14px;
+      font-weight: 500;
+      color: #06b6d4;
       text-align: center;
+      padding: 12px 20px;
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.05), rgba(59, 130, 246, 0.05));
+      border-radius: 8px;
+      border: 1px solid rgba(6, 182, 212, 0.15);
+
+      p {
+        margin: 0;
+      }
     }
   }
 
@@ -1048,15 +797,46 @@ onMounted(() => {
   color: #64748b;
 }
 
-.username-text {
-  font-size: 14px;
-  font-weight: 600;
-  color: #1e293b;
+.user-cell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+
+  .user-avatar {
+    flex-shrink: 0;
+    background: linear-gradient(135deg, #06b6d4, #3b82f6);
+    color: white;
+    font-weight: 600;
+  }
+
+  .user-info {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+
+    .username-text {
+      font-size: 14px;
+      font-weight: 600;
+      color: #1e293b;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+
+    .user-id {
+      font-size: 11px;
+      color: #94a3b8;
+      font-family: monospace;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      white-space: nowrap;
+    }
+  }
 }
 
-.phone-text {
-  font-size: 13px;
-  color: #64748b;
+.text-muted {
+  color: #cbd5e1;
 }
 
 // 移动端卡片
@@ -1076,11 +856,54 @@ onMounted(() => {
     justify-content: space-between;
     align-items: center;
     margin-bottom: 12px;
+    padding-bottom: 12px;
+    border-bottom: 1px solid #e2e8f0;
+
+    .user-info-header {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex: 1;
+      min-width: 0;
+
+      .user-avatar-mobile {
+        flex-shrink: 0;
+        background: linear-gradient(135deg, #06b6d4, #3b82f6);
+        color: white;
+        font-weight: 600;
+      }
+
+      .user-details {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+        min-width: 0;
+
+        .nickname {
+          font-size: 14px;
+          font-weight: 600;
+          color: #1e293b;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+
+        .user-id-mobile {
+          font-size: 11px;
+          color: #94a3b8;
+          font-family: monospace;
+          overflow: hidden;
+          text-overflow: ellipsis;
+          white-space: nowrap;
+        }
+      }
+    }
 
     .card-index {
       font-size: 13px;
       font-weight: 600;
       color: #64748b;
+      flex-shrink: 0;
     }
   }
 

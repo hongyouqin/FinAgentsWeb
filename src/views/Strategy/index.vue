@@ -19,10 +19,10 @@
       <div class="hero-content">
         <div class="hero-badge">
           <el-icon><Cpu /></el-icon>
-          <span>AI 策略推荐</span>
+          <span>AI量化策略分析</span>
         </div>
-        <h1 class="hero-title">策略选股</h1>
-        <p class="hero-subtitle">基于 Trend – Emotion – Timing 策略，智能筛选优质标的</p>
+        <h1 class="hero-title">全市场标的多维度扫描</h1>
+        <p class="hero-subtitle">基于Trend-Emotion-Timing量化框架，客观呈现标的趋势、情绪、时机数据，仅作参考，不构成投资建议</p>
       </div>
     </div>
 
@@ -42,24 +42,13 @@
         <el-collapse-transition>
           <div v-show="showGuide" class="guide-items">
             <div class="guide-item">
-              <span class="indicator-badge timing">最佳时机指标</span>
+              <span class="indicator-badge trend">趋势得分</span>
               <div class="indicator-info">
-                <span class="indicator-desc">时机指标绝对值突破显著阈值 <strong>1.0</strong> 时，即可考虑入场操作</span>
+                <span class="indicator-desc">由40类趋势指标综合投票得出，数值范围 <strong>[-1.0, 1.0]</strong></span>
                 <div class="color-legend">
-                  <span class="legend-item"><i class="dot timing-strong"></i>≥ 1.0 强信号</span>
-                  <span class="legend-item"><i class="dot timing-medium"></i>≥ 0.5 中等</span>
-                  <span class="legend-item"><i class="dot timing-weak"></i>&lt; 0.5 弱</span>
-                </div>
-              </div>
-            </div>
-            <div class="guide-item" style="margin-top: 10px;">
-              <span class="indicator-badge trend">锚定趋势分数</span>
-              <div class="indicator-info">
-                <span class="indicator-desc">趋势强度，大于 <strong>0.5</strong> 表示强趋势</span>
-                <div class="color-legend">
-                  <span class="legend-item"><i class="dot trend-strong"></i>&gt; 0.5 强趋势</span>
-                  <span class="legend-item"><i class="dot trend-medium"></i>&gt; 0.25 中等</span>
-                  <span class="legend-item"><i class="dot trend-weak"></i>≤ 0.25 弱</span>
+                  <span class="legend-item"><i class="dot trend-positive"></i>&gt; 0 偏多</span>
+                  <span class="legend-item"><i class="dot trend-negative"></i>&lt; 0 偏空</span>
+                  <span class="legend-item">绝对值越大，趋势一致性越强</span>
                 </div>
               </div>
             </div>
@@ -68,12 +57,31 @@
               <div class="indicator-info">
                 <span class="indicator-desc">
                   <el-icon class="tip-icon"><Warning /></el-icon>
-                  数值越低，股票上涨概率越高（范围 -1 到 1）
+                  反映短期市场情绪与超买超卖，范围 <strong>[-1.0, 1.0]</strong>
                 </span>
                 <div class="color-legend">
-                  <span class="legend-item"><i class="dot emotion-low"></i>≤ -0.3 低(看涨)</span>
-                  <span class="legend-item"><i class="dot emotion-medium"></i>-0.3~0.3 中等</span>
-                  <span class="legend-item"><i class="dot emotion-high"></i>≥ 0.3 高(谨慎)</span>
+                  <span class="legend-item"><i class="dot emotion-high"></i>接近 1.0 过热(超买)</span>
+                  <span class="legend-item"><i class="dot emotion-low"></i>接近 -1.0 低迷(超卖)</span>
+                  <span class="legend-item">情绪越低，短期修复概率越高</span>
+                </div>
+              </div>
+            </div>
+            <div class="guide-item" style="margin-top: 10px;">
+              <span class="indicator-badge anchored">锚定趋势得分</span>
+              <div class="indicator-info">
+                <span class="indicator-desc">在情绪最平稳时计算的趋势得分，过滤暴涨暴跌干扰，更真实稳健</span>
+                <div class="color-legend">
+                  <span class="legend-item">代表标的"去情绪化"的核心趋势</span>
+                </div>
+              </div>
+            </div>
+            <div class="guide-item" style="margin-top: 10px;">
+              <span class="indicator-badge timing">时机指标</span>
+              <div class="indicator-info">
+                <span class="indicator-desc">计算公式：<strong>锚定趋势得分 − 情绪指数</strong>，范围 <strong>[-2.0, 2.0]</strong></span>
+                <div class="color-legend">
+                  <span class="legend-item"><i class="dot timing-strong"></i>&gt; 1.0 趋势向上 + 情绪偏低，优势显著</span>
+                  <span class="legend-item"><i class="dot timing-weak"></i>&lt; -1.0 趋势向下 + 情绪偏高，需警惕</span>
                 </div>
               </div>
             </div>
@@ -170,22 +178,22 @@
             <el-table-column min-width="150">
               <template #header>
                 <div class="column-header">
-                  <span>最佳时机</span>
-                  <el-tooltip content="时机指标绝对值突破显著阈值 1.0 时，即可考虑入场操作" placement="top">
+                  <span>趋势得分</span>
+                  <el-tooltip content="由40类趋势指标综合投票得出，范围[-1.0, 1.0]" placement="top">
                     <el-icon class="help-icon"><QuestionFilled /></el-icon>
                   </el-tooltip>
                 </div>
               </template>
               <template #default="{ row }">
-                <div class="indicator-cell timing">
-                  <span class="indicator-value" :class="getTimingClass(row.timing_indicator)">
-                    {{ formatIndicator(row.timing_indicator) }}
+                <div class="indicator-cell trend">
+                  <span class="indicator-value" :class="getTrendClass(row.trend_score)">
+                    {{ formatIndicator(row.trend_score) }}
                   </span>
                   <el-progress 
-                    :percentage="normalizeTimingScore(row.timing_indicator)" 
+                    :percentage="normalizeTrendScore(row.trend_score)" 
                     :stroke-width="4"
                     :show-text="false"
-                    :color="getTimingColor(row.timing_indicator)"
+                    :color="getTrendColor(row.trend_score)"
                     class="indicator-progress"
                   />
                 </div>
@@ -196,21 +204,21 @@
               <template #header>
                 <div class="column-header">
                   <span>锚定趋势</span>
-                  <el-tooltip content="趋势强度，大于 0.5 表示强趋势" placement="top">
+                  <el-tooltip content="在情绪最平稳时计算的趋势得分，过滤暴涨暴跌干扰" placement="top">
                     <el-icon class="help-icon"><QuestionFilled /></el-icon>
                   </el-tooltip>
                 </div>
               </template>
               <template #default="{ row }">
-                <div class="indicator-cell trend">
-                  <span class="indicator-value" :class="getTrendClass(row.anchored_trend_score)">
+                <div class="indicator-cell anchored">
+                  <span class="indicator-value" :class="getAnchoredClass(row.anchored_trend_score)">
                     {{ formatIndicator(row.anchored_trend_score) }}
                   </span>
                   <el-progress 
-                    :percentage="normalizeTrendScore(row.anchored_trend_score)" 
+                    :percentage="normalizeAnchoredScore(row.anchored_trend_score)" 
                     :stroke-width="4"
                     :show-text="false"
-                    :color="getTrendColor(row.anchored_trend_score)"
+                    :color="getAnchoredColor(row.anchored_trend_score)"
                     class="indicator-progress"
                   />
                 </div>
@@ -221,7 +229,7 @@
               <template #header>
                 <div class="column-header">
                   <span>情绪指数</span>
-                  <el-tooltip content="数值越低，股票上涨概率越高（范围 -1 到 1）" placement="top">
+                  <el-tooltip content="反映短期市场情绪，接近-1.0超卖，接近1.0超买" placement="top">
                     <el-icon class="help-icon warning"><QuestionFilled /></el-icon>
                   </el-tooltip>
                 </div>
@@ -236,6 +244,31 @@
                     :stroke-width="4"
                     :show-text="false"
                     :color="getEmotionColor(row.emotion_index)"
+                    class="indicator-progress"
+                  />
+                </div>
+              </template>
+            </el-table-column>
+
+            <el-table-column min-width="150">
+              <template #header>
+                <div class="column-header">
+                  <span>时机指标</span>
+                  <el-tooltip content="锚定趋势得分 − 情绪指数，>1.0优势显著，<-1.0需警惕" placement="top">
+                    <el-icon class="help-icon"><QuestionFilled /></el-icon>
+                  </el-tooltip>
+                </div>
+              </template>
+              <template #default="{ row }">
+                <div class="indicator-cell timing">
+                  <span class="indicator-value" :class="getTimingClass(row.timing_indicator)">
+                    {{ formatIndicator(row.timing_indicator) }}
+                  </span>
+                  <el-progress 
+                    :percentage="normalizeTimingScore(row.timing_indicator)" 
+                    :stroke-width="4"
+                    :show-text="false"
+                    :color="getTimingColor(row.timing_indicator)"
                     class="indicator-progress"
                   />
                 </div>
@@ -274,16 +307,16 @@
 
             <div class="card-indicators">
               <div class="indicator-row">
-                <span class="indicator-label">最佳时机</span>
+                <span class="indicator-label">趋势得分</span>
                 <div class="indicator-cell-mobile">
-                  <span class="indicator-value timing" :class="getTimingClass(stock.timing_indicator)">
-                    {{ formatIndicator(stock.timing_indicator) }}
+                  <span class="indicator-value trend" :class="getTrendClass(stock.trend_score)">
+                    {{ formatIndicator(stock.trend_score) }}
                   </span>
                   <el-progress 
-                    :percentage="normalizeTimingScore(stock.timing_indicator)" 
+                    :percentage="normalizeTrendScore(stock.trend_score)" 
                     :stroke-width="4"
                     :show-text="false"
-                    :color="getTimingColor(stock.timing_indicator)"
+                    :color="getTrendColor(stock.trend_score)"
                     class="indicator-progress-mobile"
                   />
                 </div>
@@ -291,14 +324,14 @@
               <div class="indicator-row">
                 <span class="indicator-label">锚定趋势</span>
                 <div class="indicator-cell-mobile">
-                  <span class="indicator-value trend" :class="getTrendClass(stock.anchored_trend_score)">
+                  <span class="indicator-value anchored" :class="getAnchoredClass(stock.anchored_trend_score)">
                     {{ formatIndicator(stock.anchored_trend_score) }}
                   </span>
                   <el-progress 
-                    :percentage="normalizeTrendScore(stock.anchored_trend_score)" 
+                    :percentage="normalizeAnchoredScore(stock.anchored_trend_score)" 
                     :stroke-width="4"
                     :show-text="false"
-                    :color="getTrendColor(stock.anchored_trend_score)"
+                    :color="getAnchoredColor(stock.anchored_trend_score)"
                     class="indicator-progress-mobile"
                   />
                 </div>
@@ -314,6 +347,21 @@
                     :stroke-width="4"
                     :show-text="false"
                     :color="getEmotionColor(stock.emotion_index)"
+                    class="indicator-progress-mobile"
+                  />
+                </div>
+              </div>
+              <div class="indicator-row">
+                <span class="indicator-label">时机指标</span>
+                <div class="indicator-cell-mobile">
+                  <span class="indicator-value timing" :class="getTimingClass(stock.timing_indicator)">
+                    {{ formatIndicator(stock.timing_indicator) }}
+                  </span>
+                  <el-progress 
+                    :percentage="normalizeTimingScore(stock.timing_indicator)" 
+                    :stroke-width="4"
+                    :show-text="false"
+                    :color="getTimingColor(stock.timing_indicator)"
                     class="indicator-progress-mobile"
                   />
                 </div>
@@ -368,9 +416,10 @@ const stockList = ref<Array<{
   stock_code: string
   stock_name: string
   industry: string
-  timing_indicator: number
+  trend_score: number
   anchored_trend_score: number
   emotion_index: number
+  timing_indicator: number
 }>>([])
 
 // 背景粒子
@@ -455,9 +504,10 @@ const loadStockList = async () => {
       stock_code: String(item.stock_code || item.symbol || ''),
       stock_name: String(item.stock_name || item.name || ''),
       industry: String(item.industry || ''),
-      timing_indicator: item.timing_indicator ?? 0,
+      trend_score: item.trend_score ?? 0,
       anchored_trend_score: item.anchored_trend_score ?? 0,
-      emotion_index: item.emotion_index ?? 0
+      emotion_index: item.emotion_index ?? 0,
+      timing_indicator: item.timing_indicator ?? 0
     }))
   } catch (error: any) {
     console.error('加载策略数据失败:', error)
@@ -481,10 +531,19 @@ const normalizeTimingScore = (value: number | null | undefined): number => {
   return Math.min(100, (absValue / 2.0) * 100)
 }
 
-// 归一化锚定趋势分数（0.5为强趋势阈值，范围约0-1）
+// 归一化趋势得分（范围-1到1）
 const normalizeTrendScore = (value: number | null | undefined): number => {
   if (value === null || value === undefined) return 0
-  return Math.min(100, Math.max(0, value * 100))
+  // 范围 -1 到 1，转换为 0-100 的百分比
+  const clamped = Math.min(1, Math.max(-1, value))
+  return ((clamped + 1) / 2) * 100
+}
+
+// 归一化锚定趋势得分（范围-1到1）
+const normalizeAnchoredScore = (value: number | null | undefined): number => {
+  if (value === null || value === undefined) return 0
+  const clamped = Math.min(1, Math.max(-1, value))
+  return ((clamped + 1) / 2) * 100
 }
 
 // 归一化情绪指数（反向，值越低越好，范围-1到1）
@@ -505,8 +564,15 @@ const getTimingClass = (value: number | null | undefined): string => {
   return 'weak'
 }
 
-// 获取锚定趋势样式类（> 0.5 为强趋势）
+// 获取趋势得分样式类（范围-1到1）
 const getTrendClass = (value: number | null | undefined): string => {
+  if (value === null || value === undefined) return ''
+  if (value > 0) return 'positive'
+  return 'negative'
+}
+
+// 获取锚定趋势样式类（范围-1到1）
+const getAnchoredClass = (value: number | null | undefined): string => {
   if (value === null || value === undefined) return ''
   if (value > 0.5) return 'strong'
   if (value > 0.25) return 'medium'
@@ -530,11 +596,18 @@ const getTimingColor = (value: number | null | undefined): string => {
   return '#94a3b8'                        // 弱=灰色
 }
 
-// 获取锚定趋势颜色
+// 获取趋势得分颜色（范围-1到1）
 const getTrendColor = (value: number | null | undefined): string => {
   if (value === null || value === undefined) return '#94a3b8'
-  if (value > 0.5) return '#3b82f6'  // 强趋势=蓝色
-  if (value > 0.25) return '#60a5fa' // 中等=浅蓝
+  if (value > 0) return '#10b981'  // 偏多=绿色
+  return '#ef4444'                  // 偏空=红色
+}
+
+// 获取锚定趋势颜色（范围-1到1）
+const getAnchoredColor = (value: number | null | undefined): string => {
+  if (value === null || value === undefined) return '#94a3b8'
+  if (value > 0.5) return '#8b5cf6'  // 强=紫色
+  if (value > 0.25) return '#a78bfa' // 中=浅紫
   return '#94a3b8'                    // 弱=灰色
 }
 
@@ -826,10 +899,9 @@ onMounted(async () => {
       border-radius: 50%;
       flex-shrink: 0;
 
-      // 最佳时机
-      &.timing-strong { background: #10b981; }
-      &.timing-medium { background: #f59e0b; }
-      &.timing-weak { background: #94a3b8; }
+      // 趋势得分
+      &.trend-positive { background: #10b981; }
+      &.trend-negative { background: #ef4444; }
 
       // 锚定趋势
       &.trend-strong { background: #3b82f6; }
@@ -840,6 +912,11 @@ onMounted(async () => {
       &.emotion-low { background: #10b981; }
       &.emotion-medium { background: #f59e0b; }
       &.emotion-high { background: #ef4444; }
+
+      // 时机指标
+      &.timing-strong { background: #10b981; }
+      &.timing-medium { background: #f59e0b; }
+      &.timing-weak { background: #ef4444; }
     }
   }
 
@@ -865,6 +942,11 @@ onMounted(async () => {
     &.emotion {
       background: rgba(245, 158, 11, 0.12);
       color: #d97706;
+    }
+
+    &.anchored {
+      background: rgba(139, 92, 246, 0.12);
+      color: #7c3aed;
     }
   }
 
@@ -1145,20 +1227,24 @@ onMounted(async () => {
     font-size: 16px;
     font-weight: 700;
 
-    &.timing {
-      &.strong { color: #059669; }
-      &.medium { color: #f59e0b; }
-      &.weak { color: #94a3b8; }
-    }
     &.trend {
-      &.strong { color: #2563eb; }
-      &.medium { color: #60a5fa; }
+      &.positive { color: #10b981; }
+      &.negative { color: #ef4444; }
+    }
+    &.anchored {
+      &.strong { color: #8b5cf6; }
+      &.medium { color: #a78bfa; }
       &.weak { color: #94a3b8; }
     }
     &.emotion {
       &.low { color: #10b981; }
       &.medium { color: #f59e0b; }
       &.high { color: #ef4444; }
+    }
+    &.timing {
+      &.strong { color: #10b981; }
+      &.medium { color: #f59e0b; }
+      &.weak { color: #ef4444; }
     }
   }
 
@@ -1283,20 +1369,24 @@ onMounted(async () => {
         min-width: 40px;
         text-align: right;
 
-        &.timing {
-          &.strong { color: #059669; }
-          &.medium { color: #f59e0b; }
-          &.weak { color: #94a3b8; }
-        }
         &.trend {
-          &.strong { color: #2563eb; }
-          &.medium { color: #60a5fa; }
+          &.positive { color: #10b981; }
+          &.negative { color: #ef4444; }
+        }
+        &.anchored {
+          &.strong { color: #8b5cf6; }
+          &.medium { color: #a78bfa; }
           &.weak { color: #94a3b8; }
         }
         &.emotion {
           &.low { color: #10b981; }
           &.medium { color: #f59e0b; }
           &.high { color: #ef4444; }
+        }
+        &.timing {
+          &.strong { color: #10b981; }
+          &.medium { color: #f59e0b; }
+          &.weak { color: #ef4444; }
         }
       }
 

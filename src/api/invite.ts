@@ -74,7 +74,7 @@ export const inviteApi = {
   /**
    * 获取邀请二维码
    */
-  getInviteQrcode(): Promise<{ success: boolean; data: { qr_url: string; qr_base64?: string } }> {
+  getInviteQrcode(): Promise<{ success: boolean; data: { qr_url: string;  } }> {
     return request.get('/api/wechat_qrcode/invite-qrcode')
   },
 
