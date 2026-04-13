@@ -54,10 +54,10 @@
                 <el-icon><Bell /></el-icon>
                 <span>通知设置</span>
               </el-menu-item>
-              <el-menu-item index="security">
+              <!-- <el-menu-item index="security">
                 <el-icon><Lock /></el-icon>
                 <span>安全设置</span>
-              </el-menu-item>
+              </el-menu-item> -->
               <el-menu-item index="agreements">
                 <el-icon><Document /></el-icon>
                 <span>协议与条款</span>
@@ -261,7 +261,7 @@
         </el-card>
 
         <!-- 安全设置 -->
-        <el-card v-show="activeTab === 'security'" class="settings-content" shadow="never">
+        <!-- <el-card v-show="activeTab === 'security'" class="settings-content" shadow="never">
           <template #header>
             <h3>安全设置</h3>
           </template>
@@ -273,7 +273,7 @@
               </el-button>
             </el-form-item>
           </el-form>
-        </el-card>
+        </el-card> -->
 
         <!-- 协议与条款 -->
         <el-card v-show="activeTab === 'agreements'" class="settings-content" shadow="never">
