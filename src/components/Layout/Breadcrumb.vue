@@ -1,9 +1,9 @@
 <template>
   <el-breadcrumb separator="/" class="breadcrumb">
     <el-breadcrumb-item
-      v-for="item in breadcrumbList"
+      v-for="(item, index) in breadcrumbList"
       :key="item.path"
-      :to="item.path"
+      :to="index < breadcrumbList.length - 1 ? item.path : undefined"
     >
       {{ item.title }}
     </el-breadcrumb-item>
