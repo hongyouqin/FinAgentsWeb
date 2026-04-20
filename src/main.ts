@@ -114,24 +114,26 @@ const initApp = async () => {
     if (apiConnected) {
       console.log('✅ API连接正常，检查认证状态...')
 
-      // 1. 先检查微信登录（如果在微信环境中且有 code）
-      const isWechatLogin = await checkWechatLogin()
+      // 1. 先检查本地认证状态（token 是否有效）
+      const checkPromise = authStore.checkAuthStatus()
+      const timeoutPromise = new Promise((_, reject) => {
+        setTimeout(() => reject(new Error('认证检查超时')), 5000)
+      })
 
-      // 2. 如果不是微信登录，则检查本地认证状态
-      if (!isWechatLogin) {
-        const checkPromise = authStore.checkAuthStatus()
-        const timeoutPromise = new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('认证检查超时')), 5000) // 5秒超时
-        })
-
+      try {
         await Promise.race([checkPromise, timeoutPromise])
         console.log('✅ 认证状态初始化完成')
-
-        // 如果用户已登录，启动 token 自动刷新定时器
-        if (authStore.isAuthenticated) {
-          setupTokenRefreshTimer()
-        }
+      } catch (e) {
+        console.warn('⚠️ 认证检查超时或失败:', e)
       }
+
+      // 2. 如果用户已登录，启动 token 自动刷新定时器
+      if (authStore.isAuthenticated) {
+        setupTokenRefreshTimer()
+      }
+
+      // 3. 再检查微信登录（内部会判断是否已登录，已登录则跳过）
+      await checkWechatLogin()
     } else {
       console.log('⚠️ API连接失败，跳过认证检查')
     }

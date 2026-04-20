@@ -4,6 +4,7 @@ import { ElMessage, ElMessageBox } from 'element-plus'
 import { useAuthStore } from '@/stores/auth'
 import { useAppStore } from '@/stores/app'
 import router from '@/router'
+import weixin from '@/utils/weixin'
 
 // API响应接口
 export interface ApiResponse<T = any> {
@@ -68,11 +69,25 @@ const handle401Error = (authStore: any, message: string = '登录已过期，请
 
   isHandling401 = true
 
-  // 清除认证信息并跳转到登录页
-  console.log('🔒 处理 401 错误：清除认证信息并跳转登录页')
+  // 清除认证信息
+  console.log('🔒 处理 401 错误：清除认证信息')
   authStore.clearAuthInfo()
-  router.push('/login')
-  showErrorMessage(message)
+
+  // 微信环境：直接重新走微信授权登录
+  if (weixin.isWechatEnv()) {
+    console.log('📱 微信环境，重新发起微信授权登录')
+    showErrorMessage('登录已过期，正在重新登录...')
+    // 延迟跳转，让用户看到提示
+    setTimeout(async () => {
+      const wechatLogin = (await import('@/utils/wechatLogin')).default
+      wechatLogin.startAuth()
+    }, 500)
+  } else {
+    // 非微信环境：跳转到登录页
+    console.log('💻 非微信环境，跳转到登录页')
+    router.push('/login')
+    showErrorMessage(message)
+  }
 
   // 3秒后重置标志
   setTimeout(() => {

@@ -63,7 +63,7 @@
             <el-icon><Setting /></el-icon>
             系统设置
           </el-dropdown-item>
-          <el-dropdown-item divided command="logout">
+          <el-dropdown-item v-if="!isWechatEnv" divided command="logout">
             <el-icon><SwitchButton /></el-icon>
             退出登录
           </el-dropdown-item>
@@ -81,12 +81,14 @@ import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { User, Setting, SwitchButton, Coin, Wallet, ArrowRight, List, Ticket } from '@element-plus/icons-vue'
 import { useTxDialog } from '@/composables/useTxDialog'
-import wechatLogin from '@/utils/wechatLogin'
+import weixin from '@/utils/weixin'
 
 const router = useRouter()
 const appStore = useAppStore()
 const authStore = useAuthStore()
 const { openTxDialog } = useTxDialog()
+
+const isWechatEnv = computed(() => weixin.isWechatEnv())
 
 const userAvatar = computed(() => authStore.user?.avatar || undefined)
 const userDisplayName = computed(() => authStore.user?.username || '未登录')
@@ -119,18 +121,7 @@ const handleCommand = async (command: string) => {
     case 'logout':
       await authStore.logout()
       ElMessage.success('已退出登录')
-      
-      // 判断是否在微信环境
-      if (wechatLogin.isWechat()) {
-        // 微信环境：触发重新授权获取 code
-        console.log('📱 微信环境，触发重新授权获取 code')
-         router.push('/')
-        // wechatLogin.startAuth()
-      } else {
-        // 非微信环境：跳转到登录页
-        console.log('💻 非微信环境，跳转到登录页')
-        router.push('/login')
-      }
+      router.push('/login')
       break
   }
 }

@@ -196,20 +196,61 @@ class WechatLogin {
       return false
     }
 
-    // 2. 检查 URL 中是否有 code 参数
+    // 2. 检查 URL 中是否有 code 参数（微信授权回调）
     const code = this.getCodeFromUrl()
-    if (!code) {
-      console.log('ℹ️ URL 中没有 code 参数，开始微信授权')
-      // 如果没有 code，开始授权流程
-      this.startAuth()
+    if (code) {
+      // 有 code，处理授权回调
+      console.log('✅ 检测到微信授权码，处理登录...')
+      const success = await this.handleAuthCallback(code)
+      return success
+    }
+
+    // 3. 没有 code，检查用户是否已登录
+    const authStore = useAuthStore()
+    if (authStore.isAuthenticated && authStore.token) {
+      console.log('ℹ️ 用户已登录，跳过微信授权，仅获取 JSSDK 配置')
+      // 已登录但仍需获取 JSSDK 配置，以支持微信支付、分享等能力
+      await this.fetchAndRegisterJSSDK()
       return false
     }
 
-    // 3. 有 code，处理授权回调
-    console.log('✅ 检测到微信授权码，处理登录...')
-    const success = await this.handleAuthCallback(code)
+    // 4. 未登录且没有 code，开始微信授权流程
+    console.log('ℹ️ 用户未登录，开始微信授权')
+    this.startAuth()
+    return false
+  }
 
-    return success
+  /**
+   * 已登录用户单独获取并注册 JSSDK 配置
+   * 用于已登录状态下初始化微信公众号能力（支付、分享等）
+   */
+  async fetchAndRegisterJSSDK() {
+    try {
+      const authStore = useAuthStore()
+      const currentUrl = window.location.href.split('#')[0] // JSSDK 签名用的 URL 不带 hash
+
+      console.log('🔧 已登录用户获取 JSSDK 配置...')
+      const response = await fetch(`/api/auth/wechat/js_config?url=${encodeURIComponent(currentUrl)}`, {
+        method: 'GET',
+        headers: {
+          'Content-Type': 'application/json'
+        },
+      })
+
+      if (!response.ok) {
+        throw new Error(`HTTP ${response.status}`)
+      }
+
+      const result = await response.json()
+      if (result.success && result.data) {
+        await this.registerJSSDK(result.data)
+      } else {
+        console.warn('⚠️ 获取 JSSDK 配置失败:', result.message)
+      }
+    } catch (error) {
+      console.error('❌ 获取 JSSDK 配置失败:', error)
+      // 不影响主流程
+    }
   }
 
   /**
