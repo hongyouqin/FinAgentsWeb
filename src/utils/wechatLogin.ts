@@ -243,7 +243,7 @@ class WechatLogin {
 
       const result = await response.json()
       if (result.success && result.data) {
-        await this.registerJSSDK(result.data)
+        await this.registerJSSDK(result.data.wx_config)
       } else {
         console.warn('⚠️ 获取 JSSDK 配置失败:', result.message)
       }
