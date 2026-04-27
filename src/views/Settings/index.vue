@@ -595,8 +595,8 @@ watch(() => [route.path, route.query.tab], updateSectionFromRoute, { immediate: 
 
 // 从 authStore 获取用户信息（使用 computed 实现响应式）
 const generalSettings = ref({
-  username: authStore.user?.username || 'admin',
-  email: authStore.user?.email || 'admin@example.com',
+  username: authStore.user?.username || '无',
+  email: authStore.user?.email || '无',
   language: authStore.user?.preferences?.language || 'zh-CN',
   timezone: 'Asia/Shanghai'
 })
