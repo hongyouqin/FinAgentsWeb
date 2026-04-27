@@ -456,6 +456,28 @@ const routes: RouteRecordRaw[] = [
     ]
   },
   {
+    path: '/statistics',
+    name: 'Statistics',
+    component: () => import('@/layouts/BasicLayout.vue'),
+    meta: {
+      title: '数据统计',
+      icon: 'DataAnalysis',
+      requiresAuth: true,
+      transition: 'fade'
+    },
+    children: [
+      {
+        path: '',
+        name: 'StatisticsHome',
+        component: () => import('@/views/Statistics/index.vue'),
+        meta: {
+          title: '数据统计',
+          requiresAuth: true
+        }
+      }
+    ]
+  },
+  {
     path: '/strategy',
     name: 'Strategy',
     component: () => import('@/layouts/BasicLayout.vue'),

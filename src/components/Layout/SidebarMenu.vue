@@ -31,6 +31,10 @@
       <el-icon><Cpu /></el-icon>
       <template #title>策略</template>
     </el-menu-item>
+    <el-menu-item v-if="authStore.user?.is_admin" index="/statistics">
+      <el-icon><DataAnalysis /></el-icon>
+      <template #title>数据统计</template>
+    </el-menu-item>
     <!-- <el-menu-item index="/learning">
       <el-icon><Reading /></el-icon>
       <template #title>学习中心</template>
@@ -159,11 +163,14 @@ import {
   Coin,
   Service,
   Cpu,
+  DataAnalysis,
 } from '@element-plus/icons-vue'
 import qhyQrCode from '../../../assets/qhy.png'
+import { useAuthStore } from '@/stores/auth'
 
 const route = useRoute()
 const appStore = useAppStore()
+const authStore = useAuthStore()
 
 const activeMenu = computed(() => route.path)
 
