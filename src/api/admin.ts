@@ -66,3 +66,10 @@ export function getDashboardStats(): Promise<ApiResponse<DashboardData>> {
 export function getStatsHistory(days: number = 30): Promise<ApiResponse<DailyHistoryItem[]>> {
   return ApiClient.get<DailyHistoryItem[]>('/api/admin/stats/history', { days })
 }
+
+/**
+ * 触发统计数据重新生成
+ */
+export function generateStats(): Promise<ApiResponse<{ message: string }>> {
+  return ApiClient.post<{ message: string }>('/api/admin/stats/generate')
+}

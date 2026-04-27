@@ -28,6 +28,8 @@
 
     <!-- 内容区域 -->
     <div class="content-wrapper">
+      
+
       <div v-if="loading" class="loading-container">
         <el-skeleton :rows="6" animated />
       </div>
@@ -128,6 +130,20 @@
           </div>
         </div>
 
+        <!-- 操作栏 -->
+      <div class="toolbar-row">
+        <el-button
+          type="primary"
+          :loading="generating"
+          :icon="Refresh"
+          @click="handleGenerate"
+          round
+        >
+          更新统计数据
+        </el-button>
+        <span v-if="generateMsg" class="generate-msg">{{ generateMsg }}</span>
+      </div>
+
         <!-- 历史趋势 -->
         <div class="history-section">
           <div class="section-header">
@@ -182,10 +198,11 @@ import {
   Connection,
   Document,
   WarningFilled,
-  Clock
+  Clock,
+  Refresh
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
-import { getDashboardStats, getStatsHistory, type TodayStats, type DailyHistoryItem } from '@/api/admin'
+import { getDashboardStats, getStatsHistory, generateStats, type TodayStats, type DailyHistoryItem } from '@/api/admin'
 
 defineOptions({ name: 'Statistics' })
 
@@ -195,6 +212,10 @@ const stats = ref<TodayStats | null>(null)
 const historyLoading = ref(false)
 const historyData = ref<DailyHistoryItem[]>([])
 const selectedDays = ref(30)
+
+// ─── 更新按钮状态 ──────────────────────────────
+const generating = ref(false)
+const generateMsg = ref('')
 
 const userChartRef = ref<HTMLDivElement | null>(null)
 const reportChartRef = ref<HTMLDivElement | null>(null)
@@ -228,6 +249,31 @@ const makeDataZoom = (dataLength: number) => {
     },
     { type: 'inside' as const }
   ]
+}
+
+// ─── 更新统计数据 ──────────────────────────────
+const handleGenerate = async () => {
+  generating.value = true
+  generateMsg.value = ''
+  try {
+    const res = await generateStats()
+    if (res.success) {
+      generateMsg.value = res.data?.message || '数据更新成功'
+      // 重新加载所有数据
+      await fetchDashboard()
+    } else {
+      generateMsg.value = '更新失败，请重试'
+    }
+  } catch (err) {
+    console.error('更新统计数据失败:', err)
+    generateMsg.value = '更新失败，请检查网络'
+  } finally {
+    generating.value = false
+    // 3 秒后自动清除提示消息
+    setTimeout(() => {
+      generateMsg.value = ''
+    }, 3000)
+  }
 }
 
 // ─── fetchHistory 必须在 fetchDashboard 之前声明 ──
@@ -622,6 +668,19 @@ onBeforeUnmount(() => {
   padding: 0 24px;
   position: relative;
   z-index: 4;
+}
+
+// ─── 操作栏 ────────────────────────────────────
+.toolbar-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 16px;
+
+  .generate-msg {
+    font-size: 13px;
+    color: #059669;
+  }
 }
 
 .loading-container {
