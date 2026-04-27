@@ -241,7 +241,7 @@ const downloadImage = async () => {
           font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
           font-size: 14px;
           line-height: 1.6;
-          color: #1e293b;
+          color: white;
           background: white;
         }
         img {
@@ -251,6 +251,9 @@ const downloadImage = async () => {
         table {
           width: 100%;
           border-collapse: collapse;
+        }
+        h1 {
+         color: white;
         }
         th, td {
           padding: 8px 12px;
@@ -421,6 +424,7 @@ const showImagePreview = (base64Data: string) => {
     left: 0;
     right: 0;
     bottom: 0;
+    color: white;
     background: rgba(0, 0, 0, 0.95);
     z-index: 10000;
     display: flex;
@@ -467,7 +471,7 @@ const showImagePreview = (base64Data: string) => {
   // 副提示文字
   const subTip = document.createElement('div')
   subTip.style.cssText = `
-    color: rgba(255, 255, 255, 0.7);
+    color: white;
     font-size: 13px;
     text-shadow: 0 1px 4px rgba(0, 0, 0, 0.5);
   `
