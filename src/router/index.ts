@@ -594,7 +594,9 @@ router.beforeEach(async (to, from, next) => {
   }
 
   // 检查是否需要管理员权限
-  if (to.meta.requiresAdmin && !authStore.user?.is_admin) {
+  // 优先使用独立的 localStorage 标记（刷新时 user 对象可能尚未异步加载完成）
+  const isAdmin = authStore.user?.is_admin ?? (localStorage.getItem('is_admin') === 'true')
+  if (to.meta.requiresAdmin && !isAdmin) {
     console.log('🛡️ 需要管理员权限但用户非管理员:', to.fullPath)
     ElMessage.warning('无权访问该页面')
     next('/analysis/single')

@@ -152,6 +152,8 @@ export const useAuthStore = defineStore('auth', {
       }
       if (user) {
         localStorage.setItem('user-info', JSON.stringify(user))
+        // 独立持久化 is_admin 标记，刷新时路由守卫无需等 user 对象异步加载
+        localStorage.setItem('is_admin', String(user.is_admin))
       }
 
       // 设置API请求头
@@ -396,6 +398,8 @@ export const useAuthStore = defineStore('auth', {
 
         if (response.success) {
           this.user = response.data
+          // 同步刷新 is_admin 持久化标记
+          localStorage.setItem('is_admin', String(response.data.is_admin))
           console.log('✅ 用户信息获取成功:', this.user?.username)
 
           // 同步用户偏好设置到 appStore
