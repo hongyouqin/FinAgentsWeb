@@ -75,7 +75,7 @@
                     v-if="analysisForm.stockCode"
                     type="primary"
                     :loading="submitting"
-                    :disabled="!analysisForm.stockCode.trim() || !allowNewAnalysis"
+                    :disabled="submitting || !analysisForm.stockCode.trim() || !allowNewAnalysis"
                     @click="submitAnalysis"
                     class="analyze-btn"
                   >
@@ -138,7 +138,7 @@
                     @click="isDeepAnalysis = false"
                   >
                     <el-icon><Document /></el-icon>
-                    <span>标准分析</span>
+                    <span>标准分析 v4</span>
                   </div>
                   <div 
                     class="switch-option"
@@ -146,7 +146,7 @@
                     @click="isDeepAnalysis = true"
                   >
                     <el-icon><Cpu /></el-icon>
-                    <span>深度推理</span>
+                    <span>深度推理 v4-pro</span>
                   </div>
                 </div>
               </div>
@@ -163,7 +163,7 @@
                   <div class="type-card" :class="{ 'is-active': !isDeepAnalysis }">
                     <div class="type-header">
                       <el-icon><Document /></el-icon>
-                      <span class="type-title">标准分析</span>
+                      <span class="type-title">标准分析 deepseek-v4</span>
                     </div>
                     <div class="type-content">
                       <div class="type-item">
@@ -184,7 +184,7 @@
                   <div class="type-card" :class="{ 'is-active': isDeepAnalysis }">
                     <div class="type-header">
                       <el-icon><Cpu /></el-icon>
-                      <span class="type-title">深度推理</span>
+                      <span class="type-title">深度推理 deepseek-v4-pro</span>
                     </div>
                     <div class="type-content">
                       <div class="type-item">
@@ -979,6 +979,9 @@ const getDepthDescription = (depth: number): string => {
 
 // 提交分析
 const submitAnalysis = async () => {
+  // 防止重复提交
+  if (submitting.value) return
+
   const stockCode = analysisForm.stockCode.trim()
   if (!stockCode) {
     ElMessage.warning('请输入股票代码')
