@@ -463,6 +463,7 @@ const routes: RouteRecordRaw[] = [
       title: '数据统计',
       icon: 'DataAnalysis',
       requiresAuth: true,
+      requiresAdmin: true,
       transition: 'fade'
     },
     children: [
@@ -472,7 +473,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Statistics/index.vue'),
         meta: {
           title: '数据统计',
-          requiresAuth: true
+          requiresAuth: true,
+          requiresAdmin: true
         }
       }
     ]
@@ -534,6 +536,14 @@ const routes: RouteRecordRaw[] = [
   }
 ]
 
+// 扩展路由 meta 类型
+declare module 'vue-router' {
+  interface RouteMeta {
+    requiresAuth?: boolean
+    requiresAdmin?: boolean
+  }
+}
+
 // 创建路由实例
 const router = createRouter({
   history: createWebHistory(import.meta.env.BASE_URL),
@@ -580,6 +590,14 @@ router.beforeEach(async (to, from, next) => {
     // 保存原始路径，登录后跳转
     authStore.setRedirectPath(to.fullPath)
     next('/login')
+    return
+  }
+
+  // 检查是否需要管理员权限
+  if (to.meta.requiresAdmin && !authStore.user?.is_admin) {
+    console.log('🛡️ 需要管理员权限但用户非管理员:', to.fullPath)
+    ElMessage.warning('无权访问该页面')
+    next('/analysis/single')
     return
   }
 
