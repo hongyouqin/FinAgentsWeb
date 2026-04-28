@@ -25,7 +25,7 @@
             <el-icon><Download /></el-icon>
           </el-button>
         </el-tooltip>
-        <el-tooltip content="刷新报告" placement="bottom">
+        <!-- <el-tooltip content="刷新报告" placement="bottom">
           <el-button text circle class="toolbar-btn" :loading="loading" @click="loadReport">
             <el-icon><Refresh /></el-icon>
           </el-button>
@@ -34,7 +34,7 @@
           <el-button text circle class="toolbar-btn" @click="openInNewTab">
             <el-icon><TopRight /></el-icon>
           </el-button>
-        </el-tooltip>
+        </el-tooltip> -->
       </div>
     </div>
 
