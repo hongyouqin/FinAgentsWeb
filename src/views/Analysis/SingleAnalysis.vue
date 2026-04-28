@@ -80,7 +80,8 @@
                     class="analyze-btn"
                   >
                     <el-icon v-if="!submitting"><MagicStick /></el-icon>
-                    <span>{{ submitting ? '分析中' : '开始分析' }}</span>
+                    <span class="btn-full-text">{{ submitting ? '分析中' : '开始分析' }}</span>
+                    <span class="btn-short-text">{{ submitting ? '中...' : '开始' }}</span>
                   </el-button>
                 </template>
               </el-input>
@@ -1678,6 +1679,7 @@ onUnmounted(() => {
       box-shadow: 0 0 0 1px #e2e8f0 inset;
       border-radius: 16px;
       transition: all 0.3s ease;
+      border: 1px solid #06b6d4;
       
       &:hover, &:focus-within {
         box-shadow: 0 0 0 2px #06b6d4 inset;
@@ -1718,6 +1720,10 @@ onUnmounted(() => {
     background: linear-gradient(135deg, #059669 0%, #06b6d4 100%);
     border: none;
     margin-right: 4px;
+
+    .btn-short-text {
+      display: none;
+    }
     
     &:hover:not(:disabled) {
       transform: translateY(-1px);
@@ -3006,9 +3012,12 @@ onUnmounted(() => {
     font-size: 28px;
   }
   
-  .input-group .analyze-btn span {
-    display: none;
-  }
+  .input-group .analyze-btn .btn-full-text {
+      display: none;
+    }
+    .input-group .analyze-btn .btn-short-text {
+      display: inline;
+    }
   
   .decision-action .action-value {
     font-size: 24px;

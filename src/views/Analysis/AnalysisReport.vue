@@ -21,8 +21,8 @@
       </div>
       <div class="toolbar-right">
         <el-tooltip content="下载图片" placement="bottom">
-          <el-button text circle class="toolbar-btn" :loading="downloading" @click="downloadImage">
-            <el-icon><Download /></el-icon>
+          <el-button class="toolbar-btn" type="primary" plain :loading="downloading" @click="downloadImage" style="font-size: 12px; width: 40px;">
+            分享
           </el-button>
         </el-tooltip>
         <!-- <el-tooltip content="刷新报告" placement="bottom">
@@ -603,7 +603,7 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 0 20px;
+  padding: 0 10px;
   height: 52px;
   background: white;
   border-bottom: 1px solid #e8f4fd;
@@ -685,7 +685,6 @@ onMounted(() => {
 .toolbar-btn {
   width: 32px;
   height: 32px;
-  color: #64748b;
 
   &:hover {
     color: #06b6d4;
@@ -799,7 +798,7 @@ onMounted(() => {
   flex: 1;
   display: flex;
   flex-direction: column;
-  padding: 20px;
+  padding: 10px;
 }
 
 .report-iframe {
@@ -824,7 +823,7 @@ onMounted(() => {
   }
 
   .report-content {
-    padding: 12px;
+    padding: 6px;
   }
 
   .report-iframe {
