@@ -73,3 +73,10 @@ export function getStatsHistory(days: number = 30): Promise<ApiResponse<DailyHis
 export function generateStats(): Promise<ApiResponse<{ message: string }>> {
   return ApiClient.post<{ message: string }>('/api/admin/stats/generate')
 }
+
+/**
+ * 登录状态访问埋点：上报一次登录用户的访问行为（用于 DAU/活跃度统计）
+ */
+export function trackLogin(): Promise<ApiResponse<any>> {
+  return ApiClient.post<any>('/api/admin/stats/track/login')
+}

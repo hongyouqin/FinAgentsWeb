@@ -130,6 +130,20 @@ const initApp = async () => {
       // 2. 如果用户已登录，启动 token 自动刷新定时器
       if (authStore.isAuthenticated) {
         setupTokenRefreshTimer()
+
+        // 登录状态访问埋点：一次会话（sessionStorage）内只上报一次
+        if (!sessionStorage.getItem('login_track_reported')) {
+          const { trackLogin } = await import('@/api/admin')
+          trackLogin()
+            .then(() => {
+              sessionStorage.setItem('login_track_reported', '1')
+              console.log('✅ 登录访问埋点上报成功')
+            })
+            .catch((err) => {
+              // 埋点失败不影响主流程
+              console.warn('⚠️ 登录访问埋点上报失败:', err)
+            })
+        }
       }
 
       // 3. 再检查微信登录（内部会判断是否已登录，已登录则跳过）

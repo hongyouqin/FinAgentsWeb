@@ -167,6 +167,19 @@ export const useAuthStore = defineStore('auth', {
       })
     },
     
+    // 登录访问埋点上报（同一会话不重复上报）
+    async reportLoginTrack() {
+      if (sessionStorage.getItem('login_track_reported')) return
+      try {
+        const { trackLogin } = await import('@/api/admin')
+        await trackLogin()
+        sessionStorage.setItem('login_track_reported', '1')
+        console.log('✅ 登录访问埋点上报成功')
+      } catch (err) {
+        console.warn('⚠️ 登录访问埋点上报失败:', err)
+      }
+    },
+
     // 清除认证信息
     clearAuthInfo() {
       this.token = null
@@ -186,6 +199,9 @@ export const useAuthStore = defineStore('auth', {
       localStorage.removeItem('auth-token')
       localStorage.removeItem('refresh-token')
       localStorage.removeItem('user-info')
+      localStorage.removeItem('is_admin')
+      // 清除埋点标记，下次登录可重新上报
+      sessionStorage.removeItem('login_track_reported')
     },
 
     // 跳转到登录页或首页（微信环境）
@@ -239,6 +255,9 @@ export const useAuthStore = defineStore('auth', {
         const { setupTokenRefreshTimer } = await import('@/utils/auth')
         setupTokenRefreshTimer()
 
+        // 登录访问埋点（二维码登录）
+        this.reportLoginTrack()
+
 
       } catch (error) {
         console.error('二维码登录失败:', error)
@@ -286,6 +305,9 @@ export const useAuthStore = defineStore('auth', {
           // 启动 token 自动刷新定时器
           const { setupTokenRefreshTimer } = await import('@/utils/auth')
           setupTokenRefreshTimer()
+
+          // 登录访问埋点（密码/短信登录）
+          this.reportLoginTrack()
 
           // 不在这里显示成功消息，由调用方显示
           return true
