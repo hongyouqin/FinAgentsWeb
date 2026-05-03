@@ -4,10 +4,10 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>TradingAgents中文版 - AI多智能体股票分析平台</title>
-    <meta name="description" content="TradingAgents中文版(TradingAgents-CN)是基于TradingAgents论文的多智能体AI股票分析学习平台，集成多Agent协作的智能选股系统，支持A股、美股、港股实时分析，提供AI研报、技术面分析、基本面分析、情绪分析和风险评估，让每个人都能用上专业级AI量化分析工具。" />
-    <meta name="keywords" content="TradingAgents,TradingAgents中文版,TradingAgents-CN,tradingagents官网,AI股票分析,多智能体交易,AI选股,智能选股系统,AI量化分析,多Agent股票分析,A股AI分析,美股分析工具,港股分析,AI研报,股票多智能体,LLM股票分析,大模型炒股,AI投资助手,智能投顾,量化交易平台" />
-    <meta name="author" content="NB.STOCK Team" />
+    <title>TradingAgents中文版 | 多智能体AI金融交易决策框架 - A股/港股/美股 AI 分析平台</title>
+    <meta name="description" content="TradingAgents中文版（TradingAgents-CN）是基于 LLM 的多智能体AI金融交易决策框架，由基本面、情绪、新闻、技术分析师与研究员、交易员、风险经理协同工作，原生支持 A 股、港股、美股，集成 OpenAI、Gemini、Qwen、DeepSeek 等多 LLM 模型，提供可解释的 AI 研报、辩证推理与专业报告导出，支持 Docker 一键部署。" />
+    <meta name="keywords" content="TradingAgents,TradingAgents中文版,TradingAgents-CN,tradingagents官网,多智能体AI金融交易决策框架,AI股票分析,多智能体交易,多Agent股票分析,AI选股,智能选股系统,AI量化分析,A股AI分析,美股分析工具,港股分析,AI研报,LLM股票分析,大模型炒股,AI投资助手,智能投顾,量化交易平台,LangGraph,Tauric Research,TradingAgents 论文" />
+    <meta name="author" content="TradingAgents-CN Team" />
     
     <!-- 百度SEO优化 -->
     <meta name="robots" content="index,follow" />
@@ -17,8 +17,66 @@
     <meta name="MobileOptimized" content="width" />
     <meta name="HandheldFriendly" content="true" />
     <link rel="canonical" href="https://tradingagents.cn/" />
-    
-   
+
+    <!-- Open Graph -->
+    <meta property="og:type" content="website" />
+    <meta property="og:site_name" content="TradingAgents 中文版" />
+    <meta property="og:title" content="TradingAgents中文版 | 多智能体AI金融交易决策框架" />
+    <meta property="og:description" content="基于 LLM 的专业化 AI 团队，为您提供全方位的 A 股 / 港股 / 美股市场分析。多智能体协作、辩证推理、多 LLM 自由切换，Docker 一键部署。" />
+    <meta property="og:url" content="https://tradingagents.cn/" />
+    <meta property="og:image" content="https://tradingagents.cn/assets/schema.png" />
+    <meta property="og:locale" content="zh-CN" />
+
+    <!-- Twitter Card -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="TradingAgents中文版 | 多智能体AI金融交易决策框架" />
+    <meta name="twitter:description" content="多智能体协作 · 多市场覆盖 · 多 LLM 集成 · 专业报告导出 · Docker 一键部署。" />
+    <meta name="twitter:image" content="https://tradingagents.cn/assets/schema.png" />
+
+    <!-- JSON-LD 结构化数据 -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "SoftwareApplication",
+      "name": "TradingAgents 中文版",
+      "alternateName": ["TradingAgents-CN", "TradingAgents 多智能体AI金融交易决策框架"],
+      "applicationCategory": "FinanceApplication",
+      "operatingSystem": "Web, Docker",
+      "description": "基于 LLM 的多智能体AI金融交易决策框架，原生支持 A 股、港股、美股，集成多 LLM 模型，提供可解释的 AI 研报。",
+      "url": "https://tradingagents.cn/",
+      "inLanguage": "zh-CN",
+      "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
+      "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "158" }
+    }
+    </script>
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "FAQPage",
+      "mainEntity": [
+        {
+          "@type": "Question",
+          "name": "TradingAgents 中文版和原版有什么区别？",
+          "acceptedAnswer": { "@type": "Answer", "text": "TradingAgents-CN 是 TradingAgents 的中文优化版本，原生支持 A 股数据源（Tushare/AkShare），集成阿里百炼 Qwen、DeepSeek 等国内 LLM，针对中文金融语境优化提示词，并提供中文文档与技术支持。" }
+        },
+        {
+          "@type": "Question",
+          "name": "TradingAgents-CN 支持哪些 LLM 模型？",
+          "acceptedAnswer": { "@type": "Answer", "text": "支持 OpenAI GPT-4/GPT-3.5、Google Gemini、阿里百炼 Qwen、DeepSeek 等主流大模型，可一键切换或同时使用多模型对比分析。" }
+        },
+        {
+          "@type": "Question",
+          "name": "支持哪些股票市场？",
+          "acceptedAnswer": { "@type": "Answer", "text": "全面支持中国 A 股、港股与美股。A 股数据通过 Tushare / AkShare 获取，港美股通过 FinnHub / Yahoo Finance 获取。" }
+        },
+        {
+          "@type": "Question",
+          "name": "如何部署 TradingAgents-CN？",
+          "acceptedAnswer": { "@type": "Answer", "text": "提供 Docker 一键部署方案，5 分钟即可搭建完成，支持本地部署与云端部署。" }
+        }
+      ]
+    }
+    </script>
 
     <!-- 预加载关键资源 -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />

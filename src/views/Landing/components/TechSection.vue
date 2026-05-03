@@ -1,182 +1,193 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 
-// 技术优势数据
-const techStats = ref([
-  {
-    id: 'accuracy',
-    value: '95%+',
-    label: '分析准确率',
-    description: '基于多维度数据模型，AI 智能分析准确率达 95% 以上'
-  },
-  {
-    id: 'speed',
-    value: '~2min',
-    label: '平均分析时长',
-    description: '深度多维分析，2 分钟内生成专业投资报告'
-  },
-  {
-    id: 'coverage',
-    value: '10000+',
-    label: '股票覆盖',
-    description: '覆盖 A股、港股、美股超过 10000+ 上市公司'
-  },
-  {
-    id: 'realtime',
-    value: '24/7',
-    label: '实时监控',
-    description: '全天候实时数据更新，把握每一个投资机会'
-  }
+// 框架概览 4 大亮点
+const frameworkHighlights = ref([
+  { title: '多智能体协作', desc: '结构化输出与辩证推理', icon: 'agents' },
+  { title: '风险对齐', desc: '可解释与可评估', icon: 'risk' },
+  { title: '无 GPU 运行', desc: '可扩展架构', icon: 'cloud' },
+  { title: '模块化设计', desc: '灵活组件配置', icon: 'module' },
 ])
 
-// 核心技术特性
-const techFeatures = ref([
+// 角色专精
+const roleSections = ref([
   {
-    id: 'ai-engine',
-    title: 'AI 分析引擎',
-    description: '多模型融合，深度学习驱动',
-    icon: 'chip'
+    id: 'analyst',
+    title: '分析师团队',
+    subtitle: '从不同维度采集并分析市场数据',
+    image: '/assets/analyst.png',
+    imageAlt: 'TradingAgents 分析师团队：基本面、情绪、新闻、技术',
+    points: [
+      { label: '基本面分析师', desc: '评估公司基本面，识别可能的高估或低估' },
+      { label: '情绪分析师', desc: '分析社交媒体与公众情绪，衡量市场氛围' },
+      { label: '新闻分析师', desc: '评估新闻与宏观经济指标，预测市场变化' },
+      { label: '技术分析师', desc: '使用技术指标预测价格趋势与交易机会' },
+    ],
+    reversed: false,
   },
   {
-    id: 'data-pipeline',
-    title: '数据处理管道',
-    description: '实时数据流，高效 ETL 架构',
-    icon: 'server'
+    id: 'researcher',
+    title: '研究员团队',
+    subtitle: '通过看多与看空的辩证过程，严格评估分析师数据',
+    image: '/assets/researcher.png',
+    imageAlt: 'TradingAgents 研究员团队：看多看空辩论',
+    points: [
+      { label: '看多研究员', desc: '强调积极的市场指标与增长潜力' },
+      { label: '看空研究员', desc: '关注风险与负面市场信号' },
+      { label: '辩证过程', desc: '确保形成对市场的平衡理解，协助交易智能体做出更有依据的决策' },
+    ],
+    reversed: true,
   },
   {
-    id: 'multi-source',
-    title: '多源数据聚合',
-    description: '整合全球市场数据源',
-    icon: 'database'
+    id: 'trader',
+    title: '交易智能体 & 风险管理',
+    subtitle: '基于全面分析执行决策，监督市场风险敞口',
+    image: '/assets/trader.png',
+    imageAlt: 'TradingAgents 交易智能体与风险管理',
+    points: [
+      { label: '交易智能体', desc: '评估分析师与研究员的洞见，确定最优交易动作' },
+      { label: '风险管理', desc: '监督市场风险敞口，确保交易活动在预设限额内进行' },
+      { label: '资金经理', desc: '最终审批风险调整后的交易决策，并在模拟交易所执行订单' },
+    ],
+    reversed: false,
   },
-  {
-    id: 'security',
-    title: '安全防护',
-    description: '企业级安全加密与隐私保护',
-    icon: 'shield'
-  }
 ])
 </script>
 
 <template>
   <section class="tech-section">
     <div class="tech-container">
-      <!-- 标题区 -->
+      <!-- ========= 框架概览 ========= -->
       <div class="section-header">
         <div class="label-badge">
           <span class="badge-dot" />
-          <span>技术优势</span>
+          <span>TradingAgents 引擎介绍</span>
         </div>
         <h2 class="section-titleas">
-          由
-          <span class="gradient-text">尖端技术</span>
-          驱动
+          模拟一家
+          <span class="gradient-text">专业交易机构</span>
+          的决策流程
         </h2>
         <p class="section-subtitle">
-          强大的技术架构，为您的投资决策提供坚实保障
+          TradingAgents-CN 以结构化沟通与辩证协作为核心，通过分析师、研究员、交易与风控角色协同，
+          形成可解释、可评估、可扩展的决策流程。
         </p>
       </div>
 
-      <!-- 数据统计卡片（非对称布局）-->
-      <div class="stats-grid">
-        <div
-          v-for="(stat, index) in techStats"
-          :key="stat.id"
-          class="stat-card"
-          :class="`stat-card-${index + 1}`"
-        >
-          <div class="stat-card-glow" />
-          
-          <!-- 数据值 -->
-          <div class="stat-value">{{ stat.value }}</div>
-          
-          <!-- 数据标签 -->
-          <div class="stat-label">{{ stat.label }}</div>
-          
-          <!-- 数据描述 -->
-          <p class="stat-description">{{ stat.description }}</p>
+      <!-- 架构图 + 四大亮点 -->
+      <div class="framework-showcase">
+        <div class="schema-wrapper">
+          <img
+            src="/assets/schema.png"
+            alt="TradingAgents 多智能体框架架构图 - 分析师/研究员/交易员/风控协同"
+            class="schema-image"
+            loading="lazy"
+          />
+          <div class="schema-label">TradingAgents 框架架构</div>
+        </div>
 
-          <!-- 装饰线 -->
-          <div class="stat-decorator" />
+        <div class="highlights-grid">
+          <div
+            v-for="h in frameworkHighlights"
+            :key="h.title"
+            class="highlight-card"
+          >
+            <div class="highlight-icon">
+              <svg v-if="h.icon === 'agents'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <circle cx="7" cy="7" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="17" cy="7" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                <circle cx="12" cy="17" r="2.5" stroke="currentColor" stroke-width="1.5"/>
+                <path d="M9 8.5L10.5 15M15 8.5L13.5 15M9 7h6" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"/>
+              </svg>
+              <svg v-else-if="h.icon === 'risk'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 3L4 7v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V7l-8-4zM12 8v4M12 16h.01"
+                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg v-else-if="h.icon === 'cloud'" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M18 10h-1.26A8 8 0 109 20h9a5 5 0 000-10z"
+                      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+              <svg v-else viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <rect x="3" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="14" y="3" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="3" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+                <rect x="14" y="14" width="7" height="7" rx="1.5" stroke="currentColor" stroke-width="1.5"/>
+              </svg>
+            </div>
+            <h4 class="highlight-title">{{ h.title }}</h4>
+            <p class="highlight-desc">{{ h.desc }}</p>
+          </div>
         </div>
       </div>
 
-      <!-- 核心技术特性（横向布局）-->
-      <div class="features-row">
+      <!-- ========= 角色专精 ========= -->
+      <div class="section-header sub-header">
+        <div class="label-badge">
+          <span class="badge-dot" />
+          <span>角色专精</span>
+        </div>
+        <h2 class="section-titleas">
+          七个关键角色，
+          <span class="gradient-text">各司其职协同决策</span>
+        </h2>
+        <p class="section-subtitle">
+          借鉴专业交易机构的组织结构，将复杂的交易目标拆解为可管理的任务
+        </p>
+      </div>
+
+      <div class="roles-stack">
         <div
-          v-for="feature in techFeatures"
-          :key="feature.id"
-          class="feature-item"
+          v-for="role in roleSections"
+          :key="role.id"
+          class="role-row"
+          :class="{ reversed: role.reversed }"
         >
-          <!-- SVG 图标 -->
-          <div class="feature-icon-wrapper">
-            <!-- AI 芯片图标 -->
-            <svg v-if="feature.icon === 'chip'" class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="9" y="9" width="6" height="6" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <rect x="5" y="5" width="14" height="14" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <line x1="5" y1="10" x2="3" y2="10" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="5" y1="14" x2="3" y2="14" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="19" y1="10" x2="21" y2="10" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="19" y1="14" x2="21" y2="14" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="10" y1="5" x2="10" y2="3" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="14" y1="5" x2="14" y2="3" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="10" y1="19" x2="10" y2="21" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="14" y1="19" x2="14" y2="21" stroke="url(#gradientChip)" stroke-width="1.5" stroke-linecap="round"/>
-              <defs>
-                <linearGradient id="gradientChip" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#06b6d4" />
-                  <stop offset="100%" style="stop-color:#3b82f6" />
-                </linearGradient>
-              </defs>
-            </svg>
-
-            <!-- 服务器图标 -->
-            <svg v-else-if="feature.icon === 'server'" class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="4" width="18" height="6" rx="2" stroke="url(#gradientServer)" stroke-width="1.5"/>
-              <rect x="3" y="14" width="18" height="6" rx="2" stroke="url(#gradientServer)" stroke-width="1.5"/>
-              <circle cx="7" cy="7" r="1" fill="url(#gradientServer)"/>
-              <circle cx="7" cy="17" r="1" fill="url(#gradientServer)"/>
-              <line x1="11" y1="7" x2="17" y2="7" stroke="url(#gradientServer)" stroke-width="1.5" stroke-linecap="round"/>
-              <line x1="11" y1="17" x2="17" y2="17" stroke="url(#gradientServer)" stroke-width="1.5" stroke-linecap="round"/>
-              <defs>
-                <linearGradient id="gradientServer" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#3b82f6" />
-                  <stop offset="100%" style="stop-color:#06b6d4" />
-                </linearGradient>
-              </defs>
-            </svg>
-
-            <!-- 数据库图标 -->
-            <svg v-else-if="feature.icon === 'database'" class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <ellipse cx="12" cy="5" rx="8" ry="3" stroke="url(#gradientDB)" stroke-width="1.5"/>
-              <path d="M4 5v7c0 1.657 3.582 3 8 3s8-1.343 8-3V5" stroke="url(#gradientDB)" stroke-width="1.5" stroke-linecap="round"/>
-              <path d="M4 12v7c0 1.657 3.582 3 8 3s8-1.343 8-3v-7" stroke="url(#gradientDB)" stroke-width="1.5" stroke-linecap="round"/>
-              <defs>
-                <linearGradient id="gradientDB" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#06b6d4" />
-                  <stop offset="100%" style="stop-color:#3b82f6" />
-                </linearGradient>
-              </defs>
-            </svg>
-
-            <!-- 安全盾牌图标 -->
-            <svg v-else-if="feature.icon === 'shield'" class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 3L4 7v6c0 5.55 3.84 10.74 8 12 4.16-1.26 8-6.45 8-12V7l-8-4z" stroke="url(#gradientShield)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M9 12l2 2 4-4" stroke="url(#gradientShield)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <defs>
-                <linearGradient id="gradientShield" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#3b82f6" />
-                  <stop offset="100%" style="stop-color:#06b6d4" />
-                </linearGradient>
-              </defs>
-            </svg>
+          <div class="role-visual">
+            <div class="role-image-frame">
+              <img
+                :src="role.image"
+                :alt="role.imageAlt"
+                class="role-image"
+                loading="lazy"
+              />
+              <div class="visual-glow" />
+            </div>
           </div>
 
-          <!-- 特性内容 -->
-          <div class="feature-content">
-            <h4 class="feature-title">{{ feature.title }}</h4>
-            <p class="feature-description">{{ feature.description }}</p>
+          <div class="role-content">
+            <h3 class="role-title">{{ role.title }}</h3>
+            <p class="role-subtitle">{{ role.subtitle }}</p>
+
+            <ul class="role-points">
+              <li v-for="p in role.points" :key="p.label" class="role-point">
+                <span class="point-check">
+                  <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <path d="M5 13l4 4L19 7" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+                  </svg>
+                </span>
+                <div>
+                  <strong class="point-label">{{ p.label }}</strong>
+                  <span class="point-desc">{{ p.desc }}</span>
+                </div>
+              </li>
+            </ul>
           </div>
+        </div>
+      </div>
+
+      <!-- ========= 框架与平台 摘要 ========= -->
+      <div class="framework-summary">
+        <div class="summary-card">
+          <div class="summary-tag">多智能体引擎</div>
+          <p>基本面、情绪、新闻与技术分析师、研究员（多空）、交易与风控协作；面向研究的模块化决策流。</p>
+        </div>
+        <div class="summary-card">
+          <div class="summary-tag">数据与模型管理</div>
+          <p>支持多 LLM 供应商与模型能力管理；统一管理 Alpha Vantage、Tushare、AkShare、BaoStock 等数据源。</p>
+        </div>
+        <div class="summary-card">
+          <div class="summary-tag">准确率 68.5%</div>
+          <p>超过基准线 23.2 个百分点（基准 45.3%）。数据来源：TradingAgents 研究论文（arXiv:2412.20138）。</p>
         </div>
       </div>
     </div>
@@ -186,12 +197,10 @@ const techFeatures = ref([
 <style scoped lang="scss">
 .tech-section {
   position: relative;
-  min-height: 100vh;
-  padding: 6rem 3rem;
+  padding: 8rem 3rem;
   overflow: hidden;
 }
 
-// 容器
 .tech-container {
   position: relative;
   z-index: 10;
@@ -199,11 +208,15 @@ const techFeatures = ref([
   margin: 0 auto;
 }
 
-// 标题区
 .section-header {
   text-align: center;
-  margin-bottom: 5rem;
+  margin-bottom: 4rem;
+  max-width: 900px;
+  margin-left: auto;
+  margin-right: auto;
 }
+
+.sub-header { margin-top: 7rem; }
 
 .label-badge {
   display: inline-flex;
@@ -216,24 +229,19 @@ const techFeatures = ref([
   font-size: 0.875rem;
   color: #06b6d4;
   margin-bottom: 1.5rem;
-  backdrop-filter: blur(10px);
 }
 
 .badge-dot {
   width: 8px;
   height: 8px;
-  background: linear-gradient(135deg, #06b6d4, #3b82f6);
+  background: linear-gradient(135deg, #10b981, #06b6d4);
   border-radius: 50%;
   animation: dot-pulse 2s ease-in-out infinite;
 }
 
 @keyframes dot-pulse {
-  0%, 100% {
-    box-shadow: 0 0 0 0 rgba(6, 182, 212, 0.7);
-  }
-  50% {
-    box-shadow: 0 0 0 8px rgba(6, 182, 212, 0);
-  }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
 }
 
 .section-titleas {
@@ -245,216 +253,285 @@ const techFeatures = ref([
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
 .section-subtitle {
-  font-size: clamp(1rem, 2vw, 1.25rem);
+  font-size: clamp(1rem, 2vw, 1.1rem);
   color: #94a3b8;
-  line-height: 1.6;
+  line-height: 1.7;
 }
 
-// 数据统计网格（非对称布局）
-.stats-grid {
+/* ===== 框架概览 ===== */
+.framework-showcase {
   display: grid;
-  grid-template-columns: repeat(12, 1fr);
-  gap: 2rem;
-  margin-bottom: 5rem;
-}
-
-.stat-card {
-  position: relative;
-  padding: 3rem 2.5rem;
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(20px);
+  grid-template-columns: 1.3fr 1fr;
+  gap: 3rem;
+  align-items: center;
+  padding: 3rem;
+  background: rgba(30, 41, 59, 0.35);
   border: 1px solid rgba(6, 182, 212, 0.2);
-  border-radius: 24px;
-  overflow: hidden;
-  transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-
-  &:hover {
-    transform: translateY(-8px);
-    border-color: rgba(6, 182, 212, 0.5);
-    box-shadow: 0 20px 60px rgba(6, 182, 212, 0.25);
-
-    .stat-card-glow {
-      opacity: 1;
-    }
-
-    .stat-decorator {
-      width: 100%;
-    }
-  }
+  border-radius: 28px;
+  backdrop-filter: blur(20px);
 }
 
-// 非对称布局
-.stat-card-1 {
-  grid-column: 1 / 4;
-}
-
-.stat-card-2 {
-  grid-column: 4 / 7;
-}
-
-.stat-card-3 {
-  grid-column: 7 / 10;
-}
-
-.stat-card-4 {
-  grid-column: 10 / 13;
-}
-
-// 卡片光晕
-.stat-card-glow {
-  position: absolute;
-  inset: 0;
-  background: radial-gradient(circle at top, rgba(6, 182, 212, 0.15) 0%, transparent 70%);
-  opacity: 0;
-  transition: opacity 0.4s ease;
-}
-
-// 数据值
-.stat-value {
+.schema-wrapper {
   position: relative;
-  z-index: 2;
-  font-size: clamp(2.5rem, 4vw, 3.5rem);
-  font-weight: 900;
-  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-  -webkit-background-clip: text;
-  -webkit-text-fill-color: transparent;
-  background-clip: text;
-  margin-bottom: 0.75rem;
-  line-height: 1;
+  text-align: center;
 }
 
-// 数据标签
-.stat-label {
-  position: relative;
-  z-index: 2;
-  font-size: 1.125rem;
-  font-weight: 600;
-  color: #f1f5f9;
-  margin-bottom: 1rem;
+.schema-image {
+  width: 100%;
+  max-width: 640px;
+  height: auto;
+  border-radius: 18px;
+  filter: drop-shadow(0 12px 40px rgba(6, 182, 212, 0.3));
+  background: rgba(15, 23, 42, 0.6);
+  padding: 1rem;
 }
 
-// 数据描述
-.stat-description {
-  position: relative;
-  z-index: 2;
+.schema-label {
+  margin-top: 1rem;
   font-size: 0.875rem;
   color: #94a3b8;
-  line-height: 1.6;
+  letter-spacing: 0.05em;
 }
 
-// 装饰线
-.stat-decorator {
-  position: absolute;
-  bottom: 0;
-  left: 0;
-  height: 3px;
-  width: 40px;
-  background: linear-gradient(90deg, #06b6d4 0%, #3b82f6 100%);
-  transition: width 0.4s ease;
-}
-
-// 核心技术特性（横向布局）
-.features-row {
+.highlights-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-  gap: 2rem;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1.25rem;
 }
 
-.feature-item {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  text-align: center;
-  padding: 2rem 1.5rem;
-  background: rgba(30, 41, 59, 0.3);
-  backdrop-filter: blur(20px);
+.highlight-card {
+  padding: 1.5rem 1.25rem;
+  background: rgba(15, 23, 42, 0.5);
   border: 1px solid rgba(6, 182, 212, 0.15);
-  border-radius: 20px;
+  border-radius: 16px;
   transition: all 0.3s ease;
 
   &:hover {
-    border-color: rgba(6, 182, 212, 0.4);
     transform: translateY(-4px);
-
-    .feature-icon-wrapper {
-      transform: scale(1.1);
-    }
+    border-color: rgba(6, 182, 212, 0.4);
   }
 }
 
-// 特性图标
-.feature-icon-wrapper {
-  width: 56px;
-  height: 56px;
-  margin-bottom: 1.5rem;
-  transition: transform 0.3s ease;
+.highlight-icon {
+  width: 40px;
+  height: 40px;
+  color: #06b6d4;
+  margin-bottom: 0.75rem;
+  filter: drop-shadow(0 0 8px rgba(6, 182, 212, 0.4));
+
+  svg { width: 100%; height: 100%; }
 }
 
-.feature-icon {
-  width: 100%;
-  height: 100%;
-  filter: drop-shadow(0 4px 12px rgba(6, 182, 212, 0.3));
-}
-
-// 特性内容
-.feature-content {
-  flex: 1;
-}
-
-.feature-title {
-  font-size: 1.125rem;
-  font-weight: 600;
+.highlight-title {
+  font-size: 1.0625rem;
+  font-weight: 700;
   color: #f1f5f9;
-  margin-bottom: 0.5rem;
+  margin: 0 0 0.375rem;
 }
 
-.feature-description {
-  font-size: 0.875rem;
+.highlight-desc {
+  font-size: 0.8125rem;
   color: #94a3b8;
+  margin: 0;
   line-height: 1.5;
 }
 
-// 响应式
-@media (max-width: 1024px) {
-  .tech-section {
-    padding: 5rem 2rem;
+/* ===== 角色专精 ===== */
+.roles-stack {
+  display: flex;
+  flex-direction: column;
+  gap: 5rem;
+}
+
+.role-row {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 4rem;
+  align-items: center;
+
+  &.reversed .role-visual { order: 2; }
+  &.reversed .role-content { order: 1; }
+}
+
+.role-visual {
+  display: flex;
+  justify-content: center;
+}
+
+.role-image-frame {
+  position: relative;
+  width: 100%;
+  max-width: 500px;
+  padding: 1.5rem;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(16, 185, 129, 0.05));
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 24px;
+  backdrop-filter: blur(20px);
+}
+
+.role-image {
+  width: 100%;
+  height: auto;
+  border-radius: 16px;
+  display: block;
+}
+
+.visual-glow {
+  position: absolute;
+  inset: -10%;
+  background: radial-gradient(circle at center, rgba(6, 182, 212, 0.25) 0%, transparent 70%);
+  filter: blur(60px);
+  z-index: -1;
+  opacity: 0.7;
+}
+
+.role-content {
+  padding: 0 0.5rem;
+}
+
+.role-title {
+  font-size: clamp(1.75rem, 3vw, 2.25rem);
+  font-weight: 800;
+  color: #f1f5f9;
+  margin: 0 0 0.75rem;
+  letter-spacing: -0.02em;
+}
+
+.role-subtitle {
+  font-size: 1.0625rem;
+  color: #94a3b8;
+  line-height: 1.6;
+  margin: 0 0 1.75rem;
+}
+
+.role-points {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.role-point {
+  display: flex;
+  gap: 0.875rem;
+  align-items: flex-start;
+  padding: 1rem 1.125rem;
+  background: rgba(15, 23, 42, 0.5);
+  border: 1px solid rgba(6, 182, 212, 0.12);
+  border-radius: 12px;
+  transition: all 0.25s ease;
+
+  &:hover {
+    border-color: rgba(6, 182, 212, 0.35);
+    transform: translateX(4px);
   }
 
-  .stats-grid {
-    grid-template-columns: repeat(2, 1fr);
-  }
-
-  .stat-card {
-    grid-column: auto !important;
+  > div {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
   }
 }
 
+.point-check {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 4px 12px rgba(16, 185, 129, 0.4);
+
+  svg { width: 16px; height: 16px; }
+}
+
+.point-label {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #f1f5f9;
+}
+
+.point-desc {
+  font-size: 0.9375rem;
+  color: #94a3b8;
+  line-height: 1.55;
+}
+
+/* ===== 框架摘要 ===== */
+.framework-summary {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1.5rem;
+  margin-top: 6rem;
+}
+
+.summary-card {
+  padding: 2rem 1.75rem;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(6, 182, 212, 0.2);
+  border-radius: 20px;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-6px);
+    border-color: rgba(6, 182, 212, 0.45);
+    box-shadow: 0 20px 50px rgba(6, 182, 212, 0.2);
+  }
+
+  p {
+    font-size: 0.9375rem;
+    color: #94a3b8;
+    line-height: 1.65;
+    margin: 0;
+  }
+}
+
+.summary-tag {
+  display: inline-block;
+  padding: 0.375rem 0.875rem;
+  margin-bottom: 1rem;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: #10b981;
+  background: rgba(16, 185, 129, 0.1);
+  border: 1px solid rgba(16, 185, 129, 0.3);
+  border-radius: 100px;
+}
+
+@media (max-width: 1024px) {
+  .tech-section { padding: 5rem 1.75rem; }
+  .framework-showcase {
+    grid-template-columns: 1fr;
+    padding: 2rem;
+    gap: 2rem;
+  }
+  .role-row {
+    grid-template-columns: 1fr;
+    gap: 2rem;
+
+    &.reversed .role-visual { order: 1; }
+    &.reversed .role-content { order: 2; }
+  }
+  .framework-summary { grid-template-columns: 1fr; }
+}
+
 @media (max-width: 768px) {
-  .tech-section {
-    padding: 4rem 1.5rem;
-  }
-
-  .stats-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .features-row {
-    grid-template-columns: 1fr;
-  }
-
-  .stat-card {
-    padding: 2rem 1.5rem;
-  }
-
-  .stat-value {
-    font-size: 2.5rem;
-  }
+  .tech-section { padding: 4rem 1.25rem; }
+  .highlights-grid { grid-template-columns: 1fr; }
+  .framework-showcase { padding: 1.5rem; }
+  .role-image-frame { padding: 1rem; }
 }
 </style>

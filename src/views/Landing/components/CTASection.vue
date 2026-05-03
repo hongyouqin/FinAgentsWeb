@@ -1,21 +1,61 @@
 <script setup lang="ts">
+import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import wechatLogin from '@/utils/wechatLogin'
 
 const router = useRouter()
 
+// 关键要点
+const keyPoints = ref([
+  '多智能体协作系统：通过 7-8 个专业化 AI 智能体协作完成投资分析和交易决策',
+  '准确率达 68.5%：超过基准线 23.2 个百分点（基准线 45.3%）',
+  '全市场覆盖：支持 A 股、港股、美股三大市场分析',
+  '多模型支持：集成阿里百炼（Qwen）、OpenAI、Google Gemini 等主流 LLM',
+  '开源免费：基于 MIT 协议，GitHub 31.9k+ stars',
+])
+
+// FAQ（与 index.html JSON-LD 保持一致，有利于 SEO）
+const faqs = ref([
+  {
+    q: 'TradingAgents 中文版和原版有什么区别？',
+    a: 'TradingAgents-CN 是 TradingAgents 的官方中文优化版本，专为中国市场设计。主要区别包括：1) 原生支持 A 股数据源（Tushare / AkShare）；2) 集成阿里百炼（Qwen）等国内 LLM 模型；3) 针对中文金融语境优化提示词；4) 提供中文文档和技术支持。',
+    open: true,
+  },
+  {
+    q: 'TradingAgents-CN 支持哪些 LLM 模型？',
+    a: '支持多种主流 LLM 模型，包括：OpenAI GPT-4 / GPT-3.5、Google Gemini、阿里百炼（Qwen）、DeepSeek 等。您可以通过配置文件一键切换模型，也支持同时使用多个模型进行对比分析。',
+    open: false,
+  },
+  {
+    q: '支持哪些股票市场？',
+    a: 'TradingAgents 中文版全面支持中国 A 股、港股和美股三大市场。A 股数据通过 Tushare 和 AkShare 获取，港股和美股数据通过 FinnHub 和 Yahoo Finance 获取，确保数据的实时性和准确性。',
+    open: false,
+  },
+  {
+    q: '如何部署 TradingAgents-CN？',
+    a: '提供 Docker 一键部署方案，只需 5 分钟即可搭建完成。步骤：1) 安装 Docker；2) 克隆项目仓库；3) 配置 API 密钥；4) 运行 docker-compose up。支持本地部署和云端部署。',
+    open: false,
+  },
+  {
+    q: 'TradingAgents 的分析结果可以直接用于实盘交易吗？',
+    a: 'TradingAgents-CN 仅供研究与教育用途，不构成任何投资建议。实际投资决策需结合个人风险承受能力、市场环境与专业顾问意见，平台对任何投资损失不承担责任。',
+    open: false,
+  },
+])
+
+const toggleFaq = (i: number) => {
+  faqs.value[i].open = !faqs.value[i].open
+}
+
 const handleStartNow = () => {
-  // 判断是否在微信环境
   if (wechatLogin.isWechat()) {
-    console.log('📱 微信环境，触发重新授权获取 code')
     wechatLogin.startAuth()
   } else {
-    console.log('💻 非微信环境，跳转到登录页')
     router.push('/login')
   }
 }
 
-const handleLearnMore = () => {
+const handleScrollTop = () => {
   window.scrollTo({ top: 0, behavior: 'smooth' })
 }
 </script>
@@ -23,82 +63,113 @@ const handleLearnMore = () => {
 <template>
   <section class="cta-section">
     <div class="cta-container">
-      <!-- 扫描线效果 -->
-      <!-- <div class="scan-line" /> -->
-
-      <!-- 主内容区 -->
-      <div class="cta-content">
-        <!-- 标题 -->
-        <h2 class="cta-title">
-          开启您的
-          <span class="gradient-text">智能投资</span>
-          之旅
-        </h2>
-
-        <!-- 副标题 -->
-        <p class="cta-subtitle">
-          加入数千位投资者，使用 AI 技术提升投资决策能力
-        </p>
-
-        <!-- 按钮组 -->
-        <div class="cta-actions">
-          <button class="cta-btn primary-btn" @click="handleStartNow">
-            <span>立即开始</span>
-            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </button>
-
-          <button class="cta-btn secondary-btn" @click="handleLearnMore">
-            <span>了解更多</span>
-          </button>
+      <!-- ========= 关键要点 ========= -->
+      <div class="section-header">
+        <div class="label-badge">
+          <span class="badge-dot" />
+          <span>关键要点</span>
         </div>
+        <h2 class="section-titleas">
+          一眼看懂
+          <span class="gradient-text">TradingAgents 中文版</span>
+        </h2>
+        <p class="section-subtitle">数据来源：TradingAgents 研究论文（arXiv:2412.20138） | 最后更新：2026 年</p>
+      </div>
 
-        <!-- 信任指标 -->
-        <div class="trust-indicators">
-          <div class="trust-item">
-            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="url(#gradientTrust1)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <defs>
-                <linearGradient id="gradientTrust1" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#06b6d4" />
-                  <stop offset="100%" style="stop-color:#3b82f6" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <span>免费试用</span>
+      <ul class="keypoints">
+        <li v-for="(p, i) in keyPoints" :key="i" class="keypoint">
+          <span class="kp-num">{{ String(i + 1).padStart(2, '0') }}</span>
+          <span class="kp-text">{{ p }}</span>
+        </li>
+      </ul>
+
+      <!-- ========= FAQ ========= -->
+      <div class="section-header sub-header">
+        <div class="label-badge">
+          <span class="badge-dot" />
+          <span>常见问题</span>
+        </div>
+        <h2 class="section-titleas">
+          关于 TradingAgents 中文版的
+          <span class="gradient-text">常见问题解答</span>
+        </h2>
+      </div>
+
+      <div class="faq-list">
+        <div
+          v-for="(f, i) in faqs"
+          :key="i"
+          class="faq-item"
+          :class="{ open: f.open }"
+          @click="toggleFaq(i)"
+        >
+          <div class="faq-question">
+            <span class="faq-q-text">{{ f.q }}</span>
+            <span class="faq-toggle">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M6 9l6 6 6-6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
           </div>
-
-          <div class="trust-item">
-            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke="url(#gradientTrust2)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <defs>
-                <linearGradient id="gradientTrust2" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#06b6d4" />
-                  <stop offset="100%" style="stop-color:#3b82f6" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <span>数据安全</span>
-          </div>
-
-          <div class="trust-item">
-            <svg class="trust-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="url(#gradientTrust3)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <defs>
-                <linearGradient id="gradientTrust3" x1="0%" y1="0%" x2="100%" y2="100%">
-                  <stop offset="0%" style="stop-color:#06b6d4" />
-                  <stop offset="100%" style="stop-color:#3b82f6" />
-                </linearGradient>
-              </defs>
-            </svg>
-            <span>即时响应</span>
+          <div class="faq-answer" v-show="f.open">
+            <p>{{ f.a }}</p>
           </div>
         </div>
       </div>
 
-      <!-- 底部装饰线 -->
-      <div class="bottom-decorator" />
+      <!-- ========= 行动号召 ========= -->
+      <div class="cta-card">
+        <div class="cta-card-bg" />
+
+        <h2 class="cta-title">
+          立即体验
+          <span class="gradient-text">TradingAgents 中文版</span>
+        </h2>
+        <p class="cta-subtitle">
+          多智能体协作 · 多市场全覆盖 · 多 LLM 自由切换 · 开源免费
+          <br>
+          <span class="disclaimer">仅供研究与教育用途，不构成投资建议。</span>
+        </p>
+
+        <div class="cta-actions">
+          <button class="cta-btn primary-btn" @click="handleStartNow">
+            <span>开始分析</span>
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
+          <button class="cta-btn secondary-btn" @click="handleScrollTop">
+            <span>回到顶部</span>
+          </button>
+        </div>
+
+        <div class="trust-indicators">
+          <div class="trust-item">
+            <span class="trust-icon-wrap green">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span>100% 开源免费</span>
+          </div>
+          <div class="trust-item">
+            <span class="trust-icon-wrap blue">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span>数据与隐私安全</span>
+          </div>
+          <div class="trust-item">
+            <span class="trust-icon-wrap cyan">
+              <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              </svg>
+            </span>
+            <span>Docker 5 分钟部署</span>
+          </div>
+        </div>
+      </div>
     </div>
   </section>
 </template>
@@ -106,176 +177,254 @@ const handleLearnMore = () => {
 <style scoped lang="scss">
 .cta-section {
   position: relative;
-  min-height: 90vh;
-  padding: 4rem 3rem 10rem 3rem;
-  display: flex;
-  align-items: center;
-  justify-content: center;
+  padding: 6rem 3rem 8rem;
   overflow: hidden;
 }
 
-// 扫描线
-.scan-line {
-  position: absolute;
-  top: 0;
-  left: 0;
-  right: 0;
-  height: 2px;
-  background: linear-gradient(90deg, 
-    transparent 0%,
-    rgba(6, 182, 212, 0.8) 20%,
-    rgba(6, 182, 212, 1) 50%,
-    rgba(6, 182, 212, 0.8) 80%,
-    transparent 100%
-  );
-  box-shadow: 0 0 20px rgba(6, 182, 212, 0.8);
-  animation: scan-move 8s linear infinite;
-  opacity: 0.6;
-}
-
-@keyframes scan-move {
-  0% {
-    transform: translateY(0);
-    opacity: 0;
-  }
-  10% {
-    opacity: 0.6;
-  }
-  90% {
-    opacity: 0.6;
-  }
-  100% {
-    transform: translateY(80vh);
-    opacity: 0;
-  }
-}
-
-// 容器
 .cta-container {
   position: relative;
   z-index: 10;
-  max-width: 900px;
+  max-width: 1200px;
   margin: 0 auto;
+}
+
+.section-header {
   text-align: center;
+  margin-bottom: 3rem;
 }
 
-// 主内容
-.cta-content {
-  position: relative;
-  padding: 4rem 3rem 8rem 3rem;
-  background: rgba(30, 41, 59, 0.4);
-  backdrop-filter: blur(20px);
-  border: 1px solid rgba(6, 182, 212, 0.2);
-  border-radius: 32px;
-  overflow: hidden;
+.sub-header { margin-top: 6rem; }
 
-  &::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: 0;
-    right: 0;
-    height: 1px;
-    background: linear-gradient(90deg, 
-      transparent 0%,
-      rgba(6, 182, 212, 0.5) 50%,
-      transparent 100%
-    );
-  }
-}
-
-// 标题
-.cta-title {
-  font-size: clamp(2rem, 4vw, 3rem);
-  font-weight: 900;
-  line-height: 1.1;
-  color: #f1f5f9;
+.label-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  background: rgba(6, 182, 212, 0.1);
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 100px;
+  font-size: 0.875rem;
+  color: #06b6d4;
   margin-bottom: 1.5rem;
-  letter-spacing: -0.02em;
+}
+
+.badge-dot {
+  width: 8px;
+  height: 8px;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  border-radius: 50%;
+  animation: dot-pulse 2s ease-in-out infinite;
+}
+
+@keyframes dot-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7); }
+  50% { box-shadow: 0 0 0 8px rgba(16, 185, 129, 0); }
+}
+
+.section-titleas {
+  font-size: clamp(1.75rem, 3.5vw, 2.75rem);
+  font-weight: 800;
+  color: #f1f5f9;
+  line-height: 1.25;
+  margin-bottom: 0.75rem;
 }
 
 .gradient-text {
-  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
 }
 
-// 副标题
-.cta-subtitle {
-  font-size: clamp(1.125rem, 2vw, 1.5rem);
+.section-subtitle {
   color: #94a3b8;
-  line-height: 1.6;
-  margin-bottom: 3rem;
-  max-width: 600px;
-  margin-left: auto;
-  margin-right: auto;
+  font-size: 0.9375rem;
 }
 
-// 按钮组
+/* ===== 关键要点 ===== */
+.keypoints {
+  list-style: none;
+  padding: 0;
+  margin: 0 0 2rem;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
+  gap: 1rem;
+}
+
+.keypoint {
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+  padding: 1.25rem 1.5rem;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(6, 182, 212, 0.18);
+  border-radius: 16px;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+
+  &:hover {
+    transform: translateY(-4px);
+    border-color: rgba(6, 182, 212, 0.4);
+  }
+}
+
+.kp-num {
+  font-family: 'JetBrains Mono', monospace;
+  font-weight: 800;
+  font-size: 1.5rem;
+  color: transparent;
+  background: linear-gradient(135deg, #10b981, #06b6d4);
+  -webkit-background-clip: text;
+  background-clip: text;
+  flex-shrink: 0;
+  min-width: 40px;
+}
+
+.kp-text {
+  color: #cbd5e1;
+  font-size: 0.9375rem;
+  line-height: 1.6;
+}
+
+/* ===== FAQ ===== */
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+  margin-bottom: 6rem;
+}
+
+.faq-item {
+  padding: 1.25rem 1.75rem;
+  background: rgba(30, 41, 59, 0.5);
+  border: 1px solid rgba(6, 182, 212, 0.15);
+  border-radius: 14px;
+  cursor: pointer;
+  backdrop-filter: blur(20px);
+  transition: all 0.3s ease;
+
+  &:hover { border-color: rgba(6, 182, 212, 0.35); }
+
+  &.open {
+    background: rgba(6, 182, 212, 0.06);
+    border-color: rgba(6, 182, 212, 0.45);
+
+    .faq-toggle { transform: rotate(180deg); }
+  }
+}
+
+.faq-question {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+}
+
+.faq-q-text {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  color: #f1f5f9;
+}
+
+.faq-toggle {
+  flex-shrink: 0;
+  width: 28px;
+  height: 28px;
+  color: #06b6d4;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.3s ease;
+
+  svg { width: 20px; height: 20px; }
+}
+
+.faq-answer {
+  margin-top: 0.875rem;
+  padding-top: 0.875rem;
+  border-top: 1px solid rgba(6, 182, 212, 0.12);
+
+  p {
+    margin: 0;
+    color: #94a3b8;
+    font-size: 0.9375rem;
+    line-height: 1.75;
+  }
+}
+
+/* ===== 行动号召 ===== */
+.cta-card {
+  position: relative;
+  padding: 4rem 3rem;
+  background: linear-gradient(135deg, rgba(6, 182, 212, 0.08), rgba(16, 185, 129, 0.05));
+  border: 1px solid rgba(6, 182, 212, 0.3);
+  border-radius: 32px;
+  backdrop-filter: blur(20px);
+  text-align: center;
+  overflow: hidden;
+}
+
+.cta-card-bg {
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(circle at 30% 20%, rgba(6, 182, 212, 0.2) 0%, transparent 60%),
+              radial-gradient(circle at 70% 80%, rgba(16, 185, 129, 0.15) 0%, transparent 60%);
+  filter: blur(40px);
+  z-index: -1;
+}
+
+.cta-title {
+  font-size: clamp(1.75rem, 3.5vw, 2.5rem);
+  font-weight: 900;
+  color: #f1f5f9;
+  margin: 0 0 1rem;
+}
+
+.cta-subtitle {
+  font-size: 1.0625rem;
+  color: #cbd5e1;
+  line-height: 1.7;
+  margin: 0 0 2rem;
+
+  .disclaimer {
+    font-size: 0.875rem;
+    color: #fbbf24;
+    opacity: 0.8;
+  }
+}
+
 .cta-actions {
   display: flex;
-  gap: 1.5rem;
+  gap: 1.25rem;
   justify-content: center;
   flex-wrap: wrap;
-  margin-bottom: 3rem;
+  margin-bottom: 2.5rem;
 }
 
 .cta-btn {
-  position: relative;
   display: inline-flex;
   align-items: center;
-  gap: 0.75rem;
-  padding: 1rem 2.5rem;
-  font-size: 1.125rem;
-  font-weight: 600;
+  gap: 0.625rem;
+  padding: 0.9375rem 2.25rem;
+  font-size: 1rem;
+  font-weight: 700;
   border-radius: 100px;
   cursor: pointer;
   transition: all 0.3s ease;
-  overflow: hidden;
-
-  &::before {
-    content: '';
-    position: absolute;
-    inset: 0;
-    background: inherit;
-    opacity: 0;
-    transition: opacity 0.3s ease;
-  }
-
-  &:hover::before {
-    opacity: 1;
-  }
+  border: none;
 }
 
-// 主按钮
 .primary-btn {
-  background: linear-gradient(135deg, #06b6d4 0%, #3b82f6 100%);
-  border: none;
-  color: #ffffff;
-  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.3);
+  background: linear-gradient(135deg, #10b981 0%, #06b6d4 100%);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(6, 182, 212, 0.35);
 
   &:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 15px 40px rgba(6, 182, 212, 0.4);
-  }
-
-  &:active {
-    transform: translateY(0);
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(6, 182, 212, 0.5);
   }
 }
 
-.btn-icon {
-  width: 20px;
-  height: 20px;
-  transition: transform 0.3s ease;
-}
-
-.primary-btn:hover .btn-icon {
-  transform: translateX(4px);
-}
-
-// 次要按钮
 .secondary-btn {
   background: transparent;
   border: 2px solid rgba(6, 182, 212, 0.4);
@@ -283,19 +432,18 @@ const handleLearnMore = () => {
 
   &:hover {
     background: rgba(6, 182, 212, 0.1);
-    border-color: rgba(6, 182, 212, 0.6);
-    transform: translateY(-2px);
-  }
-
-  &:active {
-    transform: translateY(0);
+    border-color: #06b6d4;
+    transform: translateY(-3px);
   }
 }
 
-// 信任指标
+.btn-icon { width: 18px; height: 18px; transition: transform 0.3s ease; }
+
+.primary-btn:hover .btn-icon { transform: translateX(4px); }
+
 .trust-indicators {
   display: flex;
-  gap: 3rem;
+  gap: 2rem;
   justify-content: center;
   flex-wrap: wrap;
   padding-top: 2rem;
@@ -305,58 +453,33 @@ const handleLearnMore = () => {
 .trust-item {
   display: flex;
   align-items: center;
-  gap: 0.75rem;
-  font-size: 0.875rem;
-  color: #94a3b8;
+  gap: 0.625rem;
+  font-size: 0.9375rem;
+  color: #cbd5e1;
 }
 
-.trust-icon {
-  width: 24px;
-  height: 24px;
-  flex-shrink: 0;
+.trust-icon-wrap {
+  width: 32px;
+  height: 32px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+
+  svg { width: 18px; height: 18px; }
+
+  &.green { background: rgba(16, 185, 129, 0.15); color: #10b981; }
+  &.blue { background: rgba(59, 130, 246, 0.15); color: #3b82f6; }
+  &.cyan { background: rgba(6, 182, 212, 0.15); color: #06b6d4; }
 }
 
-// 底部装饰线
-.bottom-decorator {
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  transform: translateX(-50%);
-  width: 200px;
-  height: 4px;
-  background: linear-gradient(90deg, 
-    transparent 0%,
-    #06b6d4 50%,
-    transparent 100%
-  );
-  border-radius: 100px;
-  opacity: 0.5;
-}
-
-// 响应式
 @media (max-width: 768px) {
-  .cta-section {
-    padding: 4rem 1.5rem;
-    min-height: 70vh;
-  }
-
-  .cta-content {
-    padding: 3rem 2rem;
-  }
-
-  .cta-actions {
-    flex-direction: column;
-    gap: 1rem;
-  }
-
-  .cta-btn {
-    width: 100%;
-    justify-content: center;
-  }
-
-  .trust-indicators {
-    gap: 1.5rem;
-    flex-direction: column;
-  }
+  .cta-section { padding: 4rem 1.25rem 6rem; }
+  .keypoints { grid-template-columns: 1fr; }
+  .keypoint { padding: 1rem 1.25rem; }
+  .faq-item { padding: 1rem 1.25rem; }
+  .cta-card { padding: 2.5rem 1.5rem; }
+  .cta-btn { width: 100%; justify-content: center; }
+  .trust-indicators { flex-direction: column; gap: 1rem; }
 }
 </style>

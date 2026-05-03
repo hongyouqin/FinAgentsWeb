@@ -30,16 +30,18 @@ const initParticles = () => {
   }))
 }
 
-// 模拟股票数据流（仅A股）
+// 模拟股票数据流（A股 / 港股 / 美股，呼应 TradingAgents 多市场覆盖）
 const stockData = ref([
   { code: 'SH.600519', name: '贵州茅台', price: '+2.34%', trend: 'up' },
   { code: 'SZ.000858', name: '五粮液', price: '+1.89%', trend: 'up' },
   { code: 'SH.601318', name: '中国平安', price: '+0.89%', trend: 'up' },
-  { code: 'SZ.000001', name: '平安银行', price: '+1.12%', trend: 'up' },
-  { code: 'SH.600036', name: '招商银行', price: '+0.76%', trend: 'up' },
   { code: 'SZ.002594', name: '比亚迪', price: '+3.45%', trend: 'up' },
-  { code: 'SH.688981', name: '中芯国际', price: '-0.23%', trend: 'down' },
   { code: 'SZ.300750', name: '宁德时代', price: '+2.18%', trend: 'up' },
+  { code: 'HK.00700', name: '腾讯控股', price: '+1.56%', trend: 'up' },
+  { code: 'HK.09988', name: '阿里巴巴-W', price: '+2.01%', trend: 'up' },
+  { code: 'US.NVDA', name: 'NVIDIA', price: '+3.12%', trend: 'up' },
+  { code: 'US.TSLA', name: '特斯拉', price: '-0.68%', trend: 'down' },
+  { code: 'US.AAPL', name: '苹果', price: '+0.42%', trend: 'up' },
 ])
 
 const handleStartAnalysis = () => {
@@ -122,8 +124,8 @@ onMounted(() => {
           <div class="logo-glow">
             <Logo :size="40" />
           </div>
-          <span class="logo-text">NB.STOCK</span>
-          <span class="logo-badge">AI</span>
+          <span class="logo-text">TradingAgents</span>
+          <span class="logo-badge">中文版</span>
         </div>
 
         <el-button type="primary" class="login-btn" @click="handleLogin">
@@ -142,22 +144,31 @@ onMounted(() => {
         <div class="hero-text">
           <div class="label-badge">
             <span class="badge-dot" />
-            <span>下一代量化交易平台</span>
+            <span>AI 驱动的金融分析 · 中文版</span>
           </div>
 
           <h1 class="hero-title">
-            <span class="title-line-1">AI 驱动的</span>
+            <span class="title-line-1">TradingAgents</span>
             <span class="title-line-2">
-              <span class="gradient-text">智能股票分析</span>
-              平台
+              <span class="gradient-text">多智能体AI</span>
+              金融交易决策框架
             </span>
           </h1>
 
           <p class="hero-subtitle">
-            深度分析 · 实时洞察 · 精准决策
+            TradingAgents-CN（TradingAgents 中文版）— 基于 LLM 的专业化 AI 团队，
             <br>
-            <span class="highlight">让每一次投资都基于数据与智能</span>
+            为您提供全方位的 <span class="highlight">A 股 / 港股 / 美股</span> 市场分析
+            <br>
+            <span class="highlight">仅供研究与教育用途，不构成投资建议。</span>
           </p>
+
+          <!-- 卖点徽章 -->
+          <div class="hero-tags">
+            <span class="hero-tag">原生 Docker 部署</span>
+            <span class="hero-tag">支持 A / 港 / 美 股</span>
+            <span class="hero-tag">多 LLM 自由切换</span>
+          </div>
 
           <!-- CTA 按钮组 -->
           <div class="cta-buttons">
@@ -165,33 +176,37 @@ onMounted(() => {
               <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span class="cta-label">开始免费分析</span>
+              <span class="cta-label">开始分析</span>
               <div class="button-glow" />
             </el-button>
             <el-button size="large" class="cta-secondary" @click="handleViewDemo">
               <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <circle cx="12" cy="12" r="10" stroke="currentColor" stroke-width="2"/>
-                <polygon points="10,8 16,12 10,16" fill="currentColor"/>
+                <path d="M9 12h6m-6 4h6m-6-8h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span class="cta-label">查看演示</span>
+              <span class="cta-label">查看报告</span>
             </el-button>
           </div>
 
           <!-- 数据统计 -->
           <div class="stats-row">
             <div class="stat-itemas">
-              <div class="stat-value">A股</div>
-              <div class="stat-label">市场覆盖</div>
+              <div class="stat-value">158+</div>
+              <div class="stat-label">股票分析报告</div>
             </div>
             <div class="stat-divider" />
             <div class="stat-itemas">
-              <div class="stat-value">5000+</div>
-              <div class="stat-label">上市公司</div>
+              <div class="stat-value">7</div>
+              <div class="stat-label">专业智能体</div>
             </div>
             <div class="stat-divider" />
             <div class="stat-itemas">
-              <div class="stat-value">24/7</div>
-              <div class="stat-label">实时监控</div>
+              <div class="stat-value">5+</div>
+              <div class="stat-label">主流 LLM 模型</div>
+            </div>
+            <div class="stat-divider" />
+            <div class="stat-itemas">
+              <div class="stat-value">100%</div>
+              <div class="stat-label">开源免费</div>
             </div>
           </div>
         </div>
@@ -200,7 +215,7 @@ onMounted(() => {
         <div class="hero-visual">
           <div class="data-card card-1">
             <div class="card-header">
-              <span class="card-titleas">上证指数</span>
+              <span class="card-titleas">A 股 · 上证指数</span>
               <span class="card-trend up">+1.85%</span>
             </div>
             <div class="card-chart">
@@ -226,7 +241,7 @@ onMounted(() => {
 
           <div class="data-card card-2">
             <div class="card-header">
-              <span class="card-titleas">深证成指</span>
+              <span class="card-titleas">港股 · 恒生指数</span>
               <span class="card-trend up">+2.13%</span>
             </div>
             <div class="card-chart">
@@ -252,7 +267,7 @@ onMounted(() => {
 
           <div class="data-card card-3">
             <div class="card-header">
-              <span class="card-titleas">创业板指</span>
+              <span class="card-titleas">美股 · 纳斯达克</span>
               <span class="card-trend up">+1.67%</span>
             </div>
             <div class="card-chart">
@@ -672,6 +687,33 @@ onMounted(() => {
   .highlight {
     color: #06b6d4;
     font-weight: 500;
+  }
+}
+
+// 卖点徽章
+.hero-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+  margin-bottom: 2rem;
+}
+
+.hero-tag {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.375rem 0.875rem;
+  font-size: 0.8125rem;
+  color: #a7f3d0;
+  background: rgba(16, 185, 129, 0.08);
+  border: 1px solid rgba(16, 185, 129, 0.25);
+  border-radius: 100px;
+  backdrop-filter: blur(10px);
+
+  &::before {
+    content: '✓';
+    margin-right: 0.375rem;
+    color: #10b981;
+    font-weight: 700;
   }
 }
 
