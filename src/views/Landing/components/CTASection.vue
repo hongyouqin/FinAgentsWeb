@@ -7,38 +7,38 @@ const router = useRouter()
 
 // 关键要点
 const keyPoints = ref([
-  '多智能体协作系统：通过 7-8 个专业化 AI 智能体协作完成投资分析和交易决策',
-  '准确率达 68.5%：超过基准线 23.2 个百分点（基准线 45.3%）',
-  '全市场覆盖：支持 A 股、港股、美股三大市场分析',
-  '多模型支持：集成阿里百炼（Qwen）、OpenAI、Google Gemini 等主流 LLM',
-  '开源免费：基于 MIT 协议，GitHub 31.9k+ stars',
+  '多智能体协作系统：7 个专业 AI 角色分工协作，完成全流程投资分析与决策',
+  '专注 A 股市场：覆盖上交所、深交所、北交所近 5000 只 A 股，中文金融语境深度优化',
+  '国产大模型驱动：集成 DeepSeek V4、阿里千问 Qwen 等国产主流 LLM，合规可控',
+  '在线即用：免安装免环境配置，注册账号即可使用，新用户免费分析额度',
+  '专业研报输出：支持 PDF / Word / Markdown 导出，包含完整推理链与多空辩证记录',
 ])
 
 // FAQ（与 index.html JSON-LD 保持一致，有利于 SEO）
 const faqs = ref([
   {
-    q: 'TradingAgents 中文版和原版有什么区别？',
-    a: 'TradingAgents-CN 是 TradingAgents 的官方中文优化版本，专为中国市场设计。主要区别包括：1) 原生支持 A 股数据源（Tushare / AkShare）；2) 集成阿里百炼（Qwen）等国内 LLM 模型；3) 针对中文金融语境优化提示词；4) 提供中文文档和技术支持。',
+    q: 'TradingAgents 中文版是什么？',
+    a: 'TradingAgents 中文版（TradingAgents-CN）是面向 A 股投资者的多智能体 AI 股票分析在线平台。由基本面分析师、情绪分析师、新闻分析师、技术分析师与研究员、交易员、风险经理等多个专业 AI 角色协作，整合 A 股行情、财报、新闻与市场情绪，输出可解释的 AI 研报。',
     open: true,
   },
   {
-    q: 'TradingAgents-CN 支持哪些 LLM 模型？',
-    a: '支持多种主流 LLM 模型，包括：OpenAI GPT-4 / GPT-3.5、Google Gemini、阿里百炼（Qwen）、DeepSeek 等。您可以通过配置文件一键切换模型，也支持同时使用多个模型进行对比分析。',
+    q: '支持哪些 LLM 模型？',
+    a: '目前集成国产主流大模型，包括 DeepSeek V4、阿里千问 Qwen 等，后续将持续接入更多国产模型。您可以在界面一键切换模型，也支持同时使用多个模型进行对比分析，权衡不同模型的思路与观点。',
     open: false,
   },
   {
     q: '支持哪些股票市场？',
-    a: 'TradingAgents 中文版全面支持中国 A 股、港股和美股三大市场。A 股数据通过 Tushare 和 AkShare 获取，港股和美股数据通过 FinnHub 和 Yahoo Finance 获取，确保数据的实时性和准确性。',
+    a: 'TradingAgents 中文版目前专注于中国 A 股市场，全面覆盖上交所主板、科创板、深交所主板、创业板以及北交所近 5000 只 A 股。A 股数据通过 Tushare 、 AkShare 、 BaoStock 等主流数据源获取，确保数据的实时性与准确性。',
     open: false,
   },
   {
-    q: '如何部署 TradingAgents-CN？',
-    a: '提供 Docker 一键部署方案，只需 5 分钟即可搭建完成。步骤：1) 安装 Docker；2) 克隆项目仓库；3) 配置 API 密钥；4) 运行 docker-compose up。支持本地部署和云端部署。',
+    q: '如何开始使用 TradingAgents 中文版？',
+    a: '无需任何安装或部署，打开官网注册账号后即可在线使用。新用户注册即赠免费分析额度，输入股票代码或名称，选择分析模型和分析维度，即可开始 AI 分析，几分钟内获得专业研报。',
     open: false,
   },
   {
-    q: 'TradingAgents 的分析结果可以直接用于实盘交易吗？',
-    a: 'TradingAgents-CN 仅供研究与教育用途，不构成任何投资建议。实际投资决策需结合个人风险承受能力、市场环境与专业顾问意见，平台对任何投资损失不承担责任。',
+    q: 'AI 的分析结果可以直接用于实盘交易吗？',
+    a: 'TradingAgents 中文版仅供研究与教育用途，不构成任何投资建议。实际投资决策需结合您个人的风险承受能力、市场环境与专业顾问意见，平台对任何投资损失不承担责任。',
     open: false,
   },
 ])
@@ -122,18 +122,18 @@ const handleScrollTop = () => {
         <div class="cta-card-bg" />
 
         <h2 class="cta-title">
-          立即体验
-          <span class="gradient-text">TradingAgents 中文版</span>
+          立即开始您的
+          <span class="gradient-text">AI 研报之旅</span>
         </h2>
         <p class="cta-subtitle">
-          多智能体协作 · 多市场全覆盖 · 多 LLM 自由切换 · 开源免费
+          免安装 · 在线即用 · 注册赠送免费分析额度 · 国产大模型驱动
           <br>
           <span class="disclaimer">仅供研究与教育用途，不构成投资建议。</span>
         </p>
 
         <div class="cta-actions">
           <button class="cta-btn primary-btn" @click="handleStartNow">
-            <span>开始分析</span>
+            <span>免费注册 · 立即体验</span>
             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -150,7 +150,7 @@ const handleScrollTop = () => {
                 <path d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
-            <span>100% 开源免费</span>
+            <span>注册即赠免费额度</span>
           </div>
           <div class="trust-item">
             <span class="trust-icon-wrap blue">
@@ -166,7 +166,7 @@ const handleScrollTop = () => {
                 <path d="M13 10V3L4 14h7v7l9-11h-7z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
             </span>
-            <span>Docker 5 分钟部署</span>
+            <span>几分钟得出研报</span>
           </div>
         </div>
       </div>

@@ -5,7 +5,7 @@ import { ref } from 'vue'
 const frameworkHighlights = ref([
   { title: '多智能体协作', desc: '结构化输出与辩证推理', icon: 'agents' },
   { title: '风险对齐', desc: '可解释与可评估', icon: 'risk' },
-  { title: '无 GPU 运行', desc: '可扩展架构', icon: 'cloud' },
+  { title: '在线即用', desc: '免安装免配置', icon: 'cloud' },
   { title: '模块化设计', desc: '灵活组件配置', icon: 'module' },
 ])
 
@@ -183,7 +183,7 @@ const roleSections = ref([
         </div>
         <div class="summary-card">
           <div class="summary-tag">数据与模型管理</div>
-          <p>支持多 LLM 供应商与模型能力管理；统一管理 Alpha Vantage、Tushare、AkShare、BaoStock 等数据源。</p>
+          <p>集成 DeepSeek V4、阿里千问 Qwen 等国产主流大模型；打通 Tushare、AkShare、BaoStock 等 A 股主流数据源。</p>
         </div>
         <div class="summary-card">
           <div class="summary-tag">准确率 68.5%</div>

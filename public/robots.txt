@@ -1,0 +1,73 @@
+# robots.txt for TradingAgents 中文版 · NB.STOCK.AI
+# https://nbstockai.com/
+
+# ========= 主流搜索引擎（允许全站抓取公开页面） =========
+User-agent: Baiduspider
+Allow: /
+
+User-agent: Baiduspider-image
+Allow: /
+
+User-agent: Sogou web spider
+Allow: /
+
+User-agent: Sogou inst spider
+Allow: /
+
+User-agent: 360Spider
+Allow: /
+
+User-agent: Yisouspider
+Allow: /
+
+User-agent: Bytespider
+Allow: /
+
+User-agent: Googlebot
+Allow: /
+
+User-agent: Googlebot-Image
+Allow: /
+
+User-agent: Bingbot
+Allow: /
+
+# ========= 其它通用爬虫 =========
+User-agent: *
+Allow: /
+
+# ========= 禁止抓取的内部路径（登录后业务页、接口、管理后台等） =========
+Disallow: /dashboard
+Disallow: /analysis/
+Disallow: /screening
+Disallow: /favorites
+Disallow: /stocks/
+Disallow: /tasks
+Disallow: /queue
+Disallow: /reports/
+Disallow: /settings/
+Disallow: /recharge
+Disallow: /invite-codes
+Disallow: /statistics
+Disallow: /strategy
+Disallow: /paper
+Disallow: /api/
+Disallow: /admin/
+Disallow: /*?token=
+Disallow: /*?redirect=
+Disallow: /clear_auth.html
+
+# ========= 明确允许的公开页面（写出来让蜘蛛更容易发现） =========
+Allow: /$
+Allow: /about
+Allow: /login
+Allow: /register
+Allow: /user-agreement
+Allow: /privacy-policy
+Allow: /learning
+
+# ========= Sitemap =========
+Sitemap: https://nbstockai.com/sitemap.xml
+
+# ========= 抓取延迟（避免被 360/搜狗 压垮服务器；百度、谷歌会忽略） =========
+Crawl-delay: 2

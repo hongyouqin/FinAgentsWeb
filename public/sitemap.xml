@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  TradingAgents 中文版 - Sitemap
+  规范：https://www.sitemaps.org/protocol.html
+  百度官方说明：https://ziyuan.baidu.com/linksubmit/index
+  更新日期：2026-05-03
+-->
+<urlset
+  xmlns="http://www.sitemaps.org/schemas/sitemap/0.9"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.sitemaps.org/schemas/sitemap/0.9 http://www.sitemaps.org/schemas/sitemap/0.9/sitemap.xsd">
+
+  <!-- 首页（品牌主词：TradingAgents 中文版 / 多智能体AI金融交易决策框架） -->
+  <url>
+    <loc>https://nbstockai.com/</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>daily</changefreq>
+    <priority>1.0</priority>
+  </url>
+
+  <!-- 关于页（TradingAgents 介绍 / 团队） -->
+  <url>
+    <loc>https://nbstockai.com/about</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 学习中心（内容 SEO：AI 股票分析教程 / 策略指标说明） -->
+  <url>
+    <loc>https://nbstockai.com/learning</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 注册（转化落地页：AI 股票分析免费注册） -->
+  <url>
+    <loc>https://nbstockai.com/register</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+
+  <!-- 登录（拦截品牌词 + 登录类搜索） -->
+  <url>
+    <loc>https://nbstockai.com/login</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.6</priority>
+  </url>
+
+  <!-- 用户协议（合规页） -->
+  <url>
+    <loc>https://nbstockai.com/user-agreement</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!-- 隐私政策（合规页） -->
+  <url>
+    <loc>https://nbstockai.com/privacy-policy</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>yearly</changefreq>
+    <priority>0.3</priority>
+  </url>
+
+  <!--
+    【待建】后续每新建一个静态落地页 / 学习中心文章 / 公开 AI 研报，
+    均需追加 <url> 条目，并用百度资源平台 API 主动推送：
+      - https://nbstockai.com/tradingagents               （品牌介绍页）
+      - https://nbstockai.com/guide/ai-stock-analysis     （AI 股票分析教程）
+      - https://nbstockai.com/guide/deepseek-stock        （DeepSeek 炒股教程）
+      - https://nbstockai.com/faq                         （常见问题）
+      - https://nbstockai.com/learning/article/{slug}     （学习中心文章）
+  -->
+</urlset>

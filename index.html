@@ -4,35 +4,66 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/favicon.ico" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
-    <title>TradingAgents中文版 | 多智能体AI金融交易决策框架 - A股/港股/美股 AI 分析平台</title>
-    <meta name="description" content="TradingAgents中文版（TradingAgents-CN）是基于 LLM 的多智能体AI金融交易决策框架，由基本面、情绪、新闻、技术分析师与研究员、交易员、风险经理协同工作，原生支持 A 股、港股、美股，集成 OpenAI、Gemini、Qwen、DeepSeek 等多 LLM 模型，提供可解释的 AI 研报、辩证推理与专业报告导出，支持 Docker 一键部署。" />
-    <meta name="keywords" content="TradingAgents,TradingAgents中文版,TradingAgents-CN,tradingagents官网,多智能体AI金融交易决策框架,AI股票分析,多智能体交易,多Agent股票分析,AI选股,智能选股系统,AI量化分析,A股AI分析,美股分析工具,港股分析,AI研报,LLM股票分析,大模型炒股,AI投资助手,智能投顾,量化交易平台,LangGraph,Tauric Research,TradingAgents 论文" />
+    <title>TradingAgents中文版 | 多智能体AI金融交易决策框架 - A股 AI 在线分析平台</title>
+    <meta name="description" content="TradingAgents中文版（TradingAgents-CN）是面向 A 股投资者的多智能体 AI 股票分析在线平台，由基本面、情绪、新闻、技术分析师与研究员、交易员、风险经理协同工作，基于 DeepSeek V4、阿里千问 Qwen 等国产大模型，提供可解释的 AI 研报、多空辩证与专业报告导出，免安装在线即用。" />
+    <meta name="keywords" content="TradingAgents,TradingAgents中文版,TradingAgents-CN,tradingagents官网,多智能体AI金融交易决策框架,A股AI分析,AI股票分析,多智能体交易,多Agent股票分析,AI选股,智能选股系统,A股智能分析,AI量化分析,AI研报,LLM股票分析,大模型炒股,DeepSeek炒股,千问股票分析,国产大模型,AI投资助手,智能投顾,量化交易平台,在线股票分析" />
     <meta name="author" content="TradingAgents-CN Team" />
     
-    <!-- 百度SEO优化 -->
-    <meta name="robots" content="index,follow" />
-    <meta name="googlebot" content="index,follow" />
+    <!-- 搜索引擎抓取指令 -->
+    <meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1" />
+    <meta name="googlebot" content="index,follow,max-image-preview:large" />
     <meta name="baiduspider" content="index,follow" />
+    <meta name="bingbot" content="index,follow" />
+    <meta name="sogou web spider" content="index,follow" />
+    <meta name="360spider" content="index,follow" />
+    <meta name="yisouspider" content="index,follow" />
+    <meta name="bytespider" content="index,follow" />
+
+    <!-- 移动适配 / 设备适配（百度移动收录关键） -->
     <meta name="applicable-device" content="pc,mobile" />
     <meta name="MobileOptimized" content="width" />
     <meta name="HandheldFriendly" content="true" />
-    <link rel="canonical" href="https://tradingagents.cn/" />
+    <meta name="format-detection" content="telephone=no,email=no,address=no" />
+    <meta name="renderer" content="webkit" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+
+    <!-- 地理与语言信号 -->
+    <meta name="geo.region" content="CN" />
+    <meta name="geo.placename" content="China" />
+    <meta http-equiv="content-language" content="zh-CN" />
+
+    <!-- 标准链接（避免重复内容被百度封权重） -->
+    <link rel="canonical" href="https://nbstockai.com/" />
+    <link rel="alternate" hreflang="zh-CN" href="https://nbstockai.com/" />
+    <link rel="alternate" hreflang="x-default" href="https://nbstockai.com/" />
+
+    <!-- sitemap 与 robots 反向声明 -->
+    <link rel="sitemap" type="application/xml" title="Sitemap" href="/sitemap.xml" />
+
+    <!-- 【待替换】搜索引擎站长平台验证 meta（获取验证码后置换 content） -->
+    <meta name="baidu-site-verification" content="codeva-ePLeewhrOW" />
+    <meta name="360-site-verification" content="XXXXXXXXXXXX" />
+    <meta name="sogou_site_verification" content="XXXXXXXXXXXX" />
+    <meta name="shenma-site-verification" content="XXXXXXXXXXXX" />
+    <meta name="bytedance-verification-code" content="XXXXXXXXXXXX" />
+    <meta name="google-site-verification" content="XXXXXXXXXXXX" />
+    <meta name="msvalidate.01" content="XXXXXXXXXXXX" />
 
     <!-- Open Graph -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="TradingAgents 中文版" />
     <meta property="og:title" content="TradingAgents中文版 | 多智能体AI金融交易决策框架" />
-    <meta property="og:description" content="基于 LLM 的专业化 AI 团队，为您提供全方位的 A 股 / 港股 / 美股市场分析。多智能体协作、辩证推理、多 LLM 自由切换，Docker 一键部署。" />
-    <meta property="og:url" content="https://tradingagents.cn/" />
-    <meta property="og:image" content="https://tradingagents.cn/assets/schema.png" />
-    <meta property="og:locale" content="zh-CN" />
-
+    <meta property="og:description" content="面向 A 股投资者的多智能体 AI 分析平台。DeepSeek V4、千问 Qwen 等国产大模型驱动，多角色协作与多空辩证，打开网页即可免安装使用。" />
+    <meta property="og:url" content="https://nbstockai.com/" />
+    <meta property="og:image" content="https://nbstockai.com/assets/schema.png" />
+    <meta property="og:locale" content="zh_CN" />
+    
     <!-- Twitter Card -->
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:title" content="TradingAgents中文版 | 多智能体AI金融交易决策框架" />
-    <meta name="twitter:description" content="多智能体协作 · 多市场覆盖 · 多 LLM 集成 · 专业报告导出 · Docker 一键部署。" />
-    <meta name="twitter:image" content="https://tradingagents.cn/assets/schema.png" />
-
+    <meta name="twitter:description" content="A 股 AI 在线分析 · 多智能体协作 · DeepSeek V4 / 千问 Qwen 驱动 · 专业报告导出。" />
+    <meta name="twitter:image" content="https://nbstockai.com/assets/schema.png" />
+    
     <!-- JSON-LD 结构化数据 -->
     <script type="application/ld+json">
     {
@@ -41,9 +72,9 @@
       "name": "TradingAgents 中文版",
       "alternateName": ["TradingAgents-CN", "TradingAgents 多智能体AI金融交易决策框架"],
       "applicationCategory": "FinanceApplication",
-      "operatingSystem": "Web, Docker",
-      "description": "基于 LLM 的多智能体AI金融交易决策框架，原生支持 A 股、港股、美股，集成多 LLM 模型，提供可解释的 AI 研报。",
-      "url": "https://tradingagents.cn/",
+      "operatingSystem": "Web",
+      "description": "面向 A 股投资者的多智能体 AI 在线分析平台，集成 DeepSeek V4、千问 Qwen 等国产大模型，提供可解释的 AI 研报。",
+      "url": "https://nbstockai.com/",
       "inLanguage": "zh-CN",
       "offers": { "@type": "Offer", "price": "0", "priceCurrency": "CNY" },
       "aggregateRating": { "@type": "AggregateRating", "ratingValue": "4.9", "ratingCount": "158" }
@@ -56,25 +87,62 @@
       "mainEntity": [
         {
           "@type": "Question",
-          "name": "TradingAgents 中文版和原版有什么区别？",
-          "acceptedAnswer": { "@type": "Answer", "text": "TradingAgents-CN 是 TradingAgents 的中文优化版本，原生支持 A 股数据源（Tushare/AkShare），集成阿里百炼 Qwen、DeepSeek 等国内 LLM，针对中文金融语境优化提示词，并提供中文文档与技术支持。" }
+          "name": "TradingAgents 中文版是什么？",
+          "acceptedAnswer": { "@type": "Answer", "text": "TradingAgents 中文版（TradingAgents-CN）是面向 A 股投资者的多智能体 AI 股票分析在线平台，由多个专业 AI 角色协作完成基本面、情绪、新闻、技术面研判，输出可解释的 AI 研报。" }
         },
         {
           "@type": "Question",
-          "name": "TradingAgents-CN 支持哪些 LLM 模型？",
-          "acceptedAnswer": { "@type": "Answer", "text": "支持 OpenAI GPT-4/GPT-3.5、Google Gemini、阿里百炼 Qwen、DeepSeek 等主流大模型，可一键切换或同时使用多模型对比分析。" }
+          "name": "支持哪些 LLM 模型？",
+          "acceptedAnswer": { "@type": "Answer", "text": "目前集成国产主流大模型，包括 DeepSeek V4、阿里千问 Qwen 等，后续将持续接入更多国产模型。支持一键切换与多模型对比分析。" }
         },
         {
           "@type": "Question",
           "name": "支持哪些股票市场？",
-          "acceptedAnswer": { "@type": "Answer", "text": "全面支持中国 A 股、港股与美股。A 股数据通过 Tushare / AkShare 获取，港美股通过 FinnHub / Yahoo Finance 获取。" }
+          "acceptedAnswer": { "@type": "Answer", "text": "目前专注于中国 A 股市场（上交所 / 深交所 / 北交所），为国内投资者提供深度优化的数据源与中文金融语境分析。" }
         },
         {
           "@type": "Question",
-          "name": "如何部署 TradingAgents-CN？",
-          "acceptedAnswer": { "@type": "Answer", "text": "提供 Docker 一键部署方案，5 分钟即可搭建完成，支持本地部署与云端部署。" }
+          "name": "如何开始使用 TradingAgents 中文版？",
+          "acceptedAnswer": { "@type": "Answer", "text": "无需任何安装部署，访问官网注册账号后即可在线使用，注册即赠免费分析额度，输入股票代码或名称即可开始 AI 分析。" }
         }
       ]
+    }
+    </script>
+
+    <!-- JSON-LD: Organization（官方组织信息，提升百度 / Google 企业实体权重） -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "Organization",
+      "name": "TradingAgents 中文版",
+      "alternateName": ["TradingAgents-CN", "TradingAgents中文版官网"],
+      "url": "https://nbstockai.com/",
+      "logo": "https://nbstockai.com/logo.svg",
+      "description": "面向 A 股投资者的多智能体 AI 股票分析在线平台，基于 DeepSeek V4、阿里千问 Qwen 等国产大模型。",
+      "inLanguage": "zh-CN",
+      "foundingDate": "2025",
+      "sameAs": [
+        "https://github.com/TauricResearch/TradingAgents",
+        "https://www.tradingagents-cn.com/"
+      ]
+    }
+    </script>
+
+    <!-- JSON-LD: WebSite（启用站内搜索盒与品牌知识图谱） -->
+    <script type="application/ld+json">
+    {
+      "@context": "https://schema.org",
+      "@type": "WebSite",
+      "name": "TradingAgents 中文版",
+      "alternateName": "TradingAgents-CN",
+      "url": "https://nbstockai.com/",
+      "inLanguage": "zh-CN",
+      "publisher": { "@type": "Organization", "name": "TradingAgents 中文版", "url": "https://nbstockai.com/" },
+      "potentialAction": {
+        "@type": "SearchAction",
+        "target": "https://nbstockai.com/screening?keyword={search_term_string}",
+        "query-input": "required name=search_term_string"
+      }
     }
     </script>
 

@@ -12,17 +12,17 @@ const traditionalPoints = ref([
   '仅依赖历史数据，对突发新闻反应迟钝',
   '缺乏推理过程，"黑盒" 决策难解释',
   '仅处理结构化数据，无法理解文本情绪',
-  '需要复杂数学建模背景',
+  '需要复杂数学建模背景，不适合个人投资者',
 ])
 
 const engineAdvantages = ref([
-  '多模态分析：同时处理行情、财报、新闻、社交媒体',
+  '多维度分析：同时研判行情、财报、新闻与市场情绪',
   '透明推理：完整思维链与多角色辩论记录',
-  '实时感知：获取全球最新宏观资讯',
-  '模块化设计：可扩展、可评估、可解释',
+  '实时感知：打通 A 股主流数据源与财经资讯',
+  '开箱即用：注册账号即可在线分析，无需编程基础',
 ])
 
-// 企业级平台六大核心能力（对齐 TradingAgents-CN 官方介绍）
+// 企业级平台六大核心能力
 const features = ref([
   {
     id: 'multi-agent',
@@ -32,16 +32,16 @@ const features = ref([
     link: '/analysis/single',
   },
   {
-    id: 'multi-market',
-    title: '多市场全覆盖',
-    description: '原生支持中国 A 股（Tushare / AkShare）、港股及美股（FinnHub / Yahoo），本地化适配中文金融语境。',
+    id: 'a-share',
+    title: 'A 股全市场深度覆盖',
+    description: '覆盖上交所、深交所、北交所近 5000 只 A 股，内置行情、财报、公告与资金流向数据，中文金融语境深度优化。',
     icon: 'globe',
     link: '/screening',
   },
   {
-    id: 'multi-llm',
-    title: '多 LLM 模型集成',
-    description: '一键切换 OpenAI、Google Gemini、阿里百炼（Qwen）、DeepSeek 等模型，支持 URL 持久化配置，降低使用成本。',
+    id: 'llm',
+    title: '国产大模型驱动',
+    description: '集成 DeepSeek V4、阿里千问 Qwen 等国产主流大模型，合规合规、响应快速，支持一键切换与多模型对比分析。',
     icon: 'chip',
     link: '/analysis/single',
   },
@@ -53,16 +53,16 @@ const features = ref([
     link: '/reports',
   },
   {
-    id: 'docker',
-    title: 'Docker 一键部署',
-    description: '提供便捷的部署方案，五分钟内搭建私有化金融分析平台，支持本地运行与云端部署。',
-    icon: 'docker',
-    link: '/about',
+    id: 'online',
+    title: '在线即用，无需安装',
+    description: '免本地部署、免环境配置，打开网页注册账号即可开始分析。注册即赠免费分析额度，立刻体验 AI 研报能力。',
+    icon: 'online',
+    link: '/login',
   },
   {
     id: 'risk',
     title: '合规与风控',
-    description: '内置多层级风控模块，支持"中立 / 激进 / 保守"风格切换。仅做辅助决策工具，严格遵循合规要求。',
+    description: '内置多层级风控模块，支持"中立 / 激进 / 保守" 风格切换。仅做辅助决策工具，严格遵循合规要求。',
     icon: 'shield',
     link: '/analysis/single',
   },
@@ -145,9 +145,9 @@ const handleCardClick = (link: string) => {
       <!-- ========= 关键数字 ========= -->
       <div class="metrics-row">
         <div class="metric">
-          <div class="metric-value">158<span>+</span></div>
-          <div class="metric-label">股票分析报告</div>
-          <div class="metric-hint">覆盖 A 股、港股、美股</div>
+          <div class="metric-value">5000<span>+</span></div>
+          <div class="metric-label">A 股上市公司</div>
+          <div class="metric-hint">上交所 / 深交所 / 北交所全覆盖</div>
         </div>
         <div class="metric">
           <div class="metric-value">7</div>
@@ -155,14 +155,14 @@ const handleCardClick = (link: string) => {
           <div class="metric-hint">分析师、研究员、交易员协作</div>
         </div>
         <div class="metric">
-          <div class="metric-value">5<span>+</span></div>
-          <div class="metric-label">主流 LLM 模型</div>
-          <div class="metric-hint">OpenAI、Gemini、Qwen 等</div>
+          <div class="metric-value">2</div>
+          <div class="metric-label">国产主流 LLM</div>
+          <div class="metric-hint">DeepSeek V4、阿里千问 Qwen</div>
         </div>
         <div class="metric">
-          <div class="metric-value">100<span>%</span></div>
-          <div class="metric-label">开源免费</div>
-          <div class="metric-hint">完全开源，社区驱动</div>
+          <div class="metric-value">¥0</div>
+          <div class="metric-label">注册赠送</div>
+          <div class="metric-hint">新用户免费分析额度</div>
         </div>
       </div>
 
@@ -215,15 +215,12 @@ const handleCardClick = (link: string) => {
               <path d="M14 2v6h6M8 13h8M8 17h5M8 9h3" stroke="url(#greport)" stroke-width="1.5" stroke-linecap="round"/>
               <defs><linearGradient id="greport" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#22d3ee"/><stop offset="100%" stop-color="#3b82f6"/></linearGradient></defs>
             </svg>
-            <!-- Docker -->
-            <svg v-else-if="feature.icon === 'docker'" class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-              <rect x="3" y="11" width="3" height="3" stroke="url(#gdocker)" stroke-width="1.3"/>
-              <rect x="7" y="11" width="3" height="3" stroke="url(#gdocker)" stroke-width="1.3"/>
-              <rect x="11" y="11" width="3" height="3" stroke="url(#gdocker)" stroke-width="1.3"/>
-              <rect x="7" y="7" width="3" height="3" stroke="url(#gdocker)" stroke-width="1.3"/>
-              <rect x="11" y="7" width="3" height="3" stroke="url(#gdocker)" stroke-width="1.3"/>
-              <path d="M2 15c2 2 5 2 8 2s10-1 12-5c-1 0-2 0-3 1" stroke="url(#gdocker)" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <defs><linearGradient id="gdocker" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
+            <!-- 在线即用 -->
+            <svg v-else-if="feature.icon === 'online'" class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M3 5h18v12H3z" stroke="url(#gonline)" stroke-width="1.5" stroke-linejoin="round"/>
+              <path d="M8 21h8M12 17v4" stroke="url(#gonline)" stroke-width="1.5" stroke-linecap="round"/>
+              <path d="M8 11l3 3 5-5" stroke="url(#gonline)" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/>
+              <defs><linearGradient id="gonline" x1="0" y1="0" x2="1" y2="1"><stop offset="0%" stop-color="#0ea5e9"/><stop offset="100%" stop-color="#06b6d4"/></linearGradient></defs>
             </svg>
             <!-- 合规 -->
             <svg v-else-if="feature.icon === 'shield'" class="feature-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">

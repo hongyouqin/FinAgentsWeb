@@ -30,18 +30,18 @@ const initParticles = () => {
   }))
 }
 
-// 模拟股票数据流（A股 / 港股 / 美股，呼应 TradingAgents 多市场覆盖）
+// 模拟股票数据流（专注 A 股）
 const stockData = ref([
   { code: 'SH.600519', name: '贵州茅台', price: '+2.34%', trend: 'up' },
   { code: 'SZ.000858', name: '五粮液', price: '+1.89%', trend: 'up' },
   { code: 'SH.601318', name: '中国平安', price: '+0.89%', trend: 'up' },
+  { code: 'SZ.000001', name: '平安银行', price: '+1.12%', trend: 'up' },
+  { code: 'SH.600036', name: '招商银行', price: '+0.76%', trend: 'up' },
   { code: 'SZ.002594', name: '比亚迪', price: '+3.45%', trend: 'up' },
+  { code: 'SH.688981', name: '中芯国际', price: '-0.23%', trend: 'down' },
   { code: 'SZ.300750', name: '宁德时代', price: '+2.18%', trend: 'up' },
-  { code: 'HK.00700', name: '腾讯控股', price: '+1.56%', trend: 'up' },
-  { code: 'HK.09988', name: '阿里巴巴-W', price: '+2.01%', trend: 'up' },
-  { code: 'US.NVDA', name: 'NVIDIA', price: '+3.12%', trend: 'up' },
-  { code: 'US.TSLA', name: '特斯拉', price: '-0.68%', trend: 'down' },
-  { code: 'US.AAPL', name: '苹果', price: '+0.42%', trend: 'up' },
+  { code: 'SH.600900', name: '长江电力', price: '+0.56%', trend: 'up' },
+  { code: 'SZ.002415', name: '海康威视', price: '+1.34%', trend: 'up' },
 ])
 
 const handleStartAnalysis = () => {
@@ -156,18 +156,18 @@ onMounted(() => {
           </h1>
 
           <p class="hero-subtitle">
-            TradingAgents-CN（TradingAgents 中文版）— 基于 LLM 的专业化 AI 团队，
+            TradingAgents-CN（TradingAgents 中文版）— 基于国产大模型的专业化 AI 团队，
             <br>
-            为您提供全方位的 <span class="highlight">A 股 / 港股 / 美股</span> 市场分析
+            专注为 <span class="highlight">中国 A 股投资者</span> 提供智能股票分析
             <br>
-            <span class="highlight">仅供研究与教育用途，不构成投资建议。</span>
+            <span class="highlight">开箱即用，仅供研究与教育用途，不构成投资建议。</span>
           </p>
 
           <!-- 卖点徽章 -->
           <div class="hero-tags">
-            <span class="hero-tag">原生 Docker 部署</span>
-            <span class="hero-tag">支持 A / 港 / 美 股</span>
-            <span class="hero-tag">多 LLM 自由切换</span>
+            <span class="hero-tag">免安装 · 在线即用</span>
+            <span class="hero-tag">A 股全市场覆盖</span>
+            <span class="hero-tag">DeepSeek V4 / 千问驱动</span>
           </div>
 
           <!-- CTA 按钮组 -->
@@ -190,8 +190,8 @@ onMounted(() => {
           <!-- 数据统计 -->
           <div class="stats-row">
             <div class="stat-itemas">
-              <div class="stat-value">158+</div>
-              <div class="stat-label">股票分析报告</div>
+              <div class="stat-value">5000+</div>
+              <div class="stat-label">A 股上市公司</div>
             </div>
             <div class="stat-divider" />
             <div class="stat-itemas">
@@ -200,13 +200,13 @@ onMounted(() => {
             </div>
             <div class="stat-divider" />
             <div class="stat-itemas">
-              <div class="stat-value">5+</div>
-              <div class="stat-label">主流 LLM 模型</div>
+              <div class="stat-value">2</div>
+              <div class="stat-label">国产主流 LLM</div>
             </div>
             <div class="stat-divider" />
             <div class="stat-itemas">
-              <div class="stat-value">100%</div>
-              <div class="stat-label">开源免费</div>
+              <div class="stat-value">¥0</div>
+              <div class="stat-label">注册免费试用</div>
             </div>
           </div>
         </div>
@@ -215,7 +215,7 @@ onMounted(() => {
         <div class="hero-visual">
           <div class="data-card card-1">
             <div class="card-header">
-              <span class="card-titleas">A 股 · 上证指数</span>
+              <span class="card-titleas">上证指数</span>
               <span class="card-trend up">+1.85%</span>
             </div>
             <div class="card-chart">
@@ -241,7 +241,7 @@ onMounted(() => {
 
           <div class="data-card card-2">
             <div class="card-header">
-              <span class="card-titleas">港股 · 恒生指数</span>
+              <span class="card-titleas">深证成指</span>
               <span class="card-trend up">+2.13%</span>
             </div>
             <div class="card-chart">
@@ -267,7 +267,7 @@ onMounted(() => {
 
           <div class="data-card card-3">
             <div class="card-header">
-              <span class="card-titleas">美股 · 纳斯达克</span>
+              <span class="card-titleas">创业板指</span>
               <span class="card-trend up">+1.67%</span>
             </div>
             <div class="card-chart">
