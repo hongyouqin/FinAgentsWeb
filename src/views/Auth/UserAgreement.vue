@@ -116,6 +116,15 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useSeo } from '@/composables/useSeo'
+
+// 用户协议页低优先级收录，但仍给独立 meta
+useSeo({
+  title: '用户协议 - TradingAgents 中文版',
+  description: 'TradingAgents 中文版（TradingAgents-CN）用户服务协议，包含注册、使用、免责声明、知识产权等条款。',
+  keywords: 'TradingAgents用户协议,TradingAgents服务协议,TradingAgents中文版协议',
+  path: '/user-agreement',
+})
 
 const router = useRouter()
 

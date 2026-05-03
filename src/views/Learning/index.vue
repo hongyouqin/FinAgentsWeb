@@ -109,6 +109,15 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
+import { useSeo } from '@/composables/useSeo'
+
+// 学习中心 SEO：教育型长尾词的核心入口页
+useSeo({
+  title: '学习中心 - AI 股票分析教程与策略指标说明 | TradingAgents 中文版',
+  description: 'TradingAgents中文版学习中心：AI 股票分析入门教程、多智能体决策原理、技术面与基本面指标说明、DeepSeek V4与千问在股票分析中的实战案例，仅为教育目的。',
+  keywords: 'AI股票分析教程,人工智能炒股,多智能体决策,DeepSeek股票分析,千问股票分析,技术指标教程,A股入门,TradingAgents教程',
+  path: '/learning',
+})
 
 const router = useRouter()
 

@@ -1,5 +1,6 @@
 import { createApp } from 'vue'
 import { createPinia } from 'pinia'
+import { createHead } from '@unhead/vue'
 import ElementPlus from 'element-plus'
 import * as ElementPlusIconsVue from '@element-plus/icons-vue'
 import 'element-plus/dist/index.css'
@@ -32,6 +33,10 @@ for (const [key, component] of Object.entries(ElementPlusIconsVue)) {
 const pinia = createPinia()
 app.use(pinia)
 app.use(router)
+
+// 挂载 @unhead/vue：为每个路由提供独立的 title/description/canonical/og 等 SEO 元信息
+const head = createHead()
+app.use(head)
 // 设置全局中文 locale（Element Plus）
 dayjs.locale('zh-cn')
 app.use(ElementPlus, {
@@ -84,6 +89,34 @@ app.config.warnHandler = (msg, vm, trace) => {
 
 // 初始化认证状态
 const initApp = async () => {
+  // 预渲染/爬虫分流：不走后端依赖的初始化，直接挂载并通知预渲染器 render-event
+  // 识别条件：
+  //   1) window.__PRERENDER_INJECTED__  （预渲染脚本注入）
+  //   2) navigator.userAgent 包含 Headless / Prerender / Baiduspider / Googlebot 等爬虫特征
+  const ua = (typeof navigator !== 'undefined' ? navigator.userAgent : '') || ''
+  const isBot = /HeadlessChrome|Prerender|Baiduspider|Googlebot|bingbot|YisouSpider|Sogou web spider|360Spider|Bytespider/i.test(ua)
+  const isPrerender = (typeof window !== 'undefined' && (window as any).__PRERENDER_INJECTED__) || isBot
+
+  if (isPrerender) {
+    console.log('🤖 检测到预渲染/爬虫环境，跳过 API 与认证初始化')
+    try {
+      const appStore = useAppStore()
+      appStore.applyTheme()
+    } catch (e) {
+      // 预渲染环境下如果 store 异常也不中断挂载
+      console.warn('预渲染环境应用主题失败，忽略:', e)
+    }
+    app.mount('#app')
+    // 告知预渲染脚本：页面已经渲染完成，可以抓取 HTML
+    // （scripts/prerender.mjs 会监听这个事件或 window.__PRERENDER_READY__）
+    requestAnimationFrame(() => {
+      ;(window as any).__PRERENDER_READY__ = true
+      document.dispatchEvent(new Event('render-event'))
+      console.log('✅ 预渲染 render-event 已触发')
+    })
+    return
+  }
+
   try {
     const authStore = useAuthStore()
     const appStore = useAppStore()

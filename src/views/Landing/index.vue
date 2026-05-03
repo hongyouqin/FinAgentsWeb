@@ -3,6 +3,15 @@ import HeroSection from './components/HeroSection.vue'
 import FeaturesSection from './components/FeaturesSection.vue'
 import TechSection from './components/TechSection.vue'
 import CTASection from './components/CTASection.vue'
+import { useSeo } from '@/composables/useSeo'
+
+// 首页 SEO：抢品牌词 + A股 AI 分析大词 + 国产大模型长尾词
+useSeo({
+  title: 'TradingAgents中文版 | 多智能体AI金融交易决策框架 - A股 AI 在线分析平台',
+  description: 'TradingAgents中文版（TradingAgents-CN）是面向 A 股投资者的多智能体 AI 股票分析在线平台，基于 DeepSeek V4、阿里千问 Qwen 等国产大模型，提供可解释 AI 研报、多空辩证与专业报告导出，免安装在线即用。',
+  keywords: 'TradingAgents,TradingAgents中文版,TradingAgents-CN,多智能体AI金融交易决策框架,A股AI分析,AI股票分析,AI选股,DeepSeek炒股,千问股票分析,国产大模型,在线股票分析',
+  path: '/',
+})
 </script>
 
 <template>

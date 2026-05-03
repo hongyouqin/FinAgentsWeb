@@ -193,6 +193,15 @@ import { ElMessage } from 'element-plus'
 import { authApi } from '@/api/auth'
 import Logo from '@/components/Logo.vue'
 import type { RegisterForm } from '@/types/auth'
+import { useSeo } from '@/composables/useSeo'
+
+// 注册页 SEO：转化落地页 + “AI 股票分析免费注册”长尾
+useSeo({
+  title: '免费注册 - TradingAgents 中文版 | A 股 AI 分析在线平台',
+  description: '免费注册 TradingAgents 中文版（TradingAgents-CN），立即体验多智能体 A 股 AI 股票分析，注册即赠免费额度。基于 DeepSeek V4、阿里千问 Qwen 等国产大模型，免安装在线即用。',
+  keywords: 'AI股票分析注册,TradingAgents注册,免费AI股票分析,A股AI分析免费,DeepSeek炒股免费,千问股票分析',
+  path: '/register',
+})
 
 const router = useRouter()
 

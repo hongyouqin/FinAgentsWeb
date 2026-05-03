@@ -28,7 +28,7 @@
         <div class="logo-wrapper">
           <Logo :size="56" />
         </div>
-        <h1 class="title">NB.STOCK</h1>
+        <h1 class="title">TradingAgents-CN</h1>
         <p class="subtitle">牛逼股票</p>
       </div>
 
@@ -128,6 +128,15 @@ import { Loading, RefreshRight, Clock, CircleClose } from '@element-plus/icons-v
 import { useAuthStore } from '@/stores/auth'
 import Logo from '@/components/Logo.vue'
 import { request } from '@/api/request'
+import { useSeo } from '@/composables/useSeo'
+
+// 登录页 SEO：抦截品牌词 + “TradingAgents 登录 / AI 股票分析登录”查询
+useSeo({
+  title: '登录 - TradingAgents 中文版 | A 股 AI 分析在线平台',
+  description: '登录 TradingAgents 中文版（TradingAgents-CN）官网，免安装体验多智能体 AI 股票分析。支持账号密码与微信扫码登录，基于 DeepSeek V4、千问 Qwen 等国产大模型生成 A 股 AI 研报。',
+  keywords: 'TradingAgents登录,AI股票分析登录,A股AI分析登录,TradingAgents中文版官网',
+  path: '/login',
+})
 import wxlogo from '../../../assets/wxlogo.png' 
 
 const router = useRouter()

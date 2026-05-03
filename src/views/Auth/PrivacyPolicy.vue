@@ -166,6 +166,15 @@
 
 <script setup lang="ts">
 import { useRouter } from 'vue-router'
+import { useSeo } from '@/composables/useSeo'
+
+// 隐私政策页低优先级收录，但仍给独立 meta
+useSeo({
+  title: '隐私政策 - TradingAgents 中文版',
+  description: 'TradingAgents 中文版（TradingAgents-CN）隐私政策，说明我们如何收集、使用、存储、共享与保护您的个人信息。',
+  keywords: 'TradingAgents隐私政策,TradingAgents中文版隐私,个人信息保护',
+  path: '/privacy-policy',
+})
 
 const router = useRouter()
 

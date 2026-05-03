@@ -7,6 +7,15 @@
 <script setup lang="ts">
 import { ref, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
+import { useSeo } from '@/composables/useSeo'
+
+// 关于页 SEO：面向“TradingAgents 是什么 / TradingAgents 介绍 / 研发团队”这类查询
+useSeo({
+  title: '关于 TradingAgents 中文版 | 多智能体 AI 金融交易决策框架介绍',
+  description: '了解 TradingAgents中文版（TradingAgents-CN）的理念与架构：多智能体协作、多空辩证、A 股全市场数据、DeepSeek V4 与阿里千问 Qwen 驱动，以及我们为个人投资者量身打造的在线 AI 研报能力。',
+  keywords: 'TradingAgents介绍,TradingAgents中文版介绍,多智能体AI金融交易决策框架,TradingAgents是什么,AI量化交易,AI股票分析平台,人工智能金融',
+  path: '/about',
+})
 import {
   TrendCharts,
   Search,

@@ -565,10 +565,12 @@ router.beforeEach(async (to, from, next) => {
   const authStore = useAuthStore()
   const appStore = useAppStore()
 
-  // 设置页面标题
+  // 设置页面标题（统一品牌后缀为 TradingAgents 中文版）
+  // 注：对于接入了 useSeo() 的公开页，@unhead/vue 会在 mount 后视图级 title 覆盖此处；
+  //       未接入的鉴权内页继续使用此处的兜底 title
   const title = to.meta.title as string
   if (title) {
-    document.title = `${title} - tradingagents`
+    document.title = `${title} - TradingAgents 中文版`
   }
 
   console.log('🚦 路由守卫检查:', {
