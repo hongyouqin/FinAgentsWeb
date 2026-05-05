@@ -44,7 +44,7 @@ export const useAppStore = defineStore('app', {
     language: (useStorage('app-language', 'zh-CN').value || 'zh-CN') as 'zh-CN' | 'en-US',
 
     isOnline: navigator.onLine,
-    apiConnected: false,
+    apiConnected: true,
     lastApiCheck: 0,
 
     sidebarCollapsed: useStorage('sidebar-collapsed', false).value || false,
