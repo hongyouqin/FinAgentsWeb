@@ -28,6 +28,47 @@ useSeo({
     <!-- CTA 区 -->
     <CTASection />
 
+    <!-- 快捷导航：Guide 内链入口（SEO 权重传导面向学习指南） -->
+    <section class="landing-quicknav">
+      <div class="quicknav-inner">
+        <div class="quicknav-col">
+          <h3 class="quicknav-title">学习指南</h3>
+          <ul>
+            <li>
+              <router-link to="/guide">AI 股票分析教程中心</router-link>
+            </li>
+            <li>
+              <router-link to="/guide/ai-stock-tool-compare-2026">AI 股票分析工具盘点 2026</router-link>
+            </li>
+            <li>
+              <router-link to="/guide/deepseek-vs-qwen-stock">DeepSeek vs 千问 实测 PK</router-link>
+            </li>
+            <li>
+              <router-link to="/guide/ai-stock-worth-it">AI 炒股靠谱吗？30 支回测</router-link>
+            </li>
+          </ul>
+        </div>
+        <div class="quicknav-col">
+          <h3 class="quicknav-title">实战教程</h3>
+          <ul>
+            <li><router-link to="/guide/maotai-ai-analysis">用 AI 分析贵州茅台</router-link></li>
+            <li><router-link to="/guide/qwen-stock-analysis">千问炒股实录（含 Prompt）</router-link></li>
+            <li><router-link to="/guide/deepseek-stock-analysis">DeepSeek 实测 A 股 10 支龙头</router-link></li>
+            <li><router-link to="/guide/multi-agent-stock">多智能体 AI 架构完全解析</router-link></li>
+          </ul>
+        </div>
+        <div class="quicknav-col">
+          <h3 class="quicknav-title">热门话题</h3>
+          <ul>
+            <li><router-link to="/register">免费注册使用</router-link></li>
+            <li><router-link to="/about">关于 TradingAgents</router-link></li>
+            <li><router-link to="/learning">学习中心</router-link></li>
+            <li><router-link to="/guide">全部教程»</router-link></li>
+          </ul>
+        </div>
+      </div>
+    </section>
+
     <!-- 底部备案信息 -->
     <div class="landing-footer">
       <div class="footer-brand">
@@ -51,6 +92,71 @@ useSeo({
   width: 100%;
   overflow-x: hidden;
   background: #0f172a;
+}
+
+/* 快捷导航：Guide 内链入口（面向 SEO 权重传导） */
+.landing-quicknav {
+  background: #0f172a;
+  border-top: 1px solid rgba(255, 255, 255, 0.05);
+  padding: 48px 24px 24px;
+}
+
+.quicknav-inner {
+  max-width: 1100px;
+  margin: 0 auto;
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 40px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 28px;
+  }
+}
+
+.quicknav-col {
+  .quicknav-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.9);
+    margin: 0 0 14px;
+    letter-spacing: 1px;
+    position: relative;
+    padding-left: 10px;
+
+    &::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 4px;
+      bottom: 4px;
+      width: 3px;
+      background: linear-gradient(180deg, #10b981, #06b6d4);
+      border-radius: 2px;
+    }
+  }
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  li {
+    margin-bottom: 10px;
+    line-height: 1.5;
+  }
+
+  a {
+    color: rgba(255, 255, 255, 0.55);
+    font-size: 13px;
+    text-decoration: none;
+    transition: color 0.2s ease;
+
+    &:hover {
+      color: #06b6d4;
+    }
+  }
 }
 
 .landing-footer {

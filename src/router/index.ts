@@ -411,6 +411,30 @@ const routes: RouteRecordRaw[] = [
       transition: 'fade'
     }
   },
+  // 学习指南 / SEO 落地页（列表 + 详情）
+  // 数据源：src/data/guides.ts，预渲染脚本会为每个 slug 生成静态 HTML
+  {
+    path: '/guide',
+    name: 'GuideList',
+    component: () => import('@/views/Guide/index.vue'),
+    meta: {
+      title: 'AI 股票分析教程',
+      hideInMenu: true,
+      requiresAuth: false,
+      transition: 'fade'
+    }
+  },
+  {
+    path: '/guide/:slug',
+    name: 'GuideDetail',
+    component: () => import('@/views/Guide/Detail.vue'),
+    meta: {
+      title: '学习指南',
+      hideInMenu: true,
+      requiresAuth: false,
+      transition: 'fade'
+    }
+  },
   {
     path: '/recharge',
     name: 'Recharge',

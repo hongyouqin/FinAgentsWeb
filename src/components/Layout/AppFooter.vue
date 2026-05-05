@@ -19,6 +19,8 @@
 市场有风险，投资需谨慎。
        </div>
       <div class="agreement-links">
+        <router-link to="/guide" class="agreement-link">AI 股票分析教程</router-link>
+        <span class="separator">|</span>
         <router-link to="/user-agreement" class="agreement-link">《用户协议》</router-link>
         <span class="separator">|</span>
         <router-link to="/privacy-policy" class="agreement-link">《隐私政策》</router-link>

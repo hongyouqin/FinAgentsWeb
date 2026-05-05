@@ -30,6 +30,18 @@ const __dirname = path.dirname(__filename)
 const ROOT = path.resolve(__dirname, '..')
 const DIST = path.join(ROOT, 'dist')
 
+// 学习指南文章 slug（与 src/data/guides.ts 的 GUIDES 保持同步）
+// 新增文章时两边同步追加；sitemap.xml 也需相应追加
+const GUIDE_SLUGS = [
+  'deepseek-stock-analysis',
+  'qwen-stock-analysis',
+  'multi-agent-stock',
+  'ai-stock-tool-compare-2026',
+  'deepseek-vs-qwen-stock',
+  'maotai-ai-analysis',
+  'ai-stock-worth-it',
+]
+
 // 需要预渲染的公开路由（与 sitemap.xml / robots.txt 对齐）
 const ROUTES = [
   '/',
@@ -39,6 +51,8 @@ const ROUTES = [
   '/login',
   '/user-agreement',
   '/privacy-policy',
+  '/guide',
+  ...GUIDE_SLUGS.map((slug) => `/guide/${slug}`),
 ]
 
 // 可能的浏览器可执行路径（优先 Edge，其次 Chrome）

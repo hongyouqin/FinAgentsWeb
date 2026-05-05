@@ -66,12 +66,74 @@
     <priority>0.3</priority>
   </url>
 
+  <!-- 学习指南列表页（SEO 聘核心落地页） -->
+  <url>
+    <loc>https://nbstockai.com/guide</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>weekly</changefreq>
+    <priority>0.9</priority>
+  </url>
+
+  <!-- 学习指南：DeepSeek 实测 A 股（长尾关键词：DeepSeek 炒股） -->
+  <url>
+    <loc>https://nbstockai.com/guide/deepseek-stock-analysis</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 学习指南：通义千问炒股实录（长尾关键词：千问 股票） -->
+  <url>
+    <loc>https://nbstockai.com/guide/qwen-stock-analysis</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 学习指南：多智能体架构解析（长尾关键词：多智能体 股票） -->
+  <url>
+    <loc>https://nbstockai.com/guide/multi-agent-stock</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 学习指南：AI 股票分析工具盘点 2026（长尾：AI 选股 免费） -->
+  <url>
+    <loc>https://nbstockai.com/guide/ai-stock-tool-compare-2026</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 学习指南：DeepSeek vs 千问 实测（长尾：DeepSeek 千问 对比） -->
+  <url>
+    <loc>https://nbstockai.com/guide/deepseek-vs-qwen-stock</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 学习指南：贵州茅台 AI 分析（长尾：茅台 AI 研报） -->
+  <url>
+    <loc>https://nbstockai.com/guide/maotai-ai-analysis</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
+  <!-- 学习指南：AI 炒股靠谱吗回测（长尾：AI 炒股 靠谱吗） -->
+  <url>
+    <loc>https://nbstockai.com/guide/ai-stock-worth-it</loc>
+    <lastmod>2026-05-03</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!--
     【待建】后续每新建一个静态落地页 / 学习中心文章 / 公开 AI 研报，
     均需追加 <url> 条目，并用百度资源平台 API 主动推送：
       - https://nbstockai.com/tradingagents               （品牌介绍页）
-      - https://nbstockai.com/guide/ai-stock-analysis     （AI 股票分析教程）
-      - https://nbstockai.com/guide/deepseek-stock        （DeepSeek 炒股教程）
       - https://nbstockai.com/faq                         （常见问题）
       - https://nbstockai.com/learning/article/{slug}     （学习中心文章）
   -->
