@@ -70,14 +70,33 @@ class WeixinSDK {
     return ua.includes('micromessenger')
   }
 
+  /**
+   * 去除 redirectUri 中域名前的 www. 前缀
+   * 例如：https://www.example.com/path -> https://example.com/path
+   */
+  private stripWwwFromUrl(redirectUri: string): string {
+    try {
+      const urlObj = new URL(redirectUri)
+      if (urlObj.hostname.startsWith('www.')) {
+        urlObj.hostname = urlObj.hostname.replace(/^www\./, '')
+      }
+      return urlObj.toString()
+    } catch (e) {
+      // 非标准 URL，降级为字符串替换
+      return redirectUri.replace(/^(https?:\/\/)www\./i, '$1')
+    }
+  }
+
   getWechatCode(appId: string, redirectUri: string, state: string = 'STATE') {
-    const encodedRedirectUri = encodeURIComponent(redirectUri)
+    const cleanedRedirectUri = this.stripWwwFromUrl(redirectUri)
+    const encodedRedirectUri = encodeURIComponent(cleanedRedirectUri)
     const url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=snsapi_base&state=${state}#wechat_redirect`
     window.location.href = url
   }
 
   getWechatCodeForUser(appId: string, redirectUri: string, state: string = 'STATE') {
-    const encodedRedirectUri = encodeURIComponent(redirectUri)
+    const cleanedRedirectUri = this.stripWwwFromUrl(redirectUri)
+    const encodedRedirectUri = encodeURIComponent(cleanedRedirectUri)
     const url = `https://open.weixin.qq.com/connect/oauth2/authorize?appid=${appId}&redirect_uri=${encodedRedirectUri}&response_type=code&scope=snsapi_userinfo&state=${state}#wechat_redirect`
     window.location.href = url
   }
