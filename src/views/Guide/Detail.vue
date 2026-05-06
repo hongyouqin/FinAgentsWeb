@@ -144,9 +144,12 @@ const route = useRoute()
 const SITE_URL = 'https://nbstockai.com'
 
 // 当前文章（响应路由变化）
-const guide = computed<GuideMeta | undefined>(() =>
-  getGuideBySlug(String(route.params.slug || ''))
-)
+// 兼容 nginx 可能带尾斜杠的 URL，避免 slug="xxx/" 导致找不到文章
+const guide = computed<GuideMeta | undefined>(() => {
+  const raw = String(route.params.slug || '')
+  const slug = raw.replace(/\/+$/, '').trim()
+  return getGuideBySlug(slug)
+})
 
 // 上一篇 / 下一篇（按发布时间倒序）
 const sortedGuides = computed(() =>
