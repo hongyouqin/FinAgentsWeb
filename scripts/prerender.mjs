@@ -47,9 +47,9 @@ const ROUTES = [
   '/',
   '/about',
   '/learning',
-  // '/login',
-  // '/user-agreement',
-  // '/privacy-policy',
+  '/login',
+  '/user-agreement',
+  '/privacy-policy',
   '/guide',
   ...GUIDE_SLUGS.map((slug) => `/guide/${slug}`),
 ]
