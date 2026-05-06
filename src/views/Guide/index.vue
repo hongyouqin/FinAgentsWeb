@@ -79,7 +79,7 @@
     <section class="bottom-cta">
       <h3>看完教程，就来实际体验一下 AI 股票分析</h3>
       <p>免费注册即获体验算力，输入 A 股代码即可获得多智能体 AI 分析报告</p>
-      <el-button type="primary" size="large" @click="$router.push('/register')">
+      <el-button type="primary" size="large" @click="$router.push('/login')">
         免费注册体验
       </el-button>
     </section>

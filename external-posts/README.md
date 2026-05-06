@@ -6,7 +6,7 @@
 
 | 周次 | 日期 | 平台 | 文件 | 工时 |
 |---|---|---|---|---|
-| W1 | Day1-2 | 知乎 | 养号（点赞/收藏/关注）+ 搜 3 个目标问题先收藏 | 1h/天 |
+| W1 | Day1-2 | 知乎 | 养号（点赞/收藏/关注）+ 搜 3 个目标问题先收藏 | 1h/天 | ✅ Day1 已完成 |
 | W1 | Day3 | CSDN | `csdn/01-multi-agent-architecture.md` | 2h |
 | W1 | Day4 | CSDN | `csdn/02-ai-stock-tools-2026.md` | 2h |
 | W1 | Day5 | CSDN | `csdn/03-deepseek-vs-qwen.md` | 2h |
@@ -83,6 +83,27 @@ external-posts/
 | 发布日 | 平台 | 文章标题 | 发布 URL | 锚文本 | 目标落地页 | 7 日阅读 | 7 日排名查询 |
 |---|---|---|---|---|---|---|---|
 | 2026-05-04 | CSDN | … | … | … | … | … | … |
+
+## 收录基线记录
+
+| 日期 | `site:nbstockai.com` 收录数 | 已收录页面 | 备注 |
+|---|---|---|---|
+| 2026-05-06 | 1 | 首页 `www.nbstockai.com/` | SEO 基建首日基线，知乎养号 Day1 完成 |
+
+## 执行进度
+
+- [x] **W1 Day1**（2026-05-06）：知乎养号（点赞/收藏/关注）+ 搜 3 个目标问题收藏 + CSDN 账号准备 + 收录基线记录（1 个）
+- [ ] **W1 Day2**：知乎继续养号（互动 1h）
+- [ ] **W1 Day3**：CSDN 发布 `csdn/01-multi-agent-architecture.md`
+- [ ] **W1 Day4**：CSDN 发布 `csdn/02-ai-stock-tools-2026.md`
+- [ ] **W1 Day5**：CSDN 发布 `csdn/03-deepseek-vs-qwen.md`
+- [ ] **W1 Day6-7**：知乎回答 `zhihu/01-deepseek-stock-answer.md`
+- [ ] **W2 Day1**：掘金发布 01 + 02
+- [ ] **W2 Day2**：掘金发布 03
+- [ ] **W2 Day3**：知乎回答 02
+- [ ] **W2 Day4**：博客园发布 01 + 02
+- [ ] **W2 Day5**：简书发布 01 + 02
+- [ ] **W2 Day6-7**：复盘收录数与排名
 
 ## 风险提示
 

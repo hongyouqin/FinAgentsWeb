@@ -82,7 +82,7 @@
           <h3>想用 AI 亲自跑一次你关注的股票？</h3>
           <p>TradingAgents 中文版已内置 DeepSeek / 通义千问等国产大模型，注册即可免费体验。</p>
           <div class="cta-btns">
-            <router-link to="/register" class="btn-primary">免费注册体验</router-link>
+            <router-link to="/login" class="btn-primary">免费注册体验</router-link>
             <router-link to="/guide" class="btn-ghost">查看更多教程</router-link>
           </div>
         </div>
