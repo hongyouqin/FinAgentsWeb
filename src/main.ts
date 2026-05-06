@@ -10,6 +10,7 @@ import zhCn from 'element-plus/es/locale/lang/zh-cn'
 import dayjs from 'dayjs'
 import 'dayjs/locale/zh-cn'
 
+import NProgress from 'nprogress'
 import App from './App.vue'
 import router from './router'
 import { setupGlobalComponents } from './components'
@@ -117,6 +118,16 @@ const initApp = async () => {
     // 给 Vue 一帧时间完成 DOM 挂载，再通知预渲染器抓取
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
+        // 双保险：若路由守卫意外调用了 NProgress，彻底移除 .nprogress-busy class
+        // 与 <div id="nprogress"> DOM，避免被 Puppeteer 抓进静态产物
+        try {
+          NProgress.remove()
+          document.documentElement.classList.remove('nprogress-busy')
+          const np = document.getElementById('nprogress')
+          if (np && np.parentNode) np.parentNode.removeChild(np)
+        } catch (e) {
+          // 忽略，不影响预渲染
+        }
         ;(window as any).__PRERENDER_READY__ = true
         document.dispatchEvent(new Event('render-event'))
         console.log('✅ 预渲染 render-event 已触发')

@@ -15,6 +15,20 @@ NProgress.configure({
   speed: 500
 })
 
+/**
+ * 判定当前是否处于预渲染 / 搜索引擎爬虫环境。
+ * 预渲染时严禁调用 NProgress.start / done，否则 NProgress 会往 <html> 加
+ * `nprogress-busy` class、向 <body> 追加 `<div id="nprogress">`，
+ * 而 NProgress.done 的移除带 CSS 动画，Puppeteer 在动画未结束前就抓走 HTML，
+ * 导致线上静态产物里遗留 nprogress 残片，表现为 body 只剩 nprogress div。
+ */
+function isPrerenderEnv(): boolean {
+  if (typeof window === 'undefined') return true
+  if ((window as any).__PRERENDER_INJECTED__) return true
+  const ua = (typeof navigator !== 'undefined' ? navigator.userAgent : '') || ''
+  return /HeadlessChrome|Prerender|Baiduspider|Googlebot|bingbot|YisouSpider|Sogou web spider|360Spider|Bytespider/i.test(ua)
+}
+
 // 路由配置
 const routes: RouteRecordRaw[] = [
   {
@@ -583,8 +597,10 @@ const router = createRouter({
 
 // 全局前置守卫
 router.beforeEach(async (to, from, next) => {
-  // 开始进度条
-  NProgress.start()
+  // 开始进度条（预渲染 / 爬虫环境跳过，避免残留写入静态 HTML）
+  if (!isPrerenderEnv()) {
+    NProgress.start()
+  }
 
   const authStore = useAuthStore()
   const appStore = useAppStore()
@@ -652,8 +668,10 @@ router.beforeEach(async (to, from, next) => {
 
 // 全局后置守卫
 router.afterEach((to, from) => {
-  // 结束进度条
-  NProgress.done()
+  // 结束进度条（预渲染 / 爬虫环境跳过）
+  if (!isPrerenderEnv()) {
+    NProgress.done()
+  }
 
   // 页面切换后的处理
   nextTick(() => {
@@ -664,7 +682,9 @@ router.afterEach((to, from) => {
 // 路由错误处理
 router.onError((error) => {
   console.error('路由错误:', error)
-  NProgress.done()
+  if (!isPrerenderEnv()) {
+    NProgress.done()
+  }
   ElMessage.error('页面加载失败，请重试')
 })
 
