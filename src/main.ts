@@ -106,13 +106,21 @@ const initApp = async () => {
       // 预渲染环境下如果 store 异常也不中断挂载
       console.warn('预渲染环境应用主题失败，忽略:', e)
     }
+    // 关键：必须等 router 完成初次路由匹配 + 异步组件加载
+    // （否则 mount 时 router-view 仍是 Loading 状态，拓取出空 HTML）
+    try {
+      await router.isReady()
+    } catch (e) {
+      console.warn('预渲染 router.isReady 失败，忽略:', e)
+    }
     app.mount('#app')
-    // 告知预渲染脚本：页面已经渲染完成，可以抓取 HTML
-    // （scripts/prerender.mjs 会监听这个事件或 window.__PRERENDER_READY__）
+    // 给 Vue 一帧时间完成 DOM 挂载，再通知预渲染器抓取
     requestAnimationFrame(() => {
-      ;(window as any).__PRERENDER_READY__ = true
-      document.dispatchEvent(new Event('render-event'))
-      console.log('✅ 预渲染 render-event 已触发')
+      requestAnimationFrame(() => {
+        ;(window as any).__PRERENDER_READY__ = true
+        document.dispatchEvent(new Event('render-event'))
+        console.log('✅ 预渲染 render-event 已触发')
+      })
     })
     return
   }
