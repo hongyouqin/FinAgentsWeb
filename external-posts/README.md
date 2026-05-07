@@ -6,7 +6,7 @@
 
 | 周次 | 日期 | 平台 | 文件 | 工时 |
 |---|---|---|---|---|
-| W1 | Day1-2 | 知乎 | 养号（点赞/收藏/关注）+ 搜 3 个目标问题先收藏 | 1h/天 | ✅ Day1 已完成 |
+| W1 | Day1-2 | 知乎 | 养号（点赞/收藏/关注）+ 搜 3 个目标问题先收藏 | 1h/天 | ✅ Day1-2 已完成 |
 | W1 | Day3 | CSDN | `csdn/01-multi-agent-architecture.md` | 2h |
 | W1 | Day4 | CSDN | `csdn/02-ai-stock-tools-2026.md` | 2h |
 | W1 | Day5 | CSDN | `csdn/03-deepseek-vs-qwen.md` | 2h |
@@ -90,20 +90,50 @@ external-posts/
 |---|---|---|---|
 | 2026-05-06 | 1 | 首页 `www.nbstockai.com/` | SEO 基建首日基线，知乎养号 Day1 完成 |
 
-## 执行进度
+## 任务排期（具体日历）
+
+> 以 2026-05-06（周三）为 Day1 起算，全期 13 天。默认每天 19:00–21:00 是发布 / 互动默认时段（资讯类高峰、推荐权重高）。
+
+| 日期 | 周几 | 阶段 | 平台 | 主任务 | 关键动作 | 预计工时 |
+|---|---|---|---|---|---|---|
+| 2026-05-06 | 三 | W1 Day1 | 知乎 + CSDN | 养号 + 基线 | 点赞/收藏/关注、收藏 3 个目标问题、CSDN 账号准备、记录 site 收录 | 1h | ✅ |
+| 2026-05-07 | 四 | W1 Day2 | 知乎 + CSDN | 互动 + 软贴 | 评论高赞回答、1 条软回答（DS vs ChatGPT）、CSDN 水文铺垫 | 1h | ✅ |
+| **2026-05-08** | **五** | **W1 Day3** | **CSDN** | **发首篇硬稿** | 发布 `csdn/01-multi-agent-architecture.md`、标题重写、文末 1 主链（锚文本：多智能体 AI → `/guide/multi-agent-stock`） | 2h | ⏳ |
+| 2026-05-09 | 六 | W1 Day4 | CSDN | 发第二篇 | 发布 `csdn/02-ai-stock-tools-2026.md`、锚文本：AI 股票工具对比 → `/guide/ai-stock-tool-compare-2026`、上篇评论区回复 1–2 条 | 2h | ⏳ |
+| 2026-05-10 | 日 | W1 Day5 | CSDN | 发第三篇 | 发布 `csdn/03-deepseek-vs-qwen.md`、锚文本：DeepSeek 炒股 → `/guide/deepseek-stock-analysis`、首页裸链补 1 个 | 2h | ⏳ |
+| 2026-05-11 | 一 | W1 Day6 | 知乎 | 起草回答 | 起草 `zhihu/01-deepseek-stock-answer.md`、打磨开头 100 字钩子、间插 1 内链 | 1.5h | ⏳ |
+| 2026-05-12 | 二 | W1 Day7 | 知乎 | 发布回答 | 完稿发布 zhihu 01、文末锚文本：TradingAgents 中文版 → `/`、发后 30min 内主动评论区回复 | 1.5h | ⏳ |
+| 2026-05-13 | 三 | W2 Day1 | 掘金 | 双发 01+02 | 发布 `juejin/01-multi-agent-architecture.md` + `juejin/02-deepseek-vs-qwen-benchmark.md`（间隔7h）、锚文本错开 | 3h | ⏳ |
+| 2026-05-14 | 四 | W2 Day2 | 掘金 | 发 03 | 发布 `juejin/03-prompt-engineering-maotai.md`、锚文本：AI 研报 Prompt → `/guide/maotai-ai-analysis` | 1.5h | ⏳ |
+| 2026-05-15 | 五 | W2 Day3 | 知乎 | 第二条回答 | 发布 `zhihu/02-ai-stock-worth-it-answer.md`、锚文本：AI 股票分析 → `/`、评论区互动 | 3h | ⏳ |
+| 2026-05-16 | 六 | W2 Day4 | 博客园 | 双发 01+02 | 发布 `cnblogs/01-tradingagents-practice.md` + `cnblogs/02-ai-backtest-notes.md`（间隔4h） | 2h | ⏳ |
+| 2026-05-17 | 日 | W2 Day5 | 简书 | 双发 01+02 | 发布 `jianshu/01-ai-stock-tools-for-retail.md` + `jianshu/02-ai-stock-myth.md`（间隔4h）、裸链为主 | 2h | ⏳ |
+| 2026-05-18 | 一 | W2 Day6 | 站长 | 复盘上 | 查 `site:nbstockai.com` 收录增量、统计各平台 7 日阅读量、补百度资源提交 | 1h | ⏳ |
+| 2026-05-19 | 二 | W2 Day7 | 站长 | 复盘下 | 查目标关键词排名（不超 5 个）、汇总问题与下轮调整 | 1h | ⏳ |
+
+### 高优先级提醒
+
+- **Day3（2026-05-08）是首篇硬稿起点**，是 W1 最关键的一天：标题 / 锦文本 / 发布时间点都会影响后续评估。
+- **周六日发文**（Day5 / Day9　Day12）阅读高峰推后到 20:00。
+- **复盘日不要发文**（Day13-14），专心收集数据。
+- 若某天赶不上，**额外 1 天补上**不要同日补发（避免单平台超 2 条被判推广）。
+
+### 执行状态检查表
 
 - [x] **W1 Day1**（2026-05-06）：知乎养号（点赞/收藏/关注）+ 搜 3 个目标问题收藏 + CSDN 账号准备 + 收录基线记录（1 个）
-- [ ] **W1 Day2**：知乎继续养号（互动 1h）
-- [ ] **W1 Day3**：CSDN 发布 `csdn/01-multi-agent-architecture.md`
-- [ ] **W1 Day4**：CSDN 发布 `csdn/02-ai-stock-tools-2026.md`
-- [ ] **W1 Day5**：CSDN 发布 `csdn/03-deepseek-vs-qwen.md`
-- [ ] **W1 Day6-7**：知乎回答 `zhihu/01-deepseek-stock-answer.md`
-- [ ] **W2 Day1**：掘金发布 01 + 02
-- [ ] **W2 Day2**：掘金发布 03
-- [ ] **W2 Day3**：知乎回答 02
-- [ ] **W2 Day4**：博客园发布 01 + 02
-- [ ] **W2 Day5**：简书发布 01 + 02
-- [ ] **W2 Day6-7**：复盘收录数与排名
+- [x] **W1 Day2**（2026-05-07）：知乎目标问题互动（点赞/评论高赞回答）+ 关注 AI/量化相关话题与大 V + 知乎发软回答 1 条（DeepSeek vs ChatGPT）+ CSDN 发水文铺垫 1 条（多智能体架构随笔）
+- [ ] **W1 Day3**（2026-05-08）：CSDN 发布 `csdn/01-multi-agent-architecture.md`
+- [ ] **W1 Day4**（2026-05-09）：CSDN 发布 `csdn/02-ai-stock-tools-2026.md`
+- [ ] **W1 Day5**（2026-05-10）：CSDN 发布 `csdn/03-deepseek-vs-qwen.md`
+- [ ] **W1 Day6**（2026-05-11）：知乎起草 `zhihu/01-deepseek-stock-answer.md`
+- [ ] **W1 Day7**（2026-05-12）：知乎发布 zhihu 01
+- [ ] **W2 Day1**（2026-05-13）：掘金发布 01 + 02
+- [ ] **W2 Day2**（2026-05-14）：掘金发布 03
+- [ ] **W2 Day3**（2026-05-15）：知乎发布 zhihu 02
+- [ ] **W2 Day4**（2026-05-16）：博客园发布 01 + 02
+- [ ] **W2 Day5**（2026-05-17）：简书发布 01 + 02
+- [ ] **W2 Day6**（2026-05-18）：复盘收录数 + 阅读量
+- [ ] **W2 Day7**（2026-05-19）：复盘排名 + 下轮调整
 
 ## 风险提示
 
