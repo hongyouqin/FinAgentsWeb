@@ -27,6 +27,25 @@
     </div>
 
     <div class="content-wrapper">
+      <!-- 顶部 Tab：推荐策略 / 查询计算 -->
+      <div class="tab-switch">
+        <el-radio-group v-model="activeTab" size="large" class="tab-group">
+          <el-radio-button :value="'pitch'">
+            <el-icon><Star /></el-icon>
+            <span class="tab-label">推荐策略</span>
+          </el-radio-button>
+          <el-radio-button :value="'calc'">
+            <el-icon><DataAnalysis /></el-icon>
+            <span class="tab-label">查询计算</span>
+          </el-radio-button>
+        </el-radio-group>
+      </div>
+
+      <!-- 查询计算面板 -->
+      <TetCalc v-if="activeTab === 'calc'" />
+
+      <!-- 推荐策略面板（原内容，仅在 pitch 时展示） -->
+      <template v-if="activeTab === 'pitch'">
       <!-- 指标说明卡片 -->
       <div class="indicators-guide">
         <div class="guide-header">
@@ -377,6 +396,7 @@
           </div>
         </div>
       </div>
+      </template>
     </div>
   </div>
 </template>
@@ -395,13 +415,19 @@ import {
   TrendCharts,
   Refresh,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  Star,
+  DataAnalysis
 } from '@element-plus/icons-vue'
 import { strategyApi } from '@/api/strategy'
+import TetCalc from './TetCalc.vue'
 
 defineOptions({ name: 'Strategy' })
 
 const router = useRouter()
+
+// Tab 切换：pitch=推荐策略，calc=查询计算
+const activeTab = ref<'pitch' | 'calc'>('pitch')
 
 // 日期选择
 const selectedDate = ref<string>(formatDate(new Date()))
@@ -820,6 +846,43 @@ onMounted(async () => {
   padding: 0 24px;
   position: relative;
   z-index: 2;
+}
+
+// 顶部 Tab 切换
+.tab-switch {
+  background: white;
+  border-radius: 16px;
+  padding: 10px 14px;
+  margin-bottom: 16px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  display: flex;
+  justify-content: center;
+
+  :deep(.el-radio-button__inner) {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 22px;
+    font-weight: 600;
+    border-color: #e2e8f0;
+    color: #475569;
+    background: #f8fafc;
+    transition: all 0.25s ease;
+  }
+  :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
+    background: linear-gradient(135deg, #06b6d4, #0891b2);
+    border-color: #06b6d4;
+    color: white;
+    box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+  }
+  .tab-label { font-size: 14px; }
+
+  @media (max-width: 480px) {
+    :deep(.el-radio-button__inner) {
+      padding: 8px 14px;
+      .tab-label { font-size: 13px; }
+    }
+  }
 }
 
 // 指标说明

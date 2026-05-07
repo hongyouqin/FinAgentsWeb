@@ -29,6 +29,22 @@ export interface AvailableDatesResponse {
   }>
 }
 
+export interface TetChartParams {
+  stock_code: string
+  start_date: string   // YYYY-MM-DD
+  end_date: string     // YYYY-MM-DD
+}
+
+export interface TetChartItem {
+  date: string
+  close_stock: number
+  close_hs300: number
+  trend_score: number
+  emotion_index: number
+  anchored_trend_score: number
+  timing_indicator: number
+}
+
 export const strategyApi = {
   /**
    * 获取每日推荐股票
@@ -43,5 +59,13 @@ export const strategyApi = {
    */
   getAvailableDates(): Promise<AvailableDatesResponse> {
     return request.get('/api/stock_pitch/available-dates')
+  },
+
+  /**
+   * 查询个股 TET 指标时序（Trend・Emotion・Timing）
+   * @param params stock_code / start_date / end_date
+   */
+  getTetChart(params: TetChartParams): Promise<{ success: boolean; data: TetChartItem[] }> {
+    return request.get('/api/tet/chart', { params })
   }
 }
