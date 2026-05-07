@@ -1,8 +1,6 @@
 # Frontend Dockerfile for Vue 3 + Vite app
 # 前后端分离架构 - 前端服务
 # 构建内含 Puppeteer 预渲染（SEO 必需）：Edge/Chromium Headless
-# 抓取公开页首屏 HTML 回写 dist/<route>/index.html，让百度/Google
-# 等蜘蛛无需执行 JS 即可读到完整内容。
 
 # 构建阶段：使用Node.js 22.x（与项目开发环境一致）
 FROM node:22-alpine AS build
@@ -11,12 +9,13 @@ ENV NODE_ENV=production
 WORKDIR /app
 
 # ---------------------------------------------------------------------
-# 安装 Chromium 及其运行依赖（供 puppeteer-core 预渲染使用）
-# - chromium：无头浏览器本体
-# - nss / freetype / harfbuzz / ca-certificates / ttf-freefont：基础依赖
-# - font-noto-cjk：中文字体，保证首屏中文布局测量准确
+# 安装 Chromium 依赖
+# 【线上生产最优】
+# 1. 不使用 --no-cache，避免每次重新下载
+# 2. 最后统一清理，保证镜像最小
 # ---------------------------------------------------------------------
-RUN apk add --no-cache \
+RUN apk update && \
+    apk add \
       chromium \
       nss \
       freetype \
@@ -24,6 +23,7 @@ RUN apk add --no-cache \
       ca-certificates \
       ttf-freefont \
       font-noto-cjk \
+    # 构建完成后清理，保证镜像最小
     && rm -rf /var/cache/apk/*
 
 # 告诉 puppeteer-core 使用系统 Chromium，并阻止任何下载行为
@@ -38,17 +38,12 @@ RUN corepack enable && corepack prepare yarn@1.22.22 --activate
 COPY package.json yarn.lock .yarnrc ./
 
 # 安装依赖（使用yarn.lock确保版本一致）
-# 增加网络超时时间到5分钟，适应跨平台构建的网络延迟
 RUN yarn install --frozen-lockfile --production=false --network-timeout 300000
 
-# 复制前端源代码（现在所有源码都在当前目录）
+# 复制前端源代码
 COPY . .
 
-# ---------------------------------------------------------------------
-# 构建生产版本 + 预渲染（SEO 必需）
-# build:ssg = vite build + node scripts/prerender.mjs
-# 产物：dist/ 根 index.html + 6 个子路由的 <route>/index.html
-# ---------------------------------------------------------------------
+# 构建生产版本 + 预渲染
 RUN yarn build:ssg
 RUN cp -r ./assets ./dist/
 
@@ -61,7 +56,6 @@ WORKDIR /usr/share/nginx/html
 COPY --from=build /app/dist .
 
 # 复制Nginx配置（支持SPA路由）
-# 确保 docker/nginx.conf 文件存在
 COPY docker/nginx.conf /etc/nginx/conf.d/default.conf
 
 # 暴露端口80
