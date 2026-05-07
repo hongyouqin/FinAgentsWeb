@@ -36,7 +36,7 @@
 
   <!-- 注册（转化落地页：AI 股票分析免费注册） -->
   <url>
-    <loc>https://nbstockai.com/register</loc>
+    <loc>https://nbstockai.com/login</loc>
     <lastmod>2026-05-03</lastmod>
     <changefreq>monthly</changefreq>
     <priority>0.7</priority>

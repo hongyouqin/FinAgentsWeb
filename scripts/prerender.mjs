@@ -45,12 +45,6 @@ const GUIDE_SLUGS = [
 // 需要预渲染的公开路由（与 sitemap.xml / robots.txt 对齐）
 const ROUTES = [
   '/',
-  '/about',
-  '/learning',
-  '/register',
-  '/login',
-  '/user-agreement',
-  '/privacy-policy',
   '/guide',
   ...GUIDE_SLUGS.map((slug) => `/guide/${slug}`),
 ]

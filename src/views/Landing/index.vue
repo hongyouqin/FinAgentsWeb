@@ -60,7 +60,7 @@ useSeo({
         <div class="quicknav-col">
           <h3 class="quicknav-title">热门话题</h3>
           <ul>
-            <li><router-link to="/register">免费注册使用</router-link></li>
+            <li><router-link to="/login">免费注册使用</router-link></li>
             <li><router-link to="/about">关于 TradingAgents</router-link></li>
             <li><router-link to="/learning">学习中心</router-link></li>
             <li><router-link to="/guide">全部教程»</router-link></li>

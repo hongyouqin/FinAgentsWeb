@@ -131,4 +131,4 @@ DeepSeek 在 A 股分析上具备实用价值，尤其适合**基本面 + 事件
 
 ---
 
-**立即体验 →** [免费注册 TradingAgents 中文版](https://nbstockai.com/register)
+**立即体验 →** [免费注册 TradingAgents 中文版](https://nbstockai.com/login)

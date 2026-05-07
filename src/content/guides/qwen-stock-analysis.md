@@ -154,4 +154,4 @@ A：日常分析用 Plus（更便宜），关键决策用 Max（质量更高）�
 
 ---
 
-**立即体验 →** [免费注册 TradingAgents 中文版](https://nbstockai.com/register)
+**立即体验 →** [免费注册 TradingAgents 中文版](https://nbstockai.com/login)
