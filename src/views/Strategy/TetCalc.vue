@@ -189,10 +189,10 @@
       <div class="range-tabs">
         <button
           v-for="r in rangeOptions"
-          :key="r.value"
+          :key="r.key"
           class="range-btn"
-          :class="{ active: displayRange === r.value }"
-          @click="switchRange(r.value)"
+          :class="{ active: displayRange === r.key }"
+          @click="displayRange = r.key"
         >{{ r.label }}</button>
       </div>
 
@@ -210,15 +210,6 @@
           <span class="chart-dot price" />
           <span class="chart-title">收盘价走势</span>
           <span class="chart-sub">Close Price</span>
-        </div>
-        <div class="range-tabs inner">
-          <button
-            v-for="r in rangeOptions"
-            :key="'price-' + r.value"
-            class="range-btn"
-            :class="{ active: priceRange === r.value }"
-            @click="switchPriceRange(r.value)"
-          >{{ r.label }}</button>
         </div>
         <div ref="priceChartRef" class="chart-body" />
       </div>
@@ -266,54 +257,25 @@ const dateRange: [string, string] = [fmt(fiveYearsAgo), fmt(today)]
 const loading = ref(false)
 const chartData = ref<TetChartItem[]>([])
 
-// 时间范围选项
+// 时间范围切换
 type RangeKey = '1m' | '3m' | '6m' | '1y' | '2y'
-const rangeOptions: { value: RangeKey; label: string }[] = [
-  { value: '1m', label: '1个月' },
-  { value: '3m', label: '3个月' },
-  { value: '6m', label: '半年' },
-  { value: '1y', label: '1年' },
-  { value: '2y', label: '2年' }
+const rangeOptions: { key: RangeKey; label: string; months: number }[] = [
+  { key: '1m', label: '1个月', months: 1 },
+  { key: '3m', label: '3个月', months: 3 },
+  { key: '6m', label: '半年', months: 6 },
+  { key: '1y', label: '1年', months: 12 },
+  { key: '2y', label: '2年', months: 24 }
 ]
 const displayRange = ref<RangeKey>('2y')
-const priceRange = ref<RangeKey>('2y')
-const rangeLabel = computed(() => rangeOptions.find(r => r.value === displayRange.value)?.label || '2年')
-
-function getRangeCutoff(range: RangeKey): string {
-  const d = new Date()
-  switch (range) {
-    case '1m': d.setMonth(d.getMonth() - 1); break
-    case '3m': d.setMonth(d.getMonth() - 3); break
-    case '6m': d.setMonth(d.getMonth() - 6); break
-    case '1y': d.setFullYear(d.getFullYear() - 1); break
-    case '2y': d.setFullYear(d.getFullYear() - 2); break
-  }
-  return fmt(d)
-}
+const rangeLabel = computed(() => rangeOptions.find(r => r.key === displayRange.value)?.label || '2年')
 
 const chartDisplayData = computed(() => {
-  const cutoff = getRangeCutoff(displayRange.value)
+  const months = rangeOptions.find(r => r.key === displayRange.value)?.months || 24
+  const cutDate = new Date()
+  cutDate.setMonth(cutDate.getMonth() - months)
+  const cutoff = fmt(cutDate)
   return chartData.value.filter((i: TetChartItem) => String(i.date).slice(0, 10) >= cutoff)
 })
-
-const priceDisplayData = computed(() => {
-  const cutoff = getRangeCutoff(priceRange.value)
-  return chartData.value.filter((i: TetChartItem) => String(i.date).slice(0, 10) >= cutoff)
-})
-
-function switchRange(range: RangeKey) {
-  displayRange.value = range
-  if (chartDisplayData.value.length > 0) {
-    nextTick(() => renderTetChart())
-  }
-}
-
-function switchPriceRange(range: RangeKey) {
-  priceRange.value = range
-  if (priceDisplayData.value.length > 0) {
-    nextTick(() => renderPriceChart())
-  }
-}
 
 const hasData = computed(() => chartData.value.length > 0)
 const lastItem = computed<TetChartItem | null>(() =>
@@ -431,10 +393,12 @@ function formatNum(v: number | null | undefined, d = 4): string {
   return Number(v).toFixed(d)
 }
 
-function renderTetChart() {
-  if (!tetChartRef.value) return
+function renderCharts() {
+  if (!tetChartRef.value || !priceChartRef.value) return
   if (tetChart) tetChart.dispose()
+  if (priceChart) priceChart.dispose()
   tetChart = echarts.init(tetChartRef.value)
+  priceChart = echarts.init(priceChartRef.value)
 
   const displayData = chartDisplayData.value
   const dates = displayData.map((i: TetChartItem) => String(i.date).slice(0, 10))
@@ -514,17 +478,6 @@ function renderTetChart() {
       }
     ]
   }
-  tetChart.setOption(tetOption)
-}
-
-function renderPriceChart() {
-  if (!priceChartRef.value) return
-  if (priceChart) priceChart.dispose()
-  priceChart = echarts.init(priceChartRef.value)
-
-  const displayData = priceDisplayData.value
-  const dates = displayData.map((i: TetChartItem) => String(i.date).slice(0, 10))
-  const isNarrow = (priceChartRef.value?.clientWidth || 800) < 600
 
   const priceOption: EChartsOption = {
     grid: isNarrow
@@ -562,12 +515,9 @@ function renderPriceChart() {
       }
     ]
   }
-  priceChart.setOption(priceOption)
-}
 
-function renderCharts() {
-  renderTetChart()
-  renderPriceChart()
+  tetChart.setOption(tetOption)
+  priceChart.setOption(priceOption)
 }
 
 let resizeTimer: ReturnType<typeof setTimeout> | null = null
@@ -606,6 +556,12 @@ watch(chartData, async () => {
     renderCharts()
   }
 }, { flush: 'post' })
+
+watch(displayRange, () => {
+  if (chartData.value.length > 0) {
+    renderCharts()
+  }
+})
 </script>
 
 <style lang="scss" scoped>
@@ -1046,6 +1002,39 @@ watch(chartData, async () => {
   }
 }
 
+/* ===== 时间范围切换 ===== */
+.range-tabs {
+  display: flex;
+  gap: 8px;
+  flex-wrap: wrap;
+  padding: 2px 0;
+
+  .range-btn {
+    padding: 6px 16px;
+    border-radius: 999px;
+    font-size: 13px;
+    font-weight: 600;
+    border: 1px solid #e2e8f0;
+    background: white;
+    color: #64748b;
+    cursor: pointer;
+    transition: all 0.2s;
+    outline: none;
+
+    &:hover {
+      border-color: #8b5cf6;
+      color: #7c3aed;
+      background: rgba(139, 92, 246, 0.04);
+    }
+    &.active {
+      background: linear-gradient(135deg, #8b5cf6, #6366f1);
+      color: white;
+      border-color: transparent;
+      box-shadow: 0 4px 12px -2px rgba(139, 92, 246, 0.5);
+    }
+  }
+}
+
 /* ===== 图表卡 ===== */
 .chart-card {
   background: white;
@@ -1093,37 +1082,6 @@ watch(chartData, async () => {
   }
 }
 
-/* ===== 时间范围切换 ===== */
-.range-tabs {
-  display: flex;
-  gap: 6px;
-  flex-wrap: wrap;
-  &.inner {
-    margin-bottom: 12px;
-  }
-}
-.range-btn {
-  padding: 6px 14px;
-  border-radius: 8px;
-  border: 1px solid #e2e8f0;
-  background: white;
-  font-size: 13px;
-  font-weight: 600;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.2s;
-  &:hover {
-    border-color: #06b6d4;
-    color: #0891b2;
-  }
-  &.active {
-    background: linear-gradient(135deg, #ecfeff, #e0f2fe);
-    border-color: #06b6d4;
-    color: #0891b2;
-    box-shadow: 0 2px 8px -2px rgba(6, 182, 212, 0.3);
-  }
-}
-
 @media (max-width: 768px) {
   .section-header {
     gap: 10px;
@@ -1147,6 +1105,13 @@ watch(chartData, async () => {
     gap: 6px 20px;
     padding: 12px 14px;
     .summary-item + .summary-item::before { display: none; }
+  }
+  .range-tabs {
+    gap: 6px;
+    .range-btn {
+      padding: 5px 12px;
+      font-size: 12px;
+    }
   }
 }
 </style>
