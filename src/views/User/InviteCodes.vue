@@ -946,7 +946,7 @@ onMounted(() => {
 
   .content-wrapper {
     margin-top: -28px;
-    padding: 0 12px;
+    // padding: 0 12px;
   }
 
   .qrcode-card {
@@ -984,7 +984,7 @@ onMounted(() => {
   }
 
   .content-wrapper {
-    padding: 0 10px;
+    // padding: 0 10px;
   }
 
   .stat-card {

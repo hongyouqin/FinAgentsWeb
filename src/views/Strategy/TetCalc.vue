@@ -15,25 +15,14 @@
             <el-icon><Search /></el-icon>
           </template>
         </el-input>
-        <el-date-picker
-          v-model="dateRange"
-          type="daterange"
-          range-separator="至"
-          start-placeholder="开始日期"
-          end-placeholder="结束日期"
-          format="YYYY-MM-DD"
-          value-format="YYYY-MM-DD"
-          :disabled-date="disabledDate"
-          class="date-range"
-          size="large"
-        />
+
         <el-button type="primary" size="large" :loading="loading" class="calc-btn" @click="handleCalc">
           <el-icon><DataAnalysis /></el-icon>
           <span>计算指标</span>
         </el-button>
       </div>
       <div class="search-hint">
-        支持沪深A股 · 开始时间默认近两年 · 基准指数 000300（沪深300）
+        支持沪深A股 · 默认拉取近 5 年数据计算 · 图表展示近 2 年走势 · 基准指数 000300（沪深300）
       </div>
     </div>
 
@@ -190,12 +179,21 @@
         <div class="section-indicator" />
         <div class="section-title-group">
           <span class="section-title">历史走势</span>
-          <span class="section-sub">查询区间内 <strong>{{ chartData.length }}</strong> 条时序数据回溯</span>
+          <span class="section-sub">展示近 <strong>{{ rangeLabel }}</strong> 共 <strong>{{ chartDisplayData.length }}</strong> 条数据</span>
         </div>
         <div class="section-badge history-badge">
           <el-icon><Clock /></el-icon>
           <span>HISTORY</span>
         </div>
+      </div>
+      <div class="range-tabs">
+        <button
+          v-for="r in rangeOptions"
+          :key="r.value"
+          class="range-btn"
+          :class="{ active: displayRange === r.value }"
+          @click="switchRange(r.value)"
+        >{{ r.label }}</button>
       </div>
 
       <div class="chart-card">
@@ -212,6 +210,15 @@
           <span class="chart-dot price" />
           <span class="chart-title">收盘价走势</span>
           <span class="chart-sub">Close Price</span>
+        </div>
+        <div class="range-tabs inner">
+          <button
+            v-for="r in rangeOptions"
+            :key="'price-' + r.value"
+            class="range-btn"
+            :class="{ active: priceRange === r.value }"
+            @click="switchPriceRange(r.value)"
+          >{{ r.label }}</button>
         </div>
         <div ref="priceChartRef" class="chart-body" />
       </div>
@@ -251,15 +258,62 @@ function fmt(d: Date): string {
   return `${y}-${m}-${day}`
 }
 const today = new Date()
-const twoYearsAgo = new Date()
-twoYearsAgo.setFullYear(today.getFullYear() - 2)
+const fiveYearsAgo = new Date()
+fiveYearsAgo.setFullYear(today.getFullYear() - 5)
 
 const stockCode = ref('')
-const dateRange = ref<[string, string]>([fmt(twoYearsAgo), fmt(today)])
+const dateRange: [string, string] = [fmt(fiveYearsAgo), fmt(today)]
 const loading = ref(false)
 const chartData = ref<TetChartItem[]>([])
 
-const disabledDate = (d: Date) => d.getTime() > Date.now()
+// 时间范围选项
+type RangeKey = '1m' | '3m' | '6m' | '1y' | '2y'
+const rangeOptions: { value: RangeKey; label: string }[] = [
+  { value: '1m', label: '1个月' },
+  { value: '3m', label: '3个月' },
+  { value: '6m', label: '半年' },
+  { value: '1y', label: '1年' },
+  { value: '2y', label: '2年' }
+]
+const displayRange = ref<RangeKey>('2y')
+const priceRange = ref<RangeKey>('2y')
+const rangeLabel = computed(() => rangeOptions.find(r => r.value === displayRange.value)?.label || '2年')
+
+function getRangeCutoff(range: RangeKey): string {
+  const d = new Date()
+  switch (range) {
+    case '1m': d.setMonth(d.getMonth() - 1); break
+    case '3m': d.setMonth(d.getMonth() - 3); break
+    case '6m': d.setMonth(d.getMonth() - 6); break
+    case '1y': d.setFullYear(d.getFullYear() - 1); break
+    case '2y': d.setFullYear(d.getFullYear() - 2); break
+  }
+  return fmt(d)
+}
+
+const chartDisplayData = computed(() => {
+  const cutoff = getRangeCutoff(displayRange.value)
+  return chartData.value.filter((i: TetChartItem) => String(i.date).slice(0, 10) >= cutoff)
+})
+
+const priceDisplayData = computed(() => {
+  const cutoff = getRangeCutoff(priceRange.value)
+  return chartData.value.filter((i: TetChartItem) => String(i.date).slice(0, 10) >= cutoff)
+})
+
+function switchRange(range: RangeKey) {
+  displayRange.value = range
+  if (chartDisplayData.value.length > 0) {
+    nextTick(() => renderTetChart())
+  }
+}
+
+function switchPriceRange(range: RangeKey) {
+  priceRange.value = range
+  if (priceDisplayData.value.length > 0) {
+    nextTick(() => renderPriceChart())
+  }
+}
 
 const hasData = computed(() => chartData.value.length > 0)
 const lastItem = computed<TetChartItem | null>(() =>
@@ -338,16 +392,13 @@ function validateCode(): boolean {
 
 async function handleCalc() {
   if (!validateCode()) return
-  if (!dateRange.value || dateRange.value.length !== 2) {
-    ElMessage.warning('请选择查询起止日期')
-    return
-  }
+
   loading.value = true
   try {
     const res: any = await strategyApi.getTetChart({
       stock_code: stockCode.value.trim(),
-      start_date: dateRange.value[0],
-      end_date: dateRange.value[1]
+      start_date: dateRange[0],
+      end_date: dateRange[1]
     })
     const list: TetChartItem[] = res?.data || []
     if (!Array.isArray(list) || list.length === 0) {
@@ -380,14 +431,13 @@ function formatNum(v: number | null | undefined, d = 4): string {
   return Number(v).toFixed(d)
 }
 
-function renderCharts() {
-  if (!tetChartRef.value || !priceChartRef.value) return
+function renderTetChart() {
+  if (!tetChartRef.value) return
   if (tetChart) tetChart.dispose()
-  if (priceChart) priceChart.dispose()
   tetChart = echarts.init(tetChartRef.value)
-  priceChart = echarts.init(priceChartRef.value)
 
-  const dates = chartData.value.map((i: TetChartItem) => String(i.date).slice(0, 10))
+  const displayData = chartDisplayData.value
+  const dates = displayData.map((i: TetChartItem) => String(i.date).slice(0, 10))
   const isNarrow = (tetChartRef.value?.clientWidth || 800) < 600
 
   const tetOption: EChartsOption = {
@@ -425,7 +475,7 @@ function renderCharts() {
       {
         name: '择时信号 Timing',
         type: 'line',
-        data: chartData.value.map((i: TetChartItem) => i.timing_indicator),
+        data: displayData.map((i: TetChartItem) => i.timing_indicator),
         smooth: true,
         symbol: 'none',
         lineStyle: { color: '#06b6d4', width: 2 },
@@ -434,7 +484,7 @@ function renderCharts() {
       {
         name: '锚定趋势 Anchored',
         type: 'line',
-        data: chartData.value.map((i: TetChartItem) => i.anchored_trend_score),
+        data: displayData.map((i: TetChartItem) => i.anchored_trend_score),
         step: 'end',
         symbol: 'none',
         lineStyle: { color: '#10b981', width: 2 },
@@ -443,7 +493,7 @@ function renderCharts() {
       {
         name: '情绪指数 Emotion',
         type: 'line',
-        data: chartData.value.map((i: TetChartItem) => i.emotion_index),
+        data: displayData.map((i: TetChartItem) => i.emotion_index),
         symbol: 'none',
         lineStyle: { color: '#ef4444', width: 1.2, type: 'dashed' },
         itemStyle: { color: '#ef4444' }
@@ -464,6 +514,17 @@ function renderCharts() {
       }
     ]
   }
+  tetChart.setOption(tetOption)
+}
+
+function renderPriceChart() {
+  if (!priceChartRef.value) return
+  if (priceChart) priceChart.dispose()
+  priceChart = echarts.init(priceChartRef.value)
+
+  const displayData = priceDisplayData.value
+  const dates = displayData.map((i: TetChartItem) => String(i.date).slice(0, 10))
+  const isNarrow = (priceChartRef.value?.clientWidth || 800) < 600
 
   const priceOption: EChartsOption = {
     grid: isNarrow
@@ -487,7 +548,7 @@ function renderCharts() {
       {
         name: '收盘价',
         type: 'line',
-        data: chartData.value.map((i: TetChartItem) => i.close_stock),
+        data: displayData.map((i: TetChartItem) => i.close_stock),
         smooth: true,
         symbol: 'none',
         lineStyle: { color: '#8b5cf6', width: 2 },
@@ -501,9 +562,12 @@ function renderCharts() {
       }
     ]
   }
-
-  tetChart.setOption(tetOption)
   priceChart.setOption(priceOption)
+}
+
+function renderCharts() {
+  renderTetChart()
+  renderPriceChart()
 }
 
 let resizeTimer: ReturnType<typeof setTimeout> | null = null
@@ -601,20 +665,7 @@ watch(chartData, async () => {
     }
     :deep(.el-input__inner) { font-weight: 600; color: #0f172a; }
   }
-  .date-range {
-    flex: 1 1 320px;
-    min-width: 260px;
-    :deep(.el-range-editor) {
-      background: rgba(255, 255, 255, 0.95) !important;
-      border-radius: 12px;
-      box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.25);
-      border: none;
-      height: 40px;
-      &:hover { box-shadow: 0 0 0 1px rgba(6, 182, 212, 0.6); }
-      &.is-active { box-shadow: 0 0 0 2px #06b6d4; }
-    }
-    :deep(.el-range-separator) { color: #64748b; }
-  }
+
   .calc-btn {
     height: 40px;
     padding: 0 22px;
@@ -1039,6 +1090,37 @@ watch(chartData, async () => {
   .chart-body {
     width: 100%;
     height: 380px;
+  }
+}
+
+/* ===== 时间范围切换 ===== */
+.range-tabs {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  &.inner {
+    margin-bottom: 12px;
+  }
+}
+.range-btn {
+  padding: 6px 14px;
+  border-radius: 8px;
+  border: 1px solid #e2e8f0;
+  background: white;
+  font-size: 13px;
+  font-weight: 600;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  &:hover {
+    border-color: #06b6d4;
+    color: #0891b2;
+  }
+  &.active {
+    background: linear-gradient(135deg, #ecfeff, #e0f2fe);
+    border-color: #06b6d4;
+    color: #0891b2;
+    box-shadow: 0 2px 8px -2px rgba(6, 182, 212, 0.3);
   }
 }
 

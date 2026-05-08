@@ -922,7 +922,7 @@ onBeforeUnmount(() => {
 
   .content-wrapper {
     margin-top: -28px;
-    padding: 0 16px;
+    // padding: 0 16px;
   }
 
   .extra-info {

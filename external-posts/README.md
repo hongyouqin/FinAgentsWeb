@@ -82,7 +82,7 @@ external-posts/
 
 | 发布日 | 平台 | 文章标题 | 发布 URL | 锚文本 | 目标落地页 | 7 日阅读 | 7 日排名查询 |
 |---|---|---|---|---|---|---|---|
-| 2026-05-04 | CSDN | … | … | … | … | … | … |
+| 2026-05-08 | CSDN | LangChain 实战：基于多智能体的股票研究流程拆解 | https://blog.csdn.net/llc18230851423/article/details/160880313 | 多智能体 AI | /guide/multi-agent-stock | 待填 | 待填 |
 
 ## 收录基线记录
 
@@ -98,7 +98,7 @@ external-posts/
 |---|---|---|---|---|---|---|
 | 2026-05-06 | 三 | W1 Day1 | 知乎 + CSDN | 养号 + 基线 | 点赞/收藏/关注、收藏 3 个目标问题、CSDN 账号准备、记录 site 收录 | 1h | ✅ |
 | 2026-05-07 | 四 | W1 Day2 | 知乎 + CSDN | 互动 + 软贴 | 评论高赞回答、1 条软回答（DS vs ChatGPT）、CSDN 水文铺垫 | 1h | ✅ |
-| **2026-05-08** | **五** | **W1 Day3** | **CSDN** | **发首篇硬稿** | 发布 `csdn/01-multi-agent-architecture.md`、标题重写、文末 1 主链（锚文本：多智能体 AI → `/guide/multi-agent-stock`） | 2h | ⏳ |
+| 2026-05-08 | 五 | W1 Day3 | CSDN | 发首篇硬稿 | 首版被判营销宣传，改造 v2 版（去标题商业词 + 删导流段 + 支持引用论文）发布成功、链接已记录 | 2h | ✅ |
 | 2026-05-09 | 六 | W1 Day4 | CSDN | 发第二篇 | 发布 `csdn/02-ai-stock-tools-2026.md`、锚文本：AI 股票工具对比 → `/guide/ai-stock-tool-compare-2026`、上篇评论区回复 1–2 条 | 2h | ⏳ |
 | 2026-05-10 | 日 | W1 Day5 | CSDN | 发第三篇 | 发布 `csdn/03-deepseek-vs-qwen.md`、锚文本：DeepSeek 炒股 → `/guide/deepseek-stock-analysis`、首页裸链补 1 个 | 2h | ⏳ |
 | 2026-05-11 | 一 | W1 Day6 | 知乎 | 起草回答 | 起草 `zhihu/01-deepseek-stock-answer.md`、打磨开头 100 字钩子、间插 1 内链 | 1.5h | ⏳ |
@@ -113,7 +113,7 @@ external-posts/
 
 ### 高优先级提醒
 
-- **Day3（2026-05-08）是首篇硬稿起点**，是 W1 最关键的一天：标题 / 锦文本 / 发布时间点都会影响后续评估。
+- **Day3（2026-05-08）是首篇硬稿起点**，是 W1 最关键的一天：标题 / 锚文本 / 发布时间点都会影响后续评估。
 - **周六日发文**（Day5 / Day9　Day12）阅读高峰推后到 20:00。
 - **复盘日不要发文**（Day13-14），专心收集数据。
 - 若某天赶不上，**额外 1 天补上**不要同日补发（避免单平台超 2 条被判推广）。
@@ -122,7 +122,7 @@ external-posts/
 
 - [x] **W1 Day1**（2026-05-06）：知乎养号（点赞/收藏/关注）+ 搜 3 个目标问题收藏 + CSDN 账号准备 + 收录基线记录（1 个）
 - [x] **W1 Day2**（2026-05-07）：知乎目标问题互动（点赞/评论高赞回答）+ 关注 AI/量化相关话题与大 V + 知乎发软回答 1 条（DeepSeek vs ChatGPT）+ CSDN 发水文铺垫 1 条（多智能体架构随笔）
-- [ ] **W1 Day3**（2026-05-08）：CSDN 发布 `csdn/01-multi-agent-architecture.md`
+- [x] **W1 Day3**（2026-05-08）：CSDN 发布 `csdn/01-multi-agent-architecture.v2.md`（首版审核未过，v2 合规改造后通过）
 - [ ] **W1 Day4**（2026-05-09）：CSDN 发布 `csdn/02-ai-stock-tools-2026.md`
 - [ ] **W1 Day5**（2026-05-10）：CSDN 发布 `csdn/03-deepseek-vs-qwen.md`
 - [ ] **W1 Day6**（2026-05-11）：知乎起草 `zhihu/01-deepseek-stock-answer.md`

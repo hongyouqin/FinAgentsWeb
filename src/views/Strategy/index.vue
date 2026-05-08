@@ -843,7 +843,7 @@ onMounted(async () => {
 .content-wrapper {
   max-width: 1200px;
   margin: -32px auto 0;
-  padding: 0 24px;
+  padding: 0 8px;
   position: relative;
   z-index: 2;
 }
@@ -1485,7 +1485,7 @@ onMounted(async () => {
 
   .content-wrapper {
     margin-top: -28px;
-    padding: 0 12px;
+    // padding: 0 12px;
   }
 
   .indicators-guide {
@@ -1563,7 +1563,7 @@ onMounted(async () => {
   }
 
   .content-wrapper {
-    padding: 0 10px;
+    // padding: 0 10px;
   }
 
   .indicators-guide {
