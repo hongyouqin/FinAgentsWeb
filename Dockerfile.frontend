@@ -1,20 +1,23 @@
-# 构建阶段：Node 22 + 轻量依赖（不装完整Chromium）
+# 构建阶段：Node 22 + 轻量浏览器依赖
 FROM node:22-alpine AS build
 
 ENV NODE_ENV=production
 WORKDIR /app
 
-# 只装最基础依赖，用于puppeteer-core启动，极小！
+# 安装 Chromium + 必需依赖（轻量版，不臃肿）
 RUN apk add --no-cache \
+    chromium \
     nss \
     freetype \
     harfbuzz \
     ca-certificates \
+    ttf-freefont \
     && rm -rf /var/cache/apk/*
 
-# 关键：不下载浏览器，使用系统轻量渲染
+# 关键配置：告诉 Puppeteer 使用系统 Chromium
 ENV PUPPETEER_SKIP_DOWNLOAD=true \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium-browser \
+    CHROMIUM_PATH=/usr/bin/chromium-browser
 
 # 包管理
 RUN corepack enable && corepack prepare yarn@1.22.22 --activate
@@ -28,7 +31,7 @@ COPY . .
 RUN yarn build:ssg
 RUN cp -r ./assets ./dist/ 2>/dev/null || true
 
-# 运行阶段：纯 Nginx，极轻量
+# 运行阶段：纯 Nginx
 FROM nginx:alpine AS runtime
 WORKDIR /usr/share/nginx/html
 COPY --from=build /app/dist .
