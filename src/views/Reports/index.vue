@@ -982,7 +982,7 @@ onMounted(() => {
 
   .content-wrapper {
     margin-top: -24px;
-    padding: 0 12px;
+    // padding: 0 12px;
   }
 
   .filter-section { padding: 14px 16px; }
