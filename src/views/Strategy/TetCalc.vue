@@ -111,7 +111,7 @@
               <span class="metric-label-cn">择时信号</span>
               <span class="metric-label-en">TIMING-INDICATOR</span>
             </div>
-            <el-tooltip content="公式：锚定趋势 − 情绪指数，>1.0 做多信号，<-1.0 做空信号" placement="top">
+            <el-tooltip content="公式：锚定趋势 − 情绪指数。>1.0 视为做多信号； <-1.0 仅代表趋势不明/观望，不作为做空依据" placement="top">
               <el-icon class="metric-help"><QuestionFilled /></el-icon>
             </el-tooltip>
           </div>
@@ -126,7 +126,7 @@
               <span>{{ timingTrend.text }}</span>
             </div>
           </div>
-          <div class="metric-foot">值域 [-2, 2]，&gt;1 做多 / &lt;-1 做空</div>
+          <div class="metric-foot">值域 [-2, 2]，&gt;1 考虑做多；≤-1 趋势不明</div>
         </div>
 
         <div class="metric-card joint">
@@ -136,7 +136,7 @@
               <span class="metric-label-cn">联合趋势</span>
               <span class="metric-label-en">JOINT TREND SCORE</span>
             </div>
-            <el-tooltip content="TS_joint = sign × min(|TS_stock|, |TS_ratio|)，同方向取双向较弱者" placement="top">
+            <el-tooltip content="同趋势（个股与大盘同涨同跌）按两者里更弱的一方打分；方向相反直接判 0。分数越接近 +1，代表个股顺着大盘涨势且强于大盘，是最理想的标的" placement="top">
               <el-icon class="metric-help"><QuestionFilled /></el-icon>
             </el-tooltip>
           </div>
@@ -151,7 +151,7 @@
               <span>{{ jointTrend.text }}</span>
             </div>
           </div>
-          <div class="metric-foot">当前值（未锚定），同向取双向较弱者</div>
+          <div class="metric-foot">值域 [-1, 1]：同向取弱打分、反向判 0；越近 +1 顺势且强于大盘</div>
         </div>
       </div>
 
@@ -209,7 +209,7 @@
         <div class="chart-header">
           <span class="chart-dot price" />
           <span class="chart-title">收盘价走势</span>
-          <span class="chart-sub">Close Price</span>
+          <span class="chart-sub">Stock vs HS300</span>
         </div>
         <div ref="priceChartRef" class="chart-body" />
       </div>
@@ -303,9 +303,7 @@ const emotionClass = computed(() => {
 const timingClass = computed(() => {
   const v = lastItem.value?.timing_indicator ?? 0
   if (v >= 1.0) return 'strong-pos'
-  if (v <= -1.0) return 'strong-neg'
   if (v >= 0.5) return 'pos'
-  if (v <= -0.5) return 'neg'
   return 'neutral'
 })
 const jointClass = computed(() => {
@@ -332,15 +330,18 @@ const emotionTrend = computed<Trend>(() => {
 })
 const timingTrend = computed<Trend>(() => {
   const v = lastItem.value?.timing_indicator ?? 0
-  if (v >= 1.0) return { cls: 'strong-pos', dir: 'up', text: '做多信号' }
-  if (v <= -1.0) return { cls: 'strong-neg', dir: 'down', text: '做空信号' }
+  if (v >= 1.0) return { cls: 'strong-pos', dir: 'up', text: '考虑做多' }
+  if (v <= -1.0) return { cls: 'neutral', dir: 'flat', text: '趋势不明' }
+  if (v > 0) return { cls: 'pos', dir: 'up', text: '偏多观察' }
   return { cls: 'neutral', dir: 'flat', text: '未触发' }
 })
 const jointTrend = computed<Trend>(() => {
   const v = lastItem.value?.trend_score ?? 0
-  if (v > 0) return { cls: 'pos', dir: 'up', text: '联合多头' }
-  if (v < 0) return { cls: 'neg', dir: 'down', text: '联合空头' }
-  return { cls: 'neutral', dir: 'flat', text: '方向不明' }
+  if (v >= 0.3) return { cls: 'strong-pos', dir: 'up', text: '跑赢大盘' }
+  if (v > 0) return { cls: 'pos', dir: 'up', text: '弱跑赢' }
+  if (v <= -0.3) return { cls: 'strong-neg', dir: 'down', text: '跑输大盘' }
+  if (v < 0) return { cls: 'neg', dir: 'down', text: '弱跑输' }
+  return { cls: 'neutral', dir: 'flat', text: '方向背离' }
 })
 
 function validateCode(): boolean {
@@ -387,6 +388,7 @@ const tetChartRef = ref<HTMLDivElement>()
 const priceChartRef = ref<HTMLDivElement>()
 let tetChart: echarts.ECharts | null = null
 let priceChart: echarts.ECharts | null = null
+const CHART_GROUP_ID = 'tet-calc-sync'
 
 function formatNum(v: number | null | undefined, d = 4): string {
   if (v === null || v === undefined || Number.isNaN(v)) return '--'
@@ -408,7 +410,12 @@ function renderCharts() {
     grid: isNarrow
       ? { left: 18, right: 14, top: 28, bottom: 52, containLabel: true }
       : { left: 18, right: 24, top: 36, bottom: 56, containLabel: true },
-    tooltip: { trigger: 'axis', axisPointer: { type: 'line' } },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'line' },
+      confine: true,
+      triggerOn: 'mousemove|click'
+    },
     legend: {
       bottom: isNarrow ? 4 : 8,
       type: 'scroll',
@@ -481,26 +488,55 @@ function renderCharts() {
 
   const priceOption: EChartsOption = {
     grid: isNarrow
-      ? { left: 14, right: 14, top: 20, bottom: 32, containLabel: true }
-      : { left: 16, right: 24, top: 24, bottom: 40, containLabel: true },
-    tooltip: { trigger: 'axis', axisPointer: { type: 'line' } },
+      ? { left: 14, right: 14, top: 44, bottom: 32, containLabel: true }
+      : { left: 16, right: 14, top: 48, bottom: 40, containLabel: true },
+    tooltip: {
+      trigger: 'axis',
+      axisPointer: { type: 'line' },
+      confine: true,
+      triggerOn: 'mousemove|click',
+      valueFormatter: (v: any) => (typeof v === 'number' ? v.toFixed(2) : '--')
+    },
+    legend: {
+      top: isNarrow ? 6 : 10,
+      type: 'scroll',
+      itemWidth: isNarrow ? 12 : 16,
+      itemHeight: isNarrow ? 8 : 10,
+      itemGap: isNarrow ? 10 : 16,
+      data: ['个股收盘价', '沪深300 HS300'],
+      textStyle: { color: '#475569', fontSize: isNarrow ? 10 : 12 }
+    },
     xAxis: {
       type: 'category',
       data: dates,
       axisLine: { lineStyle: { color: '#cbd5e1' } },
       axisLabel: { color: '#64748b', fontSize: isNarrow ? 10 : 11, hideOverlap: true }
     },
-    yAxis: {
-      type: 'value',
-      scale: true,
-      axisLine: { show: false },
-      splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } },
-      axisLabel: { color: '#64748b', fontSize: 11 }
-    },
+    yAxis: [
+      {
+        type: 'value',
+        name: '个股',
+        scale: true,
+        nameTextStyle: { color: '#8b5cf6', fontSize: 10, padding: [0, 0, 0, -8] },
+        axisLine: { show: false },
+        axisLabel: { color: '#8b5cf6', fontSize: 11 },
+        splitLine: { lineStyle: { color: '#e2e8f0', type: 'dashed' } }
+      },
+      {
+        type: 'value',
+        name: 'HS300',
+        scale: true,
+        nameTextStyle: { color: '#f59e0b', fontSize: 10, padding: [0, -8, 0, 0] },
+        axisLine: { show: false },
+        axisLabel: { color: '#f59e0b', fontSize: 11 },
+        splitLine: { show: false }
+      }
+    ],
     series: [
       {
-        name: '收盘价',
+        name: '个股收盘价',
         type: 'line',
+        yAxisIndex: 0,
         data: displayData.map((i: TetChartItem) => i.close_stock),
         smooth: true,
         symbol: 'none',
@@ -512,12 +548,27 @@ function renderCharts() {
           ])
         },
         itemStyle: { color: '#8b5cf6' }
+      },
+      {
+        name: '沪深300 HS300',
+        type: 'line',
+        yAxisIndex: 1,
+        data: displayData.map((i: TetChartItem) => i.close_hs300),
+        smooth: true,
+        symbol: 'none',
+        lineStyle: { color: '#f59e0b', width: 1.5, type: 'dashed' },
+        itemStyle: { color: '#f59e0b' }
       }
     ]
   }
 
   tetChart.setOption(tetOption)
   priceChart.setOption(priceOption)
+
+  // 两图联动：鼠标/触摸在任一图表上移动，另一个图表同步显示 tooltip 与十字准星
+  tetChart.group = CHART_GROUP_ID
+  priceChart.group = CHART_GROUP_ID
+  echarts.connect(CHART_GROUP_ID)
 }
 
 let resizeTimer: ReturnType<typeof setTimeout> | null = null
