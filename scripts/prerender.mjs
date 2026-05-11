@@ -40,6 +40,7 @@ const GUIDE_SLUGS = [
   'deepseek-vs-qwen-stock',
   'maotai-ai-analysis',
   'ai-stock-worth-it',
+  'tet-indicator-strategy',
 ]
 
 // 需要预渲染的公开路由（与 sitemap.xml / robots.txt 对齐）

@@ -25,6 +25,7 @@ import aiToolCompare2026 from '@/content/guides/ai-stock-tool-compare-2026.md?ra
 import deepseekVsQwen from '@/content/guides/deepseek-vs-qwen-stock.md?raw'
 import maotaiAiAnalysis from '@/content/guides/maotai-ai-analysis.md?raw'
 import aiStockWorthIt from '@/content/guides/ai-stock-worth-it.md?raw'
+import tetIndicatorStrategy from '@/content/guides/tet-indicator-strategy.md?raw'
 
 export interface GuideMeta {
   /** URL slug，对应路由 /guide/<slug> */
@@ -189,6 +190,23 @@ export const GUIDES: GuideMeta[] = [
     readTime: 12,
     featured: true,
     content: aiStockWorthIt,
+  },
+  {
+    slug: 'tet-indicator-strategy',
+    title: 'TET 三维量化指标：锚定趋势 + 情绪指数 + 择时信号，A 股择时策略完整拆解',
+    subtitle: 'Trend · Emotion · Timing 三件套 + 联合趋势 JTS，一套不被情绪绑架的择时框架',
+    description:
+      'TET 三维量化指标详解：锚定趋势 ATS 去噪拟合真实趋势、情绪指数 EI 独立衡量超买超卖、择时信号 TI = ATS − EI 合成入场分、联合趋势 JTS 纳入沪深 300 大盘联动。含公式、阈值、决策树、与 MACD/RSI 对比、FAQ，覆盖从原理到使用的完整链路。',
+    keywords: 'TET 指标,锚定趋势,情绪指数,择时信号,A股 量化策略,A股 择时,量化指标,趋势情绪分离,联合趋势,沪深300 基准',
+    cover: '/assets/schema.png',
+    category: 'guide',
+    tags: ['量化策略', '择时', 'A股', 'TET'],
+    author: 'TradingAgents 中文版团队',
+    publishedAt: '2026-05-06T12:00:00+08:00',
+    updatedAt: '2026-05-06T12:00:00+08:00',
+    readTime: 14,
+    featured: true,
+    content: tetIndicatorStrategy,
   },
 ]
 

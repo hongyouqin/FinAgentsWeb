@@ -130,6 +130,14 @@
     <priority>0.8</priority>
   </url>
 
+  <!-- 学习指南：TET 三维量化指标解析（长尾：TET 指标 / A股 量化择时） -->
+  <url>
+    <loc>https://nbstockai.com/guide/tet-indicator-strategy</loc>
+    <lastmod>2026-05-06</lastmod>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+
   <!--
     【待建】后续每新建一个静态落地页 / 学习中心文章 / 公开 AI 研报，
     均需追加 <url> 条目，并用百度资源平台 API 主动推送：

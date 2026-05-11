@@ -331,7 +331,7 @@ const emotionTrend = computed<Trend>(() => {
 const timingTrend = computed<Trend>(() => {
   const v = lastItem.value?.timing_indicator ?? 0
   if (v >= 1.0) return { cls: 'strong-pos', dir: 'up', text: '考虑做多' }
-  if (v <= -1.0) return { cls: 'neutral', dir: 'flat', text: '趋势不明' }
+  if (v <= -1.0) return { cls: 'neutral', dir: 'flat', text: '观望' }
   if (v > 0) return { cls: 'pos', dir: 'up', text: '偏多观察' }
   return { cls: 'neutral', dir: 'flat', text: '未触发' }
 })

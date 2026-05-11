@@ -103,26 +103,31 @@ function onMarkAllRead() { notifStore.markAllRead() }
 function typeLabel(t: string) { return t === 'analysis' ? '分析' : t === 'alert' ? '预警' : '系统' }
 function tagType(t: string) { return t === 'analysis' ? 'success' : t === 'alert' ? 'warning' : 'info' }
 function toLocal(iso: string) { try { return new Date(iso).toLocaleString() } catch { return iso } }
-function go(n: any) { 
-  if (n.link) {
-    console.log('通知链接:', n.link)
-    
-    // 判断是否是内部路由链接
-    if (n.link.startsWith('/') || n.link.startsWith('#/')) {
-      // 内部路由：使用 router.push
-      const path = n.link.replace(/^#/, '')
-      router.push(path)
+function go(n: any) {
+  if (!n.link) return
+  const raw = String(n.link).trim()
+  console.log('通知链接:', raw)
+
+  // 仅 http(s):// 开头才算外链；其他（含 `/xx`、`#/xx`、`xx/yy` 这类相对路径）一律按内部路由处理，
+  // 避免后端下发 `analysis/report/xxx` 这类无前导斜杠的相对路径被浏览器相对当前路由拼接（出现 /analysis/analysis/xxx）。
+  const isExternal = /^https?:\/\//i.test(raw)
+
+  if (isExternal) {
+    // 外部链接：判断微信环境
+    if (weixin.isWechatEnv()) {
+      // 微信环境：在当前窗口打开，避免新窗口触发登录逻辑
+      window.location.href = raw
     } else {
-      // 外部链接：判断微信环境
-      if (weixin.isWechatEnv()) {
-        // 微信环境：在当前窗口打开，避免新窗口触发登录逻辑
-        window.location.href = n.link
-      } else {
-        // 非微信环境：新窗口打开
-        window.open(n.link, '_blank')
-      }
+      // 非微信环境：新窗口打开
+      window.open(raw, '_blank')
     }
+    return
   }
+
+  // 内部路由：去掉可能的 `#` 前缀，并强制补齐 `/` 前缀
+  let path = raw.replace(/^#/, '')
+  if (!path.startsWith('/')) path = '/' + path
+  router.push(path)
 }
 
 const godetile = (analysis: any) => {
