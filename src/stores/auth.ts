@@ -258,6 +258,12 @@ export const useAuthStore = defineStore('auth', {
         // 登录访问埋点（二维码登录）
         this.reportLoginTrack()
 
+        // 百度统计事件上报：扫码登录成功
+        try {
+          const { trackEvent } = await import('@/utils/track')
+          trackEvent('User', 'Login', 'qrcode')
+        } catch (_) { /* 埋点失败不影响业务 */ }
+
 
       } catch (error) {
         console.error('二维码登录失败:', error)
@@ -308,6 +314,12 @@ export const useAuthStore = defineStore('auth', {
 
           // 登录访问埋点（密码/短信登录）
           this.reportLoginTrack()
+
+          // 百度统计事件上报：账号登录成功（区分登录方式）
+          try {
+            const { trackEvent } = await import('@/utils/track')
+            trackEvent('User', 'Login', loginForm.login_type || 'password')
+          } catch (_) { /* 埋点失败不影响业务 */ }
 
           // 不在这里显示成功消息，由调用方显示
           return true

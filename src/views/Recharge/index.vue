@@ -502,6 +502,12 @@ const startPolling = (orderNo: string) => {
         payStatus.value = 'paid'
         showPayDialog.value = false
         ElMessage.success('支付成功！算力已到账 🎉')
+        // 百度统计事件上报：支付成功（核心商业转化）
+        try {
+          const { trackEvent } = await import('@/utils/track')
+          const amount = typeof d?.amount === 'number' ? d.amount : Number(d?.amount) || undefined
+          trackEvent('Recharge', 'PaySuccess', orderNo, amount)
+        } catch (_) { /* 埋点失败不影响业务 */ }
         authStore.fetchUserBalance()
         loadHistory()
       } else if (status === 'failed' || status === 'expired') {

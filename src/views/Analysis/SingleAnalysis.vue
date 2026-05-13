@@ -1052,6 +1052,12 @@ const submitAnalysis = async () => {
     const response = await analysisApi.startSingleAnalysis(request)
     ElMessage.success('分析任务已提交')
 
+    // 百度统计事件上报：用户提交分析任务（核心转化点）
+    try {
+      const { trackEvent } = await import('@/utils/track')
+      trackEvent('Analysis', 'Submit', `${analysisForm.market}:${analysisForm.symbol}`, currentPrice.value || undefined)
+    } catch (_) { /* 埋点失败不影响业务 */ }
+
     // 刷新积分余额
     authStore.forceRefreshBalance()
 
@@ -1125,6 +1131,11 @@ const startPollingTaskStatus = () => {
           clearInterval(pollingTimer.value)
           sessionStorage.removeItem(SA_TASK_KEY)
           ElMessage.success('分析完成')
+          // 百度统计事件上报：分析完成（关键转化漏斗终点）
+          try {
+            const { trackEvent } = await import('@/utils/track')
+            trackEvent('Analysis', 'Complete', `${analysisForm.market}:${analysisForm.symbol}`)
+          } catch (_) { /* 埋点失败不影响业务 */ }
           // 刷新最近分析列表，确保数据最新
           loadRecentAnalyses()
         } else if (data.status === 'failed') {
@@ -1132,6 +1143,11 @@ const startPollingTaskStatus = () => {
           clearInterval(pollingTimer.value)
           sessionStorage.removeItem(SA_TASK_KEY)
           ElMessage.error(data.error || '分析失败')
+          // 百度统计事件上报：分析失败（监控失败率）
+          try {
+            const { trackEvent } = await import('@/utils/track')
+            trackEvent('Analysis', 'Failed', `${analysisForm.market}:${analysisForm.symbol}`)
+          } catch (_) { /* 埋点失败不影响业务 */ }
           loadRecentAnalyses()
         }
       }
