@@ -29,11 +29,22 @@
           <Logo :size="56" />
         </div>
         <h1 class="title">TradingAgents-CN</h1>
-        <p class="subtitle">牛逼股票</p>
+        <p class="subtitle">多智能体 AI 股票分析 · 新用户注册送算力</p>
       </div>
 
       <!-- 登录卡片 -->
       <el-card class="login-card" shadow="never">
+        <!-- 新用户福利横幅：扫码转化的最后一推 -->
+        <div class="login-benefit-banner">
+          <div class="benefit-icon-wrap">
+            <span class="gift-icon">🎁</span>
+          </div>
+          <div class="benefit-content">
+            <div class="benefit-title">新用户扫码注册即送 <strong>5 算力</strong></div>
+            <div class="benefit-sub">邀请好友注册，得 <strong>3 算力</strong></div>
+          </div>
+        </div>
+
         <!-- 微信扫码登录 -->
         <div class="wechat-login-container">
           <!-- 二维码加载状态 -->
@@ -548,6 +559,105 @@ onMounted(() => {
 }
 
 // ========== 微信扫码登录 ==========
+/* 登录页福利横幅：二维码正上方的转化临门一脚 */
+.login-benefit-banner {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 14px 16px;
+  margin: 0 0 20px;
+  border-radius: 12px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.14), rgba(245, 158, 11, 0.08));
+  border: 1px solid rgba(251, 191, 36, 0.35);
+  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.12);
+  position: relative;
+  overflow: hidden;
+
+  &::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -50%;
+    width: 50%;
+    height: 100%;
+    background: linear-gradient(90deg, transparent, rgba(251, 191, 36, 0.15), transparent);
+    animation: benefitShine 3.2s ease-in-out infinite;
+  }
+
+  .benefit-icon-wrap {
+    flex-shrink: 0;
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(251, 191, 36, 0.35);
+
+    .gift-icon {
+      font-size: 22px;
+      line-height: 1;
+    }
+  }
+
+  .benefit-content {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    min-width: 0;
+  }
+
+  .benefit-title {
+    font-size: 14px;
+    color: #fbbf24;
+    font-weight: 500;
+    line-height: 1.3;
+
+    strong {
+      font-weight: 700;
+      font-size: 16px;
+      background: linear-gradient(135deg, #fcd34d, #fbbf24);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+      margin: 0 2px;
+    }
+  }
+
+  .benefit-sub {
+    font-size: 12px;
+    color: rgba(251, 191, 36, 0.75);
+    line-height: 1.3;
+
+    strong {
+      color: #fcd34d;
+      font-weight: 600;
+      margin: 0 2px;
+    }
+  }
+
+  @media (max-width: 480px) {
+    padding: 12px 14px;
+    gap: 12px;
+
+    .benefit-icon-wrap {
+      width: 36px;
+      height: 36px;
+      .gift-icon { font-size: 20px; }
+    }
+    .benefit-title { font-size: 13px; }
+    .benefit-sub { font-size: 11px; }
+  }
+}
+
+@keyframes benefitShine {
+  0%   { left: -50%; }
+  60%  { left: 100%; }
+  100% { left: 100%; }
+}
+
 .wechat-login-container {
   padding: 1rem 0;
 }

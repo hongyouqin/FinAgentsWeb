@@ -170,6 +170,16 @@ onMounted(() => {
             <span class="hero-tag">DeepSeek V4 / 千问驱动</span>
           </div>
 
+          <!-- 新用户福利横幅：首页只做诱饵，具体额度引导至登录页 -->
+          <div class="hero-benefit-banner" @click="handleStartAnalysis">
+            <span class="benefit-icon">🎁</span>
+            <div class="benefit-text">
+              <span class="benefit-title">新用户注册即送算力</span>
+              <span class="benefit-sub">开箱即用 · 邀请好友再得奖励</span>
+            </div>
+            <span class="benefit-arrow">→</span>
+          </div>
+
           <!-- CTA 按钮组 -->
           <div class="cta-buttons">
             <el-button type="primary" size="large" class="cta-primary" @click="handleStartAnalysis">
@@ -715,6 +725,77 @@ onMounted(() => {
     color: #10b981;
     font-weight: 700;
   }
+}
+
+// 新用户福利横幅：金色渐变 + 呼吸光晕，首屏最醒目诱饵
+.hero-benefit-banner {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  padding: 10px 18px 10px 14px;
+  margin-bottom: 1.5rem;
+  border-radius: 999px;
+  background: linear-gradient(135deg, rgba(251, 191, 36, 0.18), rgba(245, 158, 11, 0.14));
+  border: 1px solid rgba(251, 191, 36, 0.4);
+  box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15);
+  cursor: pointer;
+  transition: all 0.25s ease;
+  animation: benefitPulse 2.4s ease-in-out infinite;
+  max-width: fit-content;
+
+  &:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 28px rgba(251, 191, 36, 0.3);
+    border-color: rgba(251, 191, 36, 0.7);
+
+    .benefit-arrow { transform: translateX(4px); }
+  }
+
+  .benefit-icon {
+    font-size: 20px;
+    line-height: 1;
+    filter: drop-shadow(0 2px 6px rgba(251, 191, 36, 0.5));
+  }
+
+  .benefit-text {
+    display: flex;
+    flex-direction: column;
+    gap: 1px;
+    line-height: 1.3;
+  }
+
+  .benefit-title {
+    font-size: 14px;
+    font-weight: 600;
+    color: #fbbf24;
+    letter-spacing: 0.5px;
+  }
+
+  .benefit-sub {
+    font-size: 11px;
+    color: rgba(251, 191, 36, 0.7);
+  }
+
+  .benefit-arrow {
+    font-size: 16px;
+    font-weight: 600;
+    color: #fbbf24;
+    transition: transform 0.25s ease;
+  }
+
+  @media (max-width: 768px) {
+    padding: 8px 14px 8px 12px;
+    gap: 10px;
+
+    .benefit-icon { font-size: 18px; }
+    .benefit-title { font-size: 13px; }
+    .benefit-sub { font-size: 10px; }
+  }
+}
+
+@keyframes benefitPulse {
+  0%, 100% { box-shadow: 0 4px 20px rgba(251, 191, 36, 0.15); }
+  50%      { box-shadow: 0 4px 28px rgba(251, 191, 36, 0.35); }
 }
 
 // CTA 按钮

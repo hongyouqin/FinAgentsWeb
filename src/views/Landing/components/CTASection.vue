@@ -10,7 +10,7 @@ const keyPoints = ref([
   '多智能体协作系统：7 个专业 AI 角色分工协作，完成全流程投资分析与决策',
   '专注 A 股市场：覆盖上交所、深交所、北交所近 5000 只 A 股，中文金融语境深度优化',
   '国产大模型驱动：集成 DeepSeek V4、阿里千问 Qwen 等国产主流 LLM，合规可控',
-  '在线即用：免安装免环境配置，注册账号即可使用，新用户免费分析额度',
+  '在线即用：免安装免环境配置，新用户注册即送 5 算力，邀请好友双方各得 3 算力',
   '专业研报输出：支持 PDF / Word / Markdown 导出，包含完整推理链与多空辩证记录',
 ])
 
@@ -126,14 +126,14 @@ const handleScrollTop = () => {
           <span class="gradient-text">AI 研报之旅</span>
         </h2>
         <p class="cta-subtitle">
-          免安装 · 在线即用 · 注册赠送免费分析额度 · 国产大模型驱动
+          <span class="highlight-benefit">🎁 新用户注册即送算力</span> · 邀请好友再得奖励 · 免安装在线即用
           <br>
           <span class="disclaimer">仅供研究与教育用途，不构成投资建议。</span>
         </p>
 
         <div class="cta-actions">
           <button class="cta-btn primary-btn" @click="handleStartNow">
-            <span>免费注册 · 立即体验</span>
+            <span>免费注册 · 领取算力</span>
             <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M13.5 4.5L21 12m0 0l-7.5 7.5M21 12H3" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
             </svg>
@@ -378,6 +378,23 @@ const handleScrollTop = () => {
   font-weight: 900;
   color: #f1f5f9;
   margin: 0 0 1rem;
+}
+
+/* 福利高亮：金色脉冲，引导用户点击注册 */
+.highlight-benefit {
+  display: inline-block;
+  font-weight: 700;
+  background: linear-gradient(135deg, #fbbf24, #f59e0b);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  letter-spacing: 0.3px;
+  animation: ctaBenefitPulse 2.4s ease-in-out infinite;
+}
+
+@keyframes ctaBenefitPulse {
+  0%, 100% { opacity: 1; }
+  50%      { opacity: 0.7; }
 }
 
 .cta-subtitle {
