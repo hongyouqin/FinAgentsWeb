@@ -1,8 +1,11 @@
 # DeepSeek V4 vs 通义千问 Qwen-Plus：金融垂类场景的性能测评报告
 
 > 发布平台：掘金 · 目标专栏：AI / 大模型  
-> 目标锚文本：`DeepSeek 炒股` → `https://nbstockai.com/guide/deepseek-vs-qwen-stock`  
-> Tag：#DeepSeek #通义千问 #大模型测评 #金融AI #提示工程  
+> 锚文本策略（W2 Day1 合规版，2026-05-13）：  
+> - 正文锚文本：`DeepSeek vs 通义千问 完整横评` → `https://nbstockai.com/guide/deepseek-vs-qwen-stock` × 1（与 CSDN 03 一致，继续消耗该描述词配额 2/2 至 2/2）  
+> - 不再使用 `TradingAgents 中文版` 主锚（留给 W2 Day2 juejin/03 使用）  
+> - 文末裸链 `nbstockai.com` × 1（纯文本，不加 hyperlink）  
+> Tag：#DeepSeek #通义千问 #大模型测评（压到 3 个）  
 > 预计字数：2200 字 · 配图建议：五维雷达图
 
 ---
@@ -12,6 +15,8 @@
 通用跑分榜单（MMLU、HumanEval、GSM8K）已经测烂了，但**具体到"金融垂类"——尤其 A 股基本面分析这种需要行业知识 + 中文会计准则的场景**——国产大模型的横评数据非常少。
 
 这篇文章我用一套标准化 benchmark 测 DeepSeek V4 和 通义千问 Qwen-Plus 在 A 股分析上的差异，结论后面说。
+
+> 📌 本文为个人 5 支股票小样本的测评笔记，结果受样本、时间窗口、Prompt 版本影响明显，不具备统计意义；所有数据仅用于技术对比研究，不构成任何产品推荐或投资建议。
 
 ---
 
@@ -99,8 +104,8 @@ DeepSeek 偏**逻辑链**，千问偏**数据密度**。
 
 比亚迪最近 30 天有 5 条重要新闻（智驾发布、海外扩张等）。
 
-- DeepSeek 完全不知道这些事件（训练截止日期问题）
-- 千问通过联网搜索准确抓到了这些新闻，并正确归类
+- DeepSeek 无联网能力，无法感知训练截止日之后的事件
+- 千问通过联网搜索抓到了其中大部分新闻，并做了归类
 
 **启示**：消息面敏感的股票，千问带搜索的优势非常明显。
 
@@ -158,11 +163,11 @@ Qwen-Plus 的搜索能力强但推理稍弱，DeepSeek 相反。**最佳架构�
 
 ---
 
-## 线上复现
+## 复现方式
 
-这个 benchmark 的全过程我们做了线上版本：[nbstockai.com](https://nbstockai.com/)（TradingAgents 中文版），你可以免费切换 DeepSeek / Qwen 模型，输入任意股票代码复现本文的测试流程。
+本文的 benchmark 流程（5 支股票 × 2 模型 × 5 维打分）全部可以用公开数据 + 统一 Prompt 复现，核心步骤在「[DeepSeek vs 通义千问 完整横评](https://nbstockai.com/guide/deepseek-vs-qwen-stock)」里有详细记录，包含每支股票两份原文报告截图与评分细则，可对照交叉验证。
 
-完整对比数据（含每支股票两份原文报告）在这：[DeepSeek vs 通义千问 完整横评](https://nbstockai.com/guide/deepseek-vs-qwen-stock)。
+懒得自己搭数据管道的话，也可以直接在 nbstockai.com 切换两个模型跑同一个股票代码，肉眼对比输出差异——这是最直观的复现路径。
 
 ---
 
@@ -175,6 +180,6 @@ Qwen-Plus 的搜索能力强但推理稍弱，DeepSeek 相反。**最佳架构�
 ---
 
 > 💬 你在金融/法律/医疗等垂直领域用过哪个模型？评分如何？
-> 📝 测评数据基于公开信息，仅供研究参考。
+> 📝 测评基于公开信息 + 统一 Prompt 的小样本结果，受样本与时间窗口影响，不构成产品推荐或投资建议。
 
-**Tag：#DeepSeek #通义千问 #大模型测评 #金融AI #提示工程**
+**Tag：#DeepSeek #通义千问 #大模型测评**

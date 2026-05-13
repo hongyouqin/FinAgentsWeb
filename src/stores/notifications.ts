@@ -69,6 +69,11 @@ export const useNotificationStore = defineStore('notifications', () => {
       source: n.source
     }
     items.value.unshift(item)
+    // 🔥 P0 修复：限制通知列表最大长度 100 条，避免长期挂着收到大量通知时数组无限增长导致卡顿。
+    // 超出部分从尾部截断（尾部都是最老的通知，已读/不再关注）。
+    if (items.value.length > 100) {
+      items.value = items.value.slice(0, 100)
+    }
     if (item.status === 'unread') unreadCount.value += 1
   }
 

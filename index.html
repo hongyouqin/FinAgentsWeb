@@ -163,6 +163,23 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="default" />
     <meta name="apple-mobile-web-app-title" content="TradingAgents-CN" />
     <link rel="apple-touch-icon" href="/logo.svg" />
+
+    <!-- 百度统计（hm.baidu.com），仅在线上环境上报；本地 / 内网 / 预渲染环境跳过，避免污染数据 -->
+    <script>
+      (function () {
+        var h = (typeof location !== 'undefined' && location.hostname) || ''
+        // 跳过：localhost / 127.* / 0.0.0.0 / 192.168.* / 10.* / 内网 172.16~31.* / 预渲染 UA
+        var isLocal = !h || h === 'localhost' || /^127\./.test(h) || h === '0.0.0.0' || /^192\.168\./.test(h) || /^10\./.test(h) || /^172\.(1[6-9]|2\d|3[0-1])\./.test(h)
+        var isPrerender = typeof navigator !== 'undefined' && /Prerender|HeadlessChrome|Puppeteer/i.test(navigator.userAgent || '')
+        if (isLocal || isPrerender) return
+        var _hmt = (window._hmt = window._hmt || [])
+        var hm = document.createElement('script')
+        hm.src = 'https://hm.baidu.com/hm.js?ca6bcc614ed38b4f7deddca63113d980'
+        hm.async = true
+        var s = document.getElementsByTagName('script')[0]
+        s.parentNode.insertBefore(hm, s)
+      })()
+    </script>
   </head>
   <body>
     <div id="app"></div>

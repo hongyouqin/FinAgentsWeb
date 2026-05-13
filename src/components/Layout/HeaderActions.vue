@@ -147,13 +147,16 @@ onMounted(() => {
   notifStore.connect()
 
   timerCount = setInterval(() => notifStore.refreshUnreadCount(), 30000)
-  watch(drawerVisible, (v) => {
+  watch(drawerVisible, (v: boolean) => {
+    // 🔥 P0 修复：watch 回调中创建 setInterval 前，必须先清理上一轮 timer，
+    // 否则抽屉被频繁开合时旧 interval 无法回收，会累积成多重轮询。
+    if (timerList) {
+      clearInterval(timerList)
+      timerList = null
+    }
     if (v) {
       notifStore.loadList(filter.value)
       timerList = setInterval(() => notifStore.loadList(filter.value), 60000)
-    } else if (timerList) {
-      clearInterval(timerList)
-      timerList = null
     }
   }, { immediate: true })
   watch(filter, () => { if (drawerVisible.value) notifStore.loadList(filter.value) })

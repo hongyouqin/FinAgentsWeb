@@ -69,9 +69,10 @@ external-posts/
 │   ├── 03-deepseek-vs-qwen.md             ← W1 Day5
 │   └── 04-tet-indicator-strategy.md       ← W3 Day1 （TET主推文）
 ├── zhihu/
-│   ├── 01-deepseek-stock-answer.md        ← W1 Day6-7
+│   ├── 01-deepseek-stock-answer.md        ← W1 Day6-7（首版，已发目标问题 B「DeepSeek 能用来做股票分析吗」）
 │   ├── 02-ai-stock-worth-it-answer.md     ← W2 Day3
-│   └── 03-tet-indicator-answer.md         ← W3 Day4
+│   ├── 03-tet-indicator-answer.md         ← W3 Day4
+│   └── 04-deep-learning-stock-prediction.md ← W1 Day7 追加（口语真人化、发圆桌问题「深度学习做股票预测靠谱吗」）
 ├── juejin/
 │   ├── 01-multi-agent-architecture.md     ← W2 Day1
 │   ├── 02-deepseek-vs-qwen-benchmark.md   ← W2 Day1
@@ -112,9 +113,9 @@ external-posts/
 | 2026-05-08 | 五 | W1 Day3 | CSDN | 发首篇硬稿 | 首版被判营销宣传，改造 v2 版（去标题商业词 + 删导流段 + 支持引用论文）发布成功、链接已记录 | 2h | ✅ |
 | 2026-05-09 | 六 | W1 Day4 | CSDN | 发第二篇 | `csdn/02-ai-stock-tools-2026.md` 按 Day3 v2 合规思路改造 + 发布卡片全部就绪（标题/标签/摘要/占位评论/回复模板），当日已发布（具体 URL 待回填到「发布后记录」表） | 2h | ✅ |
 | 2026-05-10 | 日 | W1 Day5 | CSDN | 发第三篇 | 发布 `csdn/03-deepseek-vs-qwen.md`（合规改造已落地：压掉 2 次 `TradingAgents 中文版` 锚文本、首段补免责声明、结语弱化倾向性），锚文本：DeepSeek vs 通义千问 完整横评 → `/guide/deepseek-vs-qwen-stock` × 1 + `nbstockai.com` 裸链 × 1；周日 20:00 已发布 | 2h | ✅ |
-| 2026-05-11 | 一 | W1 Day6 | 知乎 | 起草回答 | 起草 `zhihu/01-deepseek-stock-answer.md`、打磨开头 100 字钩子、间插 1 内链 | 1.5h | ⏳ |
-| 2026-05-12 | 二 | W1 Day7 | 知乎 | 发布回答 | 完稿发布 zhihu 01、文末锚文本：TradingAgents 中文版 → `/`、发后 30min 内主动评论区回复 | 1.5h | ⏳ |
-| 2026-05-13 | 三 | W2 Day1 | 掘金 | 双发 01+02 | 发布 `juejin/01-multi-agent-architecture.md` + `juejin/02-deepseek-vs-qwen-benchmark.md`（间隔7h）、锚文本错开 | 3h | ⏳ |
+| 2026-05-11 | 一 | W1 Day6 | 知乎 | 起草回答 | 起草 `zhihu/01-deepseek-stock-answer.md`（✅ 合规精修 5 处落地：frontmatter 锚文本策略明文化、首段后补小样本免责、违禁词清理、懒人方案段改“架构方法论索引”、文末补主锚）、开头 100 字钩子三选一、正文辅锚DeepSeek炒股×1 + 文末主锚TradingAgents 中文版×1、Day7 发布卡片已交付（目标问题B + 3 条占位评论 + 5 条回复模板 + checklist） | 1.5h | ✅ |
+| 2026-05-12 | 二 | W1 Day7 | 知乎 | 发布回答 | 临时改稿：原zhihu/01已于Day6随手回答过，改新建 `zhihu/04-deep-learning-stock-prediction.md`（口语真人化、老程序员踩坑叙事风）、目标问题「深度学习做股票预测靠谱吗」（圆桌收录）、锚文本策略：零锚 + 1 裸链 `nbstockai.com`（纯文本不加 hyperlink）、已发布 | 1.5h | ✅ |
+| 2026-05-13 | 三 | W2 Day1 | 掘金 | 双发 01+02 | 发布 `juejin/01-multi-agent-architecture.md` + `juejin/02-deepseek-vs-qwen-benchmark.md`（间隔7h）、锚文本错开 | 3h | 🟡 进行中：✅ 双稿合规改造落地（删硬广段 / 理顺锚文本 / 首段补免责 / Tag 压到 3 个）+ ✅ 发布卡片已交付（14:00 发 01 / 21:00 发 02，间隔 7h） |
 | 2026-05-14 | 四 | W2 Day2 | 掘金 | 发 03 | 发布 `juejin/03-prompt-engineering-maotai.md`、锚文本：AI 研报 Prompt → `/guide/maotai-ai-analysis` | 1.5h | ⏳ |
 | 2026-05-15 | 五 | W2 Day3 | 知乎 | 第二条回答 | 发布 `zhihu/02-ai-stock-worth-it-answer.md`、锚文本：AI 股票分析 → `/`、评论区互动 | 3h | ⏳ |
 | 2026-05-16 | 六 | W2 Day4 | 博客园 | 双发 01+02 | 发布 `cnblogs/01-tradingagents-practice.md` + `cnblogs/02-ai-backtest-notes.md`（间隔4h） | 2h | ⏳ |
@@ -227,9 +228,9 @@ AI  大语言模型  金融科技  多智能体  LLM应用
 - [x] **W1 Day3**（2026-05-08）：CSDN 发布 `csdn/01-multi-agent-architecture.v2.md`（首版审核未过，v2 合规改造后通过）
 - [x] **W1 Day4**（2026-05-09）：CSDN 发布 `csdn/02-ai-stock-tools-2026.md`（✅ 合规改造 + ✅ 发布卡片走完 + ✅ 已发布，记得补登发布 URL 到「发布后记录」表）
 - [x] **W1 Day5**（2026-05-10）：CSDN 发布 `csdn/03-deepseek-vs-qwen.md`（✅ 合规改造 + ✅ 发布卡片走完 + ✅ 已发布，URL 已入库 `/details/160960651`，锚文本：DeepSeek vs 通义千问 完整横评 → `/guide/deepseek-vs-qwen-stock` × 1 + `nbstockai.com` 裸链 × 1）
-- [ ] **W1 Day6**（2026-05-11）：知乎起草 `zhihu/01-deepseek-stock-answer.md`
-- [ ] **W1 Day7**（2026-05-12）：知乎发布 zhihu 01
-- [ ] **W2 Day1**（2026-05-13）：掘金发布 01 + 02
+- [x] **W1 Day6**（2026-05-11）：知乎起草 `zhihu/01-deepseek-stock-answer.md`（✅ 合规精修 5 处落地 + ✅ 锁定目标问题 B「DeepSeek 能用来做股票分析吗」 + ✅ 钩子三选一 + ✅ Day7 发布卡片全集已交付）
+- [x] **W1 Day7**（2026-05-12）：知乎发布 `zhihu/04-deep-learning-stock-prediction.md`（✅ 原 zhihu/01 昨日已用于随手回答，改新建 04 口语真人化版 + ✅ 发到圆桌问题「深度学习做股票预测靠谱吗」 + ✅ 零锚 + 1 裸链 `nbstockai.com`纯文本 + ✅ 已发布，URL 待回填「发布后记录」表）
+- [ ] **W2 Day1**（2026-05-13）：掘金发布 01 + 02（🟡 进行中：✅ juejin/01 合规改造（3处）+ ✅ juejin/02 合规改造（4处）+ ✅ 双篇发布卡片已交付 / 待当日 14:00 + 21:00 按时间轴发布）
 - [ ] **W2 Day2**（2026-05-14）：掘金发布 03
 - [ ] **W2 Day3**（2026-05-15）：知乎发布 zhihu 02
 - [ ] **W2 Day4**（2026-05-16）：博客园发布 01 + 02

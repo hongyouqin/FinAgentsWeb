@@ -675,7 +675,15 @@ router.afterEach((to, from) => {
 
   // 页面切换后的处理
   nextTick(() => {
-    // 可以在这里添加页面分析、埋点等逻辑
+    // 百度统计 SPA 路由 PV 上报（预渲染 / 爬虫跳过，防止脟数据）
+    // _hmt 由 index.html 里的百度统计脚本创建；生产包 esbuild.drop console 不会动 _hmt
+    if (!isPrerenderEnv() && typeof window !== 'undefined' && Array.isArray((window as any)._hmt)) {
+      try {
+        ;(window as any)._hmt.push(['_trackPageview', to.fullPath])
+      } catch (_) {
+        // 上报失败不影响业务
+      }
+    }
   })
 })
 

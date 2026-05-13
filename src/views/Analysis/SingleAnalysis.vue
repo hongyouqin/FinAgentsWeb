@@ -1096,8 +1096,10 @@ const startPollingTaskStatus = () => {
   pollingTimer.value = setInterval(async () => {
     if (!currentTaskId.value) return
 
-    // 刷新最近分析列表，确保数据最新
-  loadRecentAnalyses()
+    // 🔥 P0 修复：移除每 2 秒刷新最近分析列表的调用。
+    // 原写法（loadRecentAnalyses）在轮询回调内每 2s 调一次列表接口，
+    // 会带来高频 API 请求 + DOM 重渲染 + watch 连锁触发，
+    // 长时间挂着时卡顿明显。列表只需在任务 completed / failed 时刷新（见下方）。
 
     try {
       const response = await analysisApi.getTaskStatus(currentTaskId.value)

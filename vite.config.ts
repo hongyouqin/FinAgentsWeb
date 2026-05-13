@@ -73,6 +73,12 @@ export default defineConfig({
       }
     }
   },
+  // 🔥 P0 性能优化：生产构建阶段删除所有 console / debugger 语句，
+  // 避免长时间挂着时 axios 拦截器等高频 console.log 造成字符串缓冲区堆积与 GC 压力。
+  // 开发模式（vite dev）不会应用 esbuild.drop，所以本地调试 console 正常可用。
+  esbuild: {
+    drop: ['console', 'debugger']
+  },
   css: {
     preprocessorOptions: {
       scss: {

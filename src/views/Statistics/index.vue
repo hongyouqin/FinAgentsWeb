@@ -330,9 +330,12 @@ const renderCharts = () => {
 
 const renderUserChart = () => {
   if (!userChartRef.value) return
-  if (!userChart) {
-    userChart = echarts.init(userChartRef.value)
+  // 🔥 P0 修复：init 前先 dispose 旧实例，避免 v-if / watch 连续触发时 DOM 重建导致旧实例泄漏。
+  if (userChart) {
+    userChart.dispose()
+    userChart = null
   }
+  userChart = echarts.init(userChartRef.value)
 
   const data = historyData.value as DailyHistoryItem[]
 
@@ -403,9 +406,12 @@ const renderUserChart = () => {
 
 const renderReportChart = () => {
   if (!reportChartRef.value) return
-  if (!reportChart) {
-    reportChart = echarts.init(reportChartRef.value)
+  // 🔥 P0 修复：init 前先 dispose 旧实例，避免 v-if / watch 连续触发时 DOM 重建导致旧实例泄漏。
+  if (reportChart) {
+    reportChart.dispose()
+    reportChart = null
   }
+  reportChart = echarts.init(reportChartRef.value)
 
   const data = historyData.value as DailyHistoryItem[]
   const dates = data.map((d: DailyHistoryItem) => d.date.slice(5))
