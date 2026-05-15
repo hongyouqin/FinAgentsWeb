@@ -195,6 +195,11 @@ export const useAuthStore = defineStore('auth', {
       // 清除API请求头
       this.setAuthHeader(null)
 
+      // 清除签到状态
+      import('./sign').then(({ useSignStore }) => {
+        useSignStore().reset()
+      })
+
       // 清除本地存储
       localStorage.removeItem('auth-token')
       localStorage.removeItem('refresh-token')
@@ -264,6 +269,19 @@ export const useAuthStore = defineStore('auth', {
           trackEvent('User', 'Login', 'qrcode')
         } catch (_) { /* 埋点失败不影响业务 */ }
 
+        // 登录成功后延迟展示签到引导
+        setTimeout(async () => {
+          try {
+            const { useSignStore } = await import('./sign')
+            const signStore = useSignStore()
+            await signStore.fetchStatus()
+            if (signStore.shouldGuide) {
+              signStore.openDialog()
+              signStore.markGuideShown()
+            }
+          } catch (_) { /* 签到引导失败不影响业务 */ }
+        }, 1500)
+
 
       } catch (error) {
         console.error('二维码登录失败:', error)
@@ -314,12 +332,25 @@ export const useAuthStore = defineStore('auth', {
 
           // 登录访问埋点（密码/短信登录）
           this.reportLoginTrack()
-
+          
           // 百度统计事件上报：账号登录成功（区分登录方式）
           try {
             const { trackEvent } = await import('@/utils/track')
             trackEvent('User', 'Login', loginForm.login_type || 'password')
           } catch (_) { /* 埋点失败不影响业务 */ }
+          
+          // 登录成功后延迟展示签到引导
+          setTimeout(async () => {
+            try {
+              const { useSignStore } = await import('./sign')
+              const signStore = useSignStore()
+              await signStore.fetchStatus()
+              if (signStore.shouldGuide) {
+                signStore.openDialog()
+                signStore.markGuideShown()
+              }
+            } catch (_) { /* 签到引导失败不影响业务 */ }
+          }, 1500)
 
           // 不在这里显示成功消息，由调用方显示
           return true

@@ -113,6 +113,18 @@
           </div>
         </div>
 
+        <div class="overview-cards">
+          <div class="stat-card">
+            <div class="card-icon sign">
+              <el-icon><Calendar /></el-icon>
+            </div>
+            <div class="card-info">
+              <span class="card-value">{{ formatNumber(signToday) }}</span>
+              <span class="card-label">今日签到</span>
+            </div>
+          </div>
+        </div>
+
         <div class="extra-info">
           <div class="extra-card">
             <div class="extra-card-header">
@@ -199,15 +211,17 @@ import {
   Document,
   WarningFilled,
   Clock,
-  Refresh
+  Refresh,
+  Calendar
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
-import { getDashboardStats, getStatsHistory, generateStats, type TodayStats, type DailyHistoryItem } from '@/api/admin'
+import { getDashboardStats, getStatsHistory, generateStats, getSignToday, type TodayStats, type DailyHistoryItem } from '@/api/admin'
 
 defineOptions({ name: 'Statistics' })
 
 const loading = ref(true)
 const stats = ref<TodayStats | null>(null)
+const signToday = ref<number>(0)
 
 const historyLoading = ref(false)
 const historyData = ref<DailyHistoryItem[]>([])
@@ -314,8 +328,22 @@ const fetchDashboard = async () => {
     console.error('获取统计数据失败:', err)
   } finally {
     loading.value = false
+    // 并行请求签到数据
+    fetchSignToday()
     await nextTick()
     fetchHistory()
+  }
+}
+
+const fetchSignToday = async () => {
+  try {
+    const res = await getSignToday()
+    if (res.success && res.data?.sign_count !== undefined) {
+      signToday.value = res.data.sign_count
+    }
+  } catch (err) {
+    console.error('获取今日签到数据失败:', err)
+    signToday.value = 0
   }
 }
 
@@ -768,6 +796,11 @@ onBeforeUnmount(() => {
     &.mau {
       background: linear-gradient(135deg, rgba(236, 72, 153, 0.12), rgba(236, 72, 153, 0.06));
       color: #ec4899;
+    }
+
+    &.sign {
+      background: linear-gradient(135deg, rgba(34, 197, 94, 0.12), rgba(34, 197, 94, 0.06));
+      color: #22c55e;
     }
   }
 

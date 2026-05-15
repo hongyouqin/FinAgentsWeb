@@ -143,7 +143,7 @@ const handleCommand = async (command: string) => {
   align-items: center;
   gap: 10px;
   cursor: pointer;
-  padding: 8px 10px;
+  padding: 8px 0px;
   border-radius: 12px;
   transition: background 0.2s ease;
   outline: none;

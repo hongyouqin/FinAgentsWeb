@@ -92,6 +92,9 @@
 
     <!-- 算力记录弹框（全局挂载，UserProfile 和 Recharge 页面均可调用） -->
     <TxDialog />
+
+    <!-- 签到弹窗（全局挂载） -->
+    <SignDialog />
   </div>
 </template>
 
@@ -105,6 +108,7 @@ import HeaderActions from '@/components/Layout/HeaderActions.vue'
 import AppFooter from '@/components/Layout/AppFooter.vue'
 import Logo from '@/components/Logo.vue'
 import TxDialog from '@/components/TxDialog.vue'
+import SignDialog from '@/components/Global/SignDialog.vue'
 import { Expand, Fold } from '@element-plus/icons-vue'
 
 const appStore = useAppStore()

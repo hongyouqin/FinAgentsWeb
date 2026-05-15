@@ -10,7 +10,7 @@
   - 多智能体 AI 股票分析 → https://nbstockai.com/guide/multi-agent-stock
   - TradingAgents 中文版 → https://nbstockai.com （首页）
 预计字数: 2800
-Tag: #Prompt工程 #LLM #大模型应用 #提示词 #金融AI
+Tag: #Prompt工程 #大模型应用 #金融AI
 配图建议:
   1. Prompt 三段式结构图（角色 + 数据 + 输出规范）
   2. 茅台 2025Q1 数据卡片截图
@@ -27,6 +27,8 @@ Tag: #Prompt工程 #LLM #大模型应用 #提示词 #金融AI
 我在做 [多智能体 AI 股票分析](https://nbstockai.com/guide/multi-agent-stock) 系统的过程中，光研报这一个环节就迭代了 20 多版 Prompt。这篇文章把最终可用的模板开源出来，以 2025Q1 贵州茅台为案例，演示从**烂 Prompt** → **可用 Prompt** 的全过程。
 
 完整茅台案例研报可以看这里 👉 [AI 研报 Prompt](https://nbstockai.com/guide/maotai-ai-analysis)
+
+> ⚠️ **免责声明**：本文所有研报输出片段（包括"中性偏谨慎""批价 2200 元"等表达）均为 Prompt 工程的方法论范例，仅用于演示提示词结构差异，不构成任何投资建议。涉及的财务数据为公开信息整理，市值 / 股价 / 批价等以发布当日实际行情为准。投资有风险，入市需谨慎。
 
 ---
 
@@ -220,6 +222,8 @@ prompt = REPORT_PROMPT.render(
 
 ## 七、茅台案例的实际输出对比
 
+> 以下表格为 Prompt 方法论范例，对比烂 / 好两种提示词的输出差异，**不构成对贵州茅台或任何标的的投资建议**。
+
 同样的数据，烂 Prompt vs 好 Prompt 输出摘要：
 
 | 小节 | 烂 Prompt 输出 | 好 Prompt 输出 |
@@ -261,9 +265,7 @@ LLM 对 Prompt 开头和结尾的 token 注意力最强，中间容易被"遗忘
 - 看多派 vs 看空派**辩论**
 - 风控独立审查
 
-想要更深度的拆解，推荐看我另一篇 → [多智能体 AI 股票分析](https://nbstockai.com/guide/multi-agent-stock)：把本文的研报 Prompt 当作"基本面分析师"角色，再组合另外 6 个角色，形成完整 pipeline。
-
-系统完整实现和 Demo：[TradingAgents 中文版](https://nbstockai.com) 开源可跑。
+想要更深度的拆解，可以参考多智能体协作的实现思路：把本文的研报 Prompt 当作"基本面分析师"角色，再组合技术 / 新闻 / 情绪 / 风控等角色，形成完整 pipeline。在线方法论笔记可见 nbstockai.com（仅供学习交流）。
 
 ---
 
@@ -281,4 +283,4 @@ Prompt 工程在金融垂类的核心不是"魔法咒语"，而是**工程化**�
 
 ---
 
-> Tag：#Prompt工程 #LLM #大模型应用 #提示词 #金融AI
+> Tag：#Prompt工程 #大模型应用 #金融AI

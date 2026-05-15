@@ -75,6 +75,18 @@ export function generateStats(): Promise<ApiResponse<{ message: string }>> {
 }
 
 /**
+ * 获取今日签到人数
+ */
+export interface SignTodayData {
+  date: string
+  sign_count: number
+}
+
+export function getSignToday(): Promise<ApiResponse<SignTodayData>> {
+  return ApiClient.get<SignTodayData>('/api/admin/stats/sign/today')
+}
+
+/**
  * 登录状态访问埋点：上报一次登录用户的访问行为（用于 DAU/活跃度统计）
  */
 export function trackLogin(): Promise<ApiResponse<any>> {
