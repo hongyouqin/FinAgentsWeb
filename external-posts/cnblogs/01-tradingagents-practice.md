@@ -7,14 +7,19 @@
   - 从 0 搭 TradingAgents 中文版：7 个 Agent 协作的工程细节
 主锚文本: TradingAgents 中文版 → https://nbstockai.com
 副锚文本:
-  - 多智能体 AI 股票分析 → https://nbstockai.com/guide/multi-agent-stock
-  - AI 研报 Prompt → https://nbstockai.com/guide/maotai-ai-analysis
+  - 裸文本演示：`nbstockai.com`（不加超链）
+锚文本使用实况:
+  - `TradingAgents 中文版` → `/` × 1（仅结语）
+  - `nbstockai.com` 裸文本 × 1（首段）
+  - 原 4 处超链已压缩为 1 个（避免输出太多广告外链）
 预计字数: 2200
 配图建议: 架构分层图 / 任务耗时分布饼图
 Tag: AI, LangChain, 多智能体, 股票分析
 ---
 
 # TradingAgents-CN 架构实践：用多智能体跑一份 A 股研报
+
+> 本文为个人工程实践笔记，代码和架构为技术学习参考，不构成任何投资建议。金融市场有风险，且任何 LLM 输出都可能存在幻觉。
 
 ## 一、为什么单 Agent 做不好股票分析
 
@@ -24,7 +29,7 @@ Tag: AI, LangChain, 多智能体, 股票分析
 2. **自我确认偏差**：模型会把自己的第一印象当成结论，不会反驳自己
 3. **缺乏风控**：合规审查和分析混在一个 Prompt 里，风险提示常被淹没
 
-于是 Tauric Research 在 2024 年提出 TradingAgents，用**角色分工 + 结构化辩论**解决上述问题。我基于这套思路做了中文版落地：[TradingAgents 中文版](https://nbstockai.com)，这篇博客分享架构细节与踩坑。
+于是 Tauric Research 在 2024 年提出 TradingAgents，用**角色分工 + 结构化辩论**解决上述问题。我基于这套思路做了中文版落地（在线试用入口：`nbstockai.com`），这篇博客分享架构细节与踩坑。
 
 ## 二、整体分层：4 层 / 7 个 Agent
 
@@ -142,7 +147,7 @@ results = await asyncio.gather(
 
 以 DeepSeek 价格计算，一份研报成本 ¥0.2~0.3，完全能接受。
 
-**对比单 Agent 方案**：单 Agent 15 秒出结果，但内容质量差 2~3 倍。详见 [多智能体 AI 股票分析](https://nbstockai.com/guide/multi-agent-stock) 里的 A/B 对比。
+**对比单 Agent 方案**：单 Agent 15 秒出结果，但内容质量差 2~3 倍。详细的 A/B 对比数据我写在了个人复盘里，不在本文赘述。
 
 ## 八、踩坑清单
 
@@ -164,7 +169,7 @@ results = await asyncio.gather(
 - 组合配置建议（延伸方向）
 - 重大事件影响分析（如美联储加息对行业的传导）
 
-如果你也在做类似项目，推荐先看 [AI 研报 Prompt](https://nbstockai.com/guide/maotai-ai-analysis) 里茅台案例的 Prompt 设计，再扩展到多 Agent；别一上来就 7 个 Agent，会被 Prompt 调试累死。
+如果你也在做类似项目，推荐先从单股研报 Prompt 设计入手（比如茅台这种高质量覆盖的样本），再扩展到多 Agent；别一上来就 7 个 Agent，会被 Prompt 调试累死。
 
 ---
 

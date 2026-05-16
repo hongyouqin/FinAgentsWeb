@@ -61,12 +61,12 @@ const handleStartAnalysis = () => {
   }
 }
 
+// 报告样本预览：从弹窗改为页内锁点滚动，样本区块在 HeroSection 下方
 const handleViewDemo = () => {
-  // 滚动到功能介绍区（直接滚动一屏高度）
-  window.scrollTo({
-    top: window.innerHeight,
-    behavior: 'smooth'
-  })
+  const target = document.getElementById('report-sample-section')
+  if (target) {
+    target.scrollIntoView({ behavior: 'smooth', block: 'start' })
+  }
 }
 
 const handleLogin = () => {
@@ -193,7 +193,8 @@ onMounted(() => {
               <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M9 12h6m-6 4h6m-6-8h6M5 4h14a2 2 0 012 2v12a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
               </svg>
-              <span class="cta-label">查看报告</span>
+              <span class="cta-label">查看报告样本</span>
+              <span class="cta-secondary-badge">PREVIEW</span>
             </el-button>
           </div>
 
@@ -865,6 +866,7 @@ onMounted(() => {
   transition: all 0.3s ease;
   backdrop-filter: blur(20px);
   margin: 0;
+  position: relative;
 
   &:hover {
     background: rgba(6, 182, 212, 0.15);
@@ -877,6 +879,24 @@ onMounted(() => {
     width: 22px;
     height: 22px;
   }
+
+  .cta-secondary-badge {
+    margin-left: 0.4rem;
+    font-size: 0.625rem;
+    font-weight: 800;
+    letter-spacing: 0.15em;
+    padding: 2px 6px;
+    border-radius: 4px;
+    background: linear-gradient(135deg, #fbbf24, #f59e0b);
+    color: #422006;
+    box-shadow: 0 0 12px rgba(251, 191, 36, 0.5);
+    animation: previewBadgePulse 1.8s ease-in-out infinite;
+  }
+}
+
+@keyframes previewBadgePulse {
+  0%, 100% { transform: scale(1); }
+  50%      { transform: scale(1.08); }
 }
 
 // 数据统计

@@ -5,10 +5,13 @@
   - AI 量化回测实测笔记：60 天 300 只 A 股，AI 研报到底能不能跑赢指数
   - 用 AI 研报选股做 60 天回测，看多 / 中性 / 看空分组收益实测
   - 给 AI 炒股泼一盆冷水：一份回测笔记
-主锚文本: AI 炒股靠谱吗 → https://nbstockai.com/guide/ai-stock-worth-it
+主锚文本: TradingAgents 中文版 → https://nbstockai.com
 副锚文本:
-  - TradingAgents 中文版 → https://nbstockai.com
-  - AI 股票工具对比 → https://nbstockai.com/guide/ai-stock-tool-compare-2026
+  - 裸文本演示：`nbstockai.com`（不加超链）
+锚文本使用实况:
+  - `TradingAgents 中文版` → `/` × 1（仅结语）
+  - `nbstockai.com` 裸文本 × 2（正文 + 结论）
+  - 原 6 处超链已压缩为 1 个；`AI 股票工具对比` 配额已用尽，改为纯文本描述
 预计字数: 2000
 配图建议: 三组收益曲线对比图 / 行业胜率热力图
 Tag: AI, 量化, 回测, 股票
@@ -16,13 +19,15 @@ Tag: AI, 量化, 回测, 股票
 
 # AI 量化回测实测笔记：60 天 300 只 A 股，AI 研报到底能不能跑赢指数
 
+> 本文为个人量化回测实验笔记，样本区间有限、不足以做统计显著性检验，所有结论仅供技术思路参考，不构成任何投资建议。市场有风险，投资需谨慎。
+
 ## 一、为什么要做这个回测
 
 去年公司开始用 AI 大模型写股票研报，老板一句话：**"你这玩意儿比中信建投强在哪？"**
 
 我答不上来。AI 研报看起来都挺合理，但到底能不能指导实盘？没有真实数据的结论都是耍流氓。于是我做了一次 60 天回测，结果比想象的**更有意思也更克制**，这篇博客分享完整方法和结论。
 
-完整结论也整理成了长文 👉 [AI 炒股靠谱吗](https://nbstockai.com/guide/ai-stock-worth-it)
+完整结论我也整理成了一份长文笔记，放在 `nbstockai.com` 上，只想看结论的可以去那里看。
 
 ## 二、实验设计
 
@@ -30,7 +35,7 @@ Tag: AI, 量化, 回测, 股票
 | --- | --- |
 | 样本池 | 沪深 300 成分股（因为流动性好、数据干净）|
 | 时间窗口 | 2025-01-06 ~ 2025-04-30（约 60 个交易日）|
-| AI 引擎 | [TradingAgents 中文版](https://nbstockai.com) 多 Agent 系统 |
+| AI 引擎 | 自研多 Agent 系统（基于 Tauric Research 开源的 TradingAgents 框架改造，适配 A 股数据源与国产 LLM）|
 | 分析周期 | 每周一开盘前对 300 只股票各生成一份研报 |
 | 分组依据 | AI 给出的 stance：看多 / 中性 / 看空 |
 | 持仓逻辑 | 每周一等权调仓到对应分组（不加杠杆、不做空）|
@@ -135,16 +140,16 @@ AI 调用必须严格用 T 日之前的数据。最初数据管道里混了"未�
 2. ❌ 把 AI 研报当成买卖点信号
 3. ❌ 期待 AI 预测股价
 
-更细致的分析我整理到了 [AI 炒股靠谱吗](https://nbstockai.com/guide/ai-stock-worth-it) 这篇长文里。
+更细致的分析我整理在个人复盘里了，不在本文赘述。
 
 ## 八、工具选型
 
 做回测用到的工具：
-- 分析引擎：[TradingAgents 中文版](https://nbstockai.com)（开源免费）
+- 分析引擎：自研多 Agent 系统（基于 TradingAgents 框架中文改造）
 - 数据源：Tushare Pro（行情、财务）+ AkShare（新闻）
 - 回测框架：自己写的 Python 脚本（本来想用 backtrader，但多因子回测自定义多）
 
-如果只想看国产 AI 股票工具横向对比，可以参考 [AI 股票工具对比](https://nbstockai.com/guide/ai-stock-tool-compare-2026)，里面列了 6 款工具的优劣。
+如果只想看国产 AI 股票工具横向对比，我之前另外写过一篇 6 款工具产品技术路线拆解，不在本文重复。
 
 ---
 
@@ -158,4 +163,4 @@ AI 研报在 A 股并不是神奇，但也不是智商税。它是一把**信息
 
 ---
 
-> 本文原创首发博客园。完整方法论和原始研报样本见 [TradingAgents 中文版](https://nbstockai.com)。
+> 本文原创首发博客园。完整方法论和原始研报样本可去 [TradingAgents 中文版](https://nbstockai.com) 体验。

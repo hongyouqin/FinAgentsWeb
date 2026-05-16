@@ -1,9 +1,29 @@
 <script setup lang="ts">
 import HeroSection from './components/HeroSection.vue'
+import ReportSampleDialog from './components/ReportSampleDialog.vue'
 import FeaturesSection from './components/FeaturesSection.vue'
 import TechSection from './components/TechSection.vue'
 import CTASection from './components/CTASection.vue'
 import { useSeo } from '@/composables/useSeo'
+import { useRouter } from 'vue-router'
+import { useAuthStore } from '@/stores/auth'
+import wechatLogin from '@/utils/wechatLogin'
+
+const router = useRouter()
+const authStore = useAuthStore()
+
+// 样本区 CTA：已登录跳分析页，未登录走登录流程（微信环境会走授权）
+const handleSampleCta = () => {
+  if (!authStore.isAuthenticated) {
+    if (wechatLogin.isWechat()) {
+      wechatLogin.startAuth()
+    } else {
+      router.push('/login')
+    }
+    return
+  }
+  router.push('/analysis/single')
+}
 
 // 首页 SEO：抢品牌词 + A股 AI 分析大词 + 国产大模型长尾词
 useSeo({
@@ -18,6 +38,9 @@ useSeo({
   <div class="landing-page">
     <!-- Hero 区 -->
     <HeroSection />
+
+    <!-- 报告样本区（默认展示，无需点击） -->
+    <ReportSampleDialog @cta="handleSampleCta" />
 
     <!-- 功能介绍区 -->
     <FeaturesSection />
