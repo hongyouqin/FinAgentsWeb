@@ -18,7 +18,7 @@ const activeIndex = ref(0)
 const previewVisible = ref(false)
 
 // 拼接 API base 路径（图片资源走后端）
-const apiBaseUrl = import.meta.env.VITE_API_BASE_URL || ''
+const apiBaseUrl =  'https://nbstockai.com/'
 const resolveUrl = (url: string | null) => {
   if (!url) return ''
   if (/^https?:\/\//.test(url)) return url
