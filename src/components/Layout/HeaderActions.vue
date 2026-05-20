@@ -13,7 +13,7 @@
         <span class="sign-btn-wrap">
           <el-tooltip
             v-if="!signGuideVisible"
-            :content="signStore.signed ? '今日已签到' : signStore.canSign ? '签到领积分' : '签到'"
+            :content="signTooltip"
             placement="bottom"
           >
             <button
@@ -147,7 +147,16 @@ let signGuideAutoHideTimer: any = null
 const needsSignAttention = computed(() => {
   if (!authStore.token) return false
   if (!signStore.initialized) return false
+  if (signStore.isBalanceSufficient) return false
   return !signStore.signed && signStore.canSign
+})
+
+/** 签到按钮 tooltip 文案 */
+const signTooltip = computed(() => {
+  if (signStore.signed) return '今日已签到'
+  if (signStore.isBalanceSufficient) return `余额充足（≥ ${signStore.balanceThreshold} 算力），请先使用后再来领取`
+  if (signStore.canSign) return '签到领算力'
+  return '签到'
 })
 
 /** localStorage key：同一用户同一天只引导一次 */
@@ -165,6 +174,8 @@ const tryShowSignGuide = () => {
   if (signStore.dialogVisible) return
   // 已签到 → 不引导
   if (signStore.signed) return
+  // 余额已达阈值 → 不引导（成本控制）
+  if (signStore.isBalanceSufficient) return
   // 今日不可签到 → 不引导
   if (!signStore.canSign) return
   // 今日已引导过 → 不重复

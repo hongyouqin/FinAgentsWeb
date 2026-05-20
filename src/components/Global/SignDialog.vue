@@ -37,13 +37,17 @@
 
       <!-- 状态文案 -->
       <div class="sign-status-text">
-        <template v-if="!signStore.signed">
-          <div class="status-main">签到可得 <span class="reward-num">{{ rewardAmount }}</span> 算力</div>
-          <div class="status-sub">点击下方按钮领取今日奖励</div>
-        </template>
-        <template v-else>
+        <template v-if="signStore.signed">
           <div class="status-main success"><span class="reward-num">{{ rewardAmount }}</span> 算力领取成功</div>
           <div class="status-sub">明日记得再来哦 ~</div>
+        </template>
+        <template v-else-if="signStore.isBalanceSufficient">
+          <div class="status-main">余额充足，暂不需要领取</div>
+          <div class="status-sub">当前可用算力 <strong>{{ signStore.balance.toFixed(1) }}</strong>，使用至 {{ signStore.balanceThreshold }} 以下再来领取吧</div>
+        </template>
+        <template v-else>
+          <div class="status-main">签到可得 <span class="reward-num">{{ rewardAmount }}</span> 算力</div>
+          <div class="status-sub">点击下方按钮领取今日奖励</div>
         </template>
       </div>
 
@@ -61,6 +65,9 @@
         <template v-else-if="signStore.animating">
           <span class="btn-loading" />
           <span>签到中...</span>
+        </template>
+        <template v-else-if="signStore.isBalanceSufficient">
+          <span>余额充足 · 无需领取</span>
         </template>
         <template v-else>
           <span>立即签到</span>

@@ -5,13 +5,14 @@
   - AI 炒股，你以为的神奇不神奇
   - 我用 AI 炒股两个月，说几句不太好听的实话
   - 别再说"AI 能炒股赚钱"了，先看看这 3 组数据
-主锚文本: AI 炒股靠谱吗 → https://nbstockai.com/guide/ai-stock-worth-it
-副锚文本:
-  - TradingAgents 中文版 → https://nbstockai.com
-  - DeepSeek 炒股 → https://nbstockai.com/guide/deepseek-vs-qwen-stock
+锚文本策略（简书裸链为主）:
+  - 主锚（裸链）: nbstockai.com × 2（仅裸文本，不加 hyperlink）
+  - 副锚（裸链）: nbstockai.com/guide/ai-stock-worth-it × 2
+  - 副锚（裸链）: nbstockai.com/guide/deepseek-stock-analysis × 1
 预计字数: 1500
 风格: 人文化、故事化、投资反思
 Tag: 投资, 理财, AI, 人工智能
+合规: ✅ 首段补免责声明 / ✅ 所有超链改裸文本（简书裸链为主策略）/ ✅ DeepSeek 炒股落地页与锚文本表一致
 ---
 
 # AI 炒股，你以为的神奇不神奇
@@ -28,6 +29,8 @@ Tag: 投资, 理财, AI, 人工智能
 
 作为一个折腾过 TradingAgents、DeepSeek、千问一圈的人，我知道 AI 在炒股这件事上真实的能力是什么——不是"预测涨停"，而是"**帮你把做研究的时间从 5 小时压缩到 1 小时**"。
 
+> ⚠️ 声明：本文为个人使用体验与回测数据分享，不构成任何投资建议。投资有风险，入市需谨慎。
+
 这篇写给对 AI 炒股抱有不切实际幻想的朋友，说几句不太好听的实话。
 
 ## 二、AI 不会预测股价，永远不会
@@ -42,7 +45,7 @@ Tag: 投资, 理财, AI, 人工智能
 
 ## 三、数据说话：60 天 300 只 A 股回测
 
-为了验证 AI 选股到底靠不靠谱，我做了一次严肃的回测，细节完整版写在了 [AI 炒股靠谱吗](https://nbstockai.com/guide/ai-stock-worth-it) 这篇里，这里只讲三组数据：
+为了验证 AI 选股到底靠不靠谱，我做了一次严肃的回测，细节完整版写在了 nbstockai.com/guide/ai-stock-worth-it 这篇里，这里只讲三组数据：
 
 ### 数据 1：分组收益（60 天）
 
@@ -108,7 +111,7 @@ AI 立刻不客气地给你泼冷水：
 ### 3. 没有"盘感"
 A 股的情绪和博弈，很多时候不讲基本面。这是盘房里老股民几十年的肌肉记忆，AI 目前完全做不到。
 
-更详细的讨论在 [AI 炒股靠谱吗](https://nbstockai.com/guide/ai-stock-worth-it)。
+更详细的讨论在 nbstockai.com/guide/ai-stock-worth-it。
 
 ## 六、怎么用 AI 才合理
 
@@ -116,8 +119,8 @@ A 股的情绪和博弈，很多时候不讲基本面。这是盘房里老股民
 
 1. **别用 AI 找牛股**，用 AI 做**初筛和排雷**。
 2. **别跟 AI 比赛**，把它当成**研究员助理**。
-3. **别付 998**，免费的 [TradingAgents 中文版](https://nbstockai.com) 完全够用。
-4. **多换几个模型对比**，DeepSeek 深、千问新闻新，细节可看 [DeepSeek 炒股](https://nbstockai.com/guide/deepseek-vs-qwen-stock)。
+3. **别付 998**，免费的 nbstockai.com（TradingAgents 中文版）完全够用。
+4. **多换几个模型对比**，DeepSeek 深、千问新闻新，细节可看 nbstockai.com/guide/deepseek-stock-analysis。
 5. **永远带着怀疑看研报**，AI 有讨好症，一定要问它"请给看空理由"。
 
 ## 七、写在最后
@@ -130,7 +133,7 @@ AI 之于炒股，差不多是这个意思。
 
 它不是一把能自动斩妖除魔的仙器，它是一把**磨刀石**。你自己没判断力，给你再锋利的剑也白搭；你自己有判断力，它帮你把每个决策都磨得更准一点。
 
-如果你还没试过，我建议你**不要花一分钱**，先去用用 [TradingAgents 中文版](https://nbstockai.com)，跑一只你最熟悉的自选股看看。用完你会知道：**它既没那么神奇，也没那么废**。
+如果你还没试过，我建议你**不要花一分钱**，先去用用 nbstockai.com（TradingAgents 中文版），跑一只你最熟悉的自选股看看。用完你会知道：**它既没那么神奇，也没那么废**。
 
 而这种**不再走极端**的认知，本身就是投资路上最值钱的东西。
 

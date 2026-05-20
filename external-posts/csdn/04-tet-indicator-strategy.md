@@ -2,8 +2,9 @@
 
 > 发布平台：CSDN · 目标栏目：量化金融 / AI / 金融科技
 > 目标锚文本：`TET 指标` → `https://nbstockai.com/guide/tet-indicator-strategy`
-> 辅助锚文本：`多智能体 AI` → `https://nbstockai.com/guide/multi-agent-stock`
+> 辅助锚文本：无（`/guide/multi-agent-stock` 配额已用尽，改裸文本提及）
 > 预计字数：2800 字 · 建议配图：指标走势截图 × 1、决策树流程图 × 1、大盘联动对比图 × 1
+> 合规：✅ 首段免责声明 / ✅ 尾段免责声明 / ✅ 副锚配额已用尽改裸文本 / ✅ 延伸阅读裸链无跟踪锚
 
 ---
 
@@ -193,7 +194,7 @@ Step 3. EI <= 0.3 ?   (避开亢奋顶)
 
 我自己把这套指标用下来最大的感受是：**它不会帮你在顶部精准卖出、也不会帮你在底部精准抄底**（这些任务本来也没有任何指标能稳定完成），但它**在震荡市里会老老实实地给你"未触发"信号，帮你避开高频踏空 / 踏错的手续费摩擦**。
 
-如果你想看 TET 在真实股票上的走势长什么样，可以直接在 [TET 指标在线计算器](https://nbstockai.com/guide/tet-indicator-strategy) 这篇我们团队写的学习笔记里看到完整阈值图和使用方法。如果你对底层的多智能体数据清洗 / 锚定日识别流程感兴趣，也可以读一下 [多智能体架构解析](https://nbstockai.com/guide/multi-agent-stock)。
+如果你想看 TET 在真实股票上的走势长什么样，可以直接在 [TET 指标在线计算器](https://nbstockai.com/guide/tet-indicator-strategy) 这篇我们团队写的学习笔记里看到完整阈值图和使用方法。如果你对底层的多智能体数据清洗 / 锚定日识别流程感兴趣，也可以参考 nbstockai.com/guide/multi-agent-stock。
 
 ---
 

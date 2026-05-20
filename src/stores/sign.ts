@@ -1,6 +1,12 @@
 import { defineStore } from 'pinia'
 import { getSignStatus, submitSign, type SignStatus, type SignResult } from '@/api/sign'
 
+/**
+ * 签到余额阈值（前端成本控制）
+ * 可用算力 ≥ 该阈值时，不予签到，鼓励用户先消耗现有算力。
+ */
+export const SIGN_BALANCE_THRESHOLD = 10
+
 interface SignState {
   /** 签到状态 */
   status: SignStatus | null
@@ -32,12 +38,28 @@ export const useSignStore = defineStore('sign', {
   getters: {
     /** 今日是否已签到 */
     signed: (state): boolean => state.status?.has_signed ?? false,
-    /** 今日是否可以签到 */
-    canSign: (state): boolean => state.status?.can_sign_today ?? false,
     /** 当前积分余额 */
     balance: (state): number => state.status?.current_power?.available ?? 0,
+    /** 余额是否已足够（达阈值 → 无需签到领取） */
+    isBalanceSufficient: (state): boolean =>
+      (state.status?.current_power?.available ?? 0) >= SIGN_BALANCE_THRESHOLD,
+    /** 余额阈值（供 UI 展示） */
+    balanceThreshold: (): number => SIGN_BALANCE_THRESHOLD,
+    /** 今日是否可以签到（同时考虑后端授权与前端余额阈值） */
+    canSign: (state): boolean => {
+      if (!state.status?.can_sign_today) return false
+      if ((state.status?.current_power?.available ?? 0) >= SIGN_BALANCE_THRESHOLD) return false
+      return true
+    },
     /** 是否应该引导提示（可签到 + 未引导过） */
-    shouldGuide: (state): boolean => (state.status?.can_sign_today ?? false) && !state.status?.has_signed && !state.guideShown && state.initialized
+    shouldGuide: (state): boolean => {
+      if (!state.initialized) return false
+      if (state.guideShown) return false
+      if (state.status?.has_signed) return false
+      if (!state.status?.can_sign_today) return false
+      if ((state.status?.current_power?.available ?? 0) >= SIGN_BALANCE_THRESHOLD) return false
+      return true
+    }
   },
 
   actions: {
