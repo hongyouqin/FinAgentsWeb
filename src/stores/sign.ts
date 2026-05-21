@@ -1,5 +1,6 @@
 import { defineStore } from 'pinia'
 import { getSignStatus, submitSign, type SignStatus, type SignResult } from '@/api/sign'
+import { useAuthStore } from '@/stores/auth'
 
 /**
  * 签到余额阈值（前端成本控制）
@@ -38,26 +39,33 @@ export const useSignStore = defineStore('sign', {
   getters: {
     /** 今日是否已签到 */
     signed: (state): boolean => state.status?.has_signed ?? false,
-    /** 当前积分余额 */
-    balance: (state): number => state.status?.current_power?.available ?? 0,
+    /** 当前积分余额（从 authStore 获取，单一数据源） */
+    balance(): number {
+      const authStore = useAuthStore()
+      return authStore.available
+    },
     /** 余额是否已足够（达阈值 → 无需签到领取） */
-    isBalanceSufficient: (state): boolean =>
-      (state.status?.current_power?.available ?? 0) >= SIGN_BALANCE_THRESHOLD,
+    isBalanceSufficient(): boolean {
+      const authStore = useAuthStore()
+      return authStore.available >= SIGN_BALANCE_THRESHOLD
+    },
     /** 余额阈值（供 UI 展示） */
     balanceThreshold: (): number => SIGN_BALANCE_THRESHOLD,
     /** 今日是否可以签到（同时考虑后端授权与前端余额阈值） */
-    canSign: (state): boolean => {
-      if (!state.status?.can_sign_today) return false
-      if ((state.status?.current_power?.available ?? 0) >= SIGN_BALANCE_THRESHOLD) return false
+    canSign(): boolean {
+      if (!this.status?.can_sign_today) return false
+      const authStore = useAuthStore()
+      if (authStore.available >= SIGN_BALANCE_THRESHOLD) return false
       return true
     },
     /** 是否应该引导提示（可签到 + 未引导过） */
-    shouldGuide: (state): boolean => {
-      if (!state.initialized) return false
-      if (state.guideShown) return false
-      if (state.status?.has_signed) return false
-      if (!state.status?.can_sign_today) return false
-      if ((state.status?.current_power?.available ?? 0) >= SIGN_BALANCE_THRESHOLD) return false
+    shouldGuide(): boolean {
+      if (!this.initialized) return false
+      if (this.guideShown) return false
+      if (this.status?.has_signed) return false
+      if (!this.status?.can_sign_today) return false
+      const authStore = useAuthStore()
+      if (authStore.available >= SIGN_BALANCE_THRESHOLD) return false
       return true
     }
   },
@@ -110,10 +118,8 @@ export const useSignStore = defineStore('sign', {
     /** 打开签到弹窗 */
     openDialog() {
       this.dialogVisible = true
-      // 每次打开弹窗刷新一下状态
-      if (!this.status) {
-        this.fetchStatus()
-      }
+      // 每次打开弹窗都刷新状态，确保余额等数据为最新
+      this.fetchStatus()
     },
 
     /** 关闭签到弹窗 */
