@@ -156,6 +156,8 @@
         <span v-if="generateMsg" class="generate-msg">{{ generateMsg }}</span>
       </div>
 
+      
+
         <!-- 历史趋势 -->
         <div class="history-section">
           <div class="section-header">
@@ -192,6 +194,91 @@
             </div>
           </template>
         </div>
+
+
+        <!-- TET 图表点击统计 -->
+        <div class="tet-stats-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <el-icon><DataAnalysis /></el-icon>
+              TET 图表点击统计
+            </h3>
+            <div class="day-selector">
+              <el-radio-group v-model="tetDays" size="small" @change="fetchChartClicks">
+                <el-radio-button :value="7">7天</el-radio-button>
+                <el-radio-button :value="14">14天</el-radio-button>
+                <el-radio-button :value="30">30天</el-radio-button>
+                <el-radio-button :value="90">90天</el-radio-button>
+              </el-radio-group>
+            </div>
+          </div>
+
+          <div v-if="tetLoading" class="chart-loading">
+            <el-skeleton :rows="3" animated />
+          </div>
+
+          <template v-else-if="tetSummary">
+            <!-- 汇总卡片 -->
+            <div class="tet-overview-cards">
+              <div class="stat-card">
+                <div class="card-icon tet-total">
+                  <el-icon><Pointer /></el-icon>
+                </div>
+                <div class="card-info">
+                  <span class="card-value">{{ formatNumber(tetSummary.total_clicks) }}</span>
+                  <span class="card-label">总点击数</span>
+                </div>
+              </div>
+              <div class="stat-card">
+                <div class="card-icon tet-today">
+                  <el-icon><Sunny /></el-icon>
+                </div>
+                <div class="card-info">
+                  <span class="card-value">{{ formatNumber(tetSummary.today_clicks) }}</span>
+                  <span class="card-label">今日点击</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Top 10 榜单 -->
+            <div class="tet-rankings">
+              <div class="ranking-card">
+                <h4 class="ranking-title">
+                  <el-icon><TrendCharts /></el-icon>
+                  热门股票 Top 10
+                </h4>
+                <div class="ranking-list">
+                  <div v-for="(item, idx) in tetSummary.top_stocks" :key="item.stock_code" class="ranking-item">
+                    <span class="rank-num" :class="{ top: idx < 3 }">{{ idx + 1 }}</span>
+                    <span class="rank-name">{{ item.stock_code }}<template v-if="item.stock_name"> {{ item.stock_name }}</template></span>
+                    <span class="rank-count">{{ item.count }} 次</span>
+                  </div>
+                  <div v-if="!tetSummary.top_stocks?.length" class="ranking-empty">暂无数据</div>
+                </div>
+              </div>
+              <div class="ranking-card">
+                <h4 class="ranking-title">
+                  <el-icon><User /></el-icon>
+                  活跃用户 Top 10
+                </h4>
+                <div class="ranking-list">
+                  <div v-for="(item, idx) in tetSummary.top_users" :key="item.user_id" class="ranking-item">
+                    <span class="rank-num" :class="{ top: idx < 3 }">{{ idx + 1 }}</span>
+                    <span class="rank-name">{{ item.username }}</span>
+                    <span class="rank-count">{{ item.count }} 次</span>
+                  </div>
+                  <div v-if="!tetSummary.top_users?.length" class="ranking-empty">暂无数据</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 每日趋势图 -->
+            <div class="chart-card">
+              <h4 class="chart-title">TET 计算点击趋势</h4>
+              <div ref="tetChartRef" class="chart-container"></div>
+            </div>
+          </template>
+        </div>
       </template>
     </div>
   </div>
@@ -212,16 +299,25 @@ import {
   WarningFilled,
   Clock,
   Refresh,
-  Calendar
+  Calendar,
+  Pointer,
+  Sunny
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
-import { getDashboardStats, getStatsHistory, generateStats, getSignToday, type TodayStats, type DailyHistoryItem } from '@/api/admin'
+import { getDashboardStats, getStatsHistory, generateStats, getSignToday, getChartClicksSummary, type TodayStats, type DailyHistoryItem, type ChartClicksSummary } from '@/api/admin'
 
 defineOptions({ name: 'Statistics' })
 
 const loading = ref(true)
 const stats = ref<TodayStats | null>(null)
 const signToday = ref<number>(0)
+
+// ─── TET 图表点击统计 ──────────────────────────
+const tetDays = ref(30)
+const tetLoading = ref(false)
+const tetSummary = ref<ChartClicksSummary | null>(null)
+const tetChartRef = ref<HTMLDivElement | null>(null)
+let tetChart: echarts.ECharts | null = null
 
 const historyLoading = ref(false)
 const historyData = ref<DailyHistoryItem[]>([])
@@ -328,8 +424,9 @@ const fetchDashboard = async () => {
     console.error('获取统计数据失败:', err)
   } finally {
     loading.value = false
-    // 并行请求签到数据
+    // 并行请求签到数据和 TET 点击统计
     fetchSignToday()
+    fetchChartClicks()
     await nextTick()
     fetchHistory()
   }
@@ -345,6 +442,77 @@ const fetchSignToday = async () => {
     console.error('获取今日签到数据失败:', err)
     signToday.value = 0
   }
+}
+
+const fetchChartClicks = async () => {
+  tetLoading.value = true
+  // 销毁旧图表
+  tetChart?.dispose()
+  tetChart = null
+  try {
+    const res = await getChartClicksSummary(tetDays.value)
+    if (res.success && res.data) {
+      tetSummary.value = res.data
+    }
+  } catch (err) {
+    console.error('获取 TET 点击统计失败:', err)
+    tetSummary.value = null
+  } finally {
+    tetLoading.value = false
+    await nextTick()
+    if (tetSummary.value?.daily_trend?.length) {
+      renderTetChart()
+    }
+  }
+}
+
+const renderTetChart = () => {
+  if (!tetChartRef.value) return
+  if (tetChart) {
+    tetChart.dispose()
+    tetChart = null
+  }
+  tetChart = echarts.init(tetChartRef.value)
+  const trend = tetSummary.value?.daily_trend || []
+  const dates = trend.map((d: { date: string; count: number }) => d.date.slice(5))
+  const clicks = trend.map((d: { date: string; count: number }) => d.count)
+
+  tetChart.setOption({
+    tooltip: {
+      trigger: 'axis',
+      backgroundColor: 'rgba(15, 23, 42, 0.9)',
+      borderColor: '#334155',
+      textStyle: { color: '#e2e8f0', fontSize: 12 }
+    },
+    grid: { left: 50, right: 20, top: 24, bottom: 46 },
+    dataZoom: makeDataZoom(trend.length),
+    xAxis: {
+      type: 'category',
+      data: dates,
+      axisLine: { lineStyle: { color: '#cbd5e1' } },
+      axisLabel: { color: '#94a3b8', fontSize: 12 }
+    },
+    yAxis: {
+      type: 'value',
+      splitLine: { lineStyle: { color: '#f1f5f9' } },
+      axisLabel: { color: '#94a3b8', fontSize: 12 }
+    },
+    series: [
+      {
+        name: '点击数',
+        type: 'bar',
+        data: clicks,
+        barWidth: trend.length > 60 ? 6 : 10,
+        itemStyle: {
+          color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
+            { offset: 0, color: '#06b6d4' },
+            { offset: 1, color: 'rgba(6, 182, 212, 0.15)' }
+          ]),
+          borderRadius: [4, 4, 0, 0]
+        }
+      }
+    ]
+  })
 }
 
 const onDaysChange = () => {
@@ -514,6 +682,7 @@ const renderReportChart = () => {
 const handleResize = () => {
   userChart?.resize()
   reportChart?.resize()
+  tetChart?.resize()
 }
 
 const formatNumber = (val: number | undefined): string => {
@@ -547,6 +716,7 @@ onBeforeUnmount(() => {
   window.removeEventListener('resize', handleResize)
   userChart?.dispose()
   reportChart?.dispose()
+  tetChart?.dispose()
 })
 </script>
 
@@ -869,6 +1039,128 @@ onBeforeUnmount(() => {
 
 .history-section {
   margin-top: 8px;
+}
+
+// ─── TET 图表点击统计 ──────────────────────────
+.tet-stats-section {
+  margin-bottom: 24px;
+  padding-top: 8px;
+  border-top: 1px solid #e0f2fe;
+}
+
+.tet-overview-cards {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+
+  .card-icon {
+    &.tet-total {
+      background: linear-gradient(135deg, rgba(6, 182, 212, 0.12), rgba(6, 182, 212, 0.06));
+      color: #06b6d4;
+    }
+    &.tet-today {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.12), rgba(245, 158, 11, 0.06));
+      color: #f59e0b;
+    }
+  }
+}
+
+.tet-rankings {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 16px;
+  margin-bottom: 16px;
+}
+
+.ranking-card {
+  background: white;
+  border-radius: 16px;
+  padding: 20px;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
+  border: 1px solid #e0f2fe;
+
+  .ranking-title {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #334155;
+    margin: 0 0 14px 0;
+
+    .el-icon { color: #06b6d4; font-size: 16px; }
+  }
+}
+
+.ranking-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.ranking-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 6px 10px;
+  border-radius: 8px;
+  background: #f8fafc;
+  transition: background 0.2s;
+
+  &:hover { background: #f0f9ff; }
+
+  .rank-num {
+    width: 24px;
+    height: 24px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    background: #f1f5f9;
+    color: #64748b;
+    flex-shrink: 0;
+
+    &.top {
+      background: linear-gradient(135deg, #059669, #06b6d4);
+      color: white;
+    }
+  }
+
+  .rank-name {
+    flex: 1;
+    font-size: 13px;
+    color: #334155;
+    font-weight: 500;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .rank-count {
+    font-size: 12px;
+    color: #94a3b8;
+    font-weight: 600;
+    flex-shrink: 0;
+  }
+}
+
+.ranking-empty {
+  text-align: center;
+  padding: 20px;
+  color: #94a3b8;
+  font-size: 13px;
+}
+
+@media (max-width: 768px) {
+  .tet-rankings {
+    grid-template-columns: 1fr;
+  }
+  .tet-overview-cards {
+    grid-template-columns: 1fr;
+  }
 }
 
 .section-header {

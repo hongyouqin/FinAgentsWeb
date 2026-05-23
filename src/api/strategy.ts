@@ -67,5 +67,13 @@ export const strategyApi = {
    */
   getTetChart(params: TetChartParams): Promise<{ success: boolean; data: TetChartItem[] }> {
     return request.get('/api/tet/chart', { params })
+  },
+
+  /**
+   * 埋点记录：用户点击 TET 图表计算的行为
+   * POST /api/admin/stats/track/chart-click
+   */
+  trackChartClick(data: { event_type: string; stock_code: string; start_date: string; end_date: string }): Promise<any> {
+    return request.post('/api/admin/stats/track/chart-click', data)
   }
 }

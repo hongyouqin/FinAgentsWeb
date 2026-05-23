@@ -92,3 +92,38 @@ export function getSignToday(): Promise<ApiResponse<SignTodayData>> {
 export function trackLogin(): Promise<ApiResponse<any>> {
   return ApiClient.post<any>('/api/admin/stats/track/login')
 }
+
+// ─── TET 图表点击统计 ────────────────────────────
+
+export interface ChartClickStock {
+  stock_code: string
+  stock_name?: string
+  click_count: number
+}
+
+export interface ChartClickUser {
+  user_id: number
+  username: string
+  click_count: number
+}
+
+export interface ChartClickDailyTrend {
+  date: string
+  count: number
+}
+
+export interface ChartClicksSummary {
+  total_clicks: number
+  today_clicks: number
+  top_stocks: ChartClickStock[]
+  top_users: ChartClickUser[]
+  daily_trend: ChartClickDailyTrend[]
+}
+
+/**
+ * 获取 TET 图表点击统计汇总
+ * @param days 查询天数，默认 30
+ */
+export function getChartClicksSummary(days: number = 30): Promise<ApiResponse<ChartClicksSummary>> {
+  return ApiClient.get<ChartClicksSummary>('/api/admin/stats/tracking/chart-clicks/summary', { days })
+}

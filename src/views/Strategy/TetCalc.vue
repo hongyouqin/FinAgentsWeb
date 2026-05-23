@@ -242,6 +242,14 @@ import { strategyApi, type TetChartItem } from '@/api/strategy'
 
 defineOptions({ name: 'TetCalc' })
 
+const props = defineProps<{
+  initialCode?: string
+}>()
+
+const emit = defineEmits<{
+  (e: 'calculated', code: string): void
+}>()
+
 function fmt(d: Date): string {
   const y = d.getFullYear()
   const m = String(d.getMonth() + 1).padStart(2, '0')
@@ -369,7 +377,16 @@ async function handleCalc() {
       ElMessage.warning('该股票在所选区间暂无数据')
     } else {
       chartData.value = list
+      emit('calculated', stockCode.value.trim())
     }
+
+    // 埋点记录：用户计算操作（不阻塞主流程）
+    strategyApi.trackChartClick({
+      event_type: 'tet_chart_click',
+      stock_code: stockCode.value.trim(),
+      start_date: dateRange[0],
+      end_date: dateRange[1]
+    }).catch(() => { /* 埋点失败不影响业务 */ })
   } catch (e: any) {
     console.error('TET 查询失败', e)
     ElMessage.error(e?.message || '查询失败，请稍后重试')
@@ -613,6 +630,14 @@ watch(displayRange, () => {
     renderCharts()
   }
 })
+
+// 监听父组件传入的初始股票代码，自动触发计算
+watch(() => props.initialCode, (code: string | undefined) => {
+  if (code && /^\d{6}$/.test(code)) {
+    stockCode.value = code
+    nextTick(() => handleCalc())
+  }
+}, { immediate: true })
 </script>
 
 <style lang="scss" scoped>

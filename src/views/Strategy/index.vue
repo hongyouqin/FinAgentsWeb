@@ -42,7 +42,7 @@
       </div>
 
       <!-- 查询计算面板 -->
-      <TetCalc v-if="activeTab === 'calc'" />
+      <TetCalc v-if="activeTab === 'calc'" :initial-code="calcInitCode" />
 
       <!-- 推荐策略面板（原内容，仅在 pitch 时展示） -->
       <template v-if="activeTab === 'pitch'">
@@ -294,8 +294,12 @@
               </template>
             </el-table-column>
 
-            <el-table-column label="操作" width="100" fixed="right">
+            <el-table-column label="操作" width="160" fixed="right">
               <template #default="{ row }">
+                <el-button type="primary" size="small" text @click="goToCalc(row.stock_code)">
+                  <el-icon><DataAnalysis /></el-icon>
+                  计算
+                </el-button>
                 <el-button type="primary" size="small" text @click="goToAnalysis(row.stock_code)">
                   <el-icon><TrendCharts /></el-icon>
                   分析
@@ -388,6 +392,10 @@
             </div>
 
             <div class="card-footer">
+              <el-button type="primary" size="small" @click.stop="goToCalc(stock.stock_code)">
+                <el-icon><DataAnalysis /></el-icon>
+                计算
+              </el-button>
               <el-button type="primary" size="small" @click.stop="goToAnalysis(stock.stock_code)">
                 <el-icon><TrendCharts /></el-icon>
                 去分析
@@ -428,6 +436,7 @@ const router = useRouter()
 
 // Tab 切换：pitch=推荐策略，calc=查询计算
 const activeTab = ref<'pitch' | 'calc'>('pitch')
+const calcInitCode = ref<string>('')
 
 // 日期选择
 const selectedDate = ref<string>(formatDate(new Date()))
@@ -651,6 +660,14 @@ const goToAnalysis = (stockCode: string) => {
     path: '/analysis/single',
     query: { symbol: stockCode }
   })
+}
+
+// 切换到查询计算 Tab 并传入股票代码
+const goToCalc = (stockCode: string) => {
+  // 去掉可能的后缀（如 .SH, .SZ）
+  const code = stockCode.replace(/\.(SH|SZ|BJ)$/i, '')
+  calcInitCode.value = code
+  activeTab.value = 'calc'
 }
 
 // 打开同花顺股票详情页

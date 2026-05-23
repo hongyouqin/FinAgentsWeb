@@ -7,7 +7,7 @@
 >   → https://www.zhihu.com/question/1889003547569419124
 > - ⏸️ 围观不答：MACD滞后性（question/451249179）/ 过拟合判断（question/1916192663230705907）
 > 目标锚文本：`TET 指标` → `https://nbstockai.com/guide/tet-indicator-strategy`（quota 2/3）
-> 辅助锚文本：`A股量化择时` → `https://nbstockai.com/guide/tet-indicator-strategy`（quota 1/2）
+> 辅助引流：文末裸链 `nbstockai.com` × 1（不限次）、「量化择时」以裸文本提及（不加超链）
 > 预计字数：2100 字（主发版）/ 钩子替换首段 + 同正文
 > 合规：✅ 开头 100 字不贴链 / ✅ 文末 1 主链 + 1 裸链 / ✅ 免责声明段 / ✅ 无商业违禁词
 
@@ -167,7 +167,9 @@ TI = ATS − EI
 
 ## 六、可以在哪里看到
 
-如果你想直接看某支股票的 TET 曲线，不想自己实现，可以看这篇我们团队写的 [TET 指标完整拆解](https://nbstockai.com/guide/tet-indicator-strategy)，里面有公式、阈值、决策树和在线计算器入口。也可以读一下 [A 股量化择时思路](https://nbstockai.com/guide/tet-indicator-strategy)，了解更多实现细节。
+如果你想直接看某支股票的 TET 曲线、不想自己实现，可以看这篇我们团队写的 [TET 指标完整拆解](https://nbstockai.com/guide/tet-indicator-strategy)，里面有公式、阈值、决策树和在线计算器入口。这套指标主要面向 A 股量化择时场景，算是对「市场结构性事实编码进指标定义」的一个小尝试。
+
+如果想看更多同领域的笔记、可以去 nbstockai.com 看，里面还有多智能体、基本面研报深度分析等不同路线的素材。
 
 ---
 
