@@ -538,7 +538,7 @@ const loadStockList = async () => {
   try {
     const res = await strategyApi.getDailyPitch({
       date: selectedDate.value,
-      limit: 50,
+      limit: 100,
       include_stats: true
     })
     

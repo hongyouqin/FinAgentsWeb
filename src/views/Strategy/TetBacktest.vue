@@ -117,7 +117,7 @@
         <div class="chart-header">
           <span class="chart-dot" />
           <span class="chart-title">净值曲线</span>
-          <span class="chart-sub">Strategy vs Benchmark (HS300)</span>
+          <span class="chart-sub">TET策略 vs 持股不动</span>
         </div>
         <div ref="equityChartRef" class="chart-body" />
       </div>
@@ -245,18 +245,17 @@ function renderChart() {
   equityChart.setOption({
     tooltip: {
       trigger: 'axis',
-      axisPointer: { type: 'cross' },
       confine: true,
       valueFormatter: (v: any) => typeof v === 'number' ? v.toFixed(4) : '--'
     },
     legend: {
-      data: ['TET 策略', '沪深300 基准'],
+      data: ['TET 策略净值', '持股不动净值'],
       top: isNarrow ? 4 : 8,
       textStyle: { color: '#475569', fontSize: isNarrow ? 11 : 12 }
     },
     grid: isNarrow
-      ? { left: 14, right: 14, top: 44, bottom: 32, containLabel: true }
-      : { left: 16, right: 24, top: 48, bottom: 36, containLabel: true },
+      ? { left: 14, right: 14, top: 40, bottom: 32, containLabel: true }
+      : { left: 16, right: 24, top: 44, bottom: 36, containLabel: true },
     xAxis: {
       type: 'category',
       data: dates,
@@ -272,7 +271,7 @@ function renderChart() {
     },
     series: [
       {
-        name: 'TET 策略',
+        name: 'TET 策略净值',
         type: 'line',
         data: strategyData,
         smooth: true,
@@ -280,19 +279,19 @@ function renderChart() {
         lineStyle: { color: '#8b5cf6', width: 2.5 },
         areaStyle: {
           color: new echarts.graphic.LinearGradient(0, 0, 0, 1, [
-            { offset: 0, color: 'rgba(139, 92, 246, 0.2)' },
+            { offset: 0, color: 'rgba(139, 92, 246, 0.18)' },
             { offset: 1, color: 'rgba(139, 92, 246, 0.01)' }
           ])
         },
         itemStyle: { color: '#8b5cf6' }
       },
       {
-        name: '沪深300 基准',
+        name: '持股不动净值',
         type: 'line',
         data: benchmarkData,
         smooth: true,
         symbol: 'none',
-        lineStyle: { color: '#f59e0b', width: 1.8, type: 'dashed' },
+        lineStyle: { color: '#f59e0b', width: 2, type: 'dashed' },
         itemStyle: { color: '#f59e0b' }
       }
     ]

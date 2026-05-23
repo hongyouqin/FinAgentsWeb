@@ -26,21 +26,16 @@
                 />
               </el-option-group>
             </el-select>
-            <span class="form-hint">已选 {{ stockCodes.length }} 只，最多 20 只 · 推荐列表来自「推荐策略」Tab</span>
+            <div class="form-hint-row">
+              <span class="form-hint">已选 {{ stockCodes.length }} 只 · 推荐列表来自「推荐策略」Tab</span>
+              <el-button v-if="recommendedStocks.length" size="small" class="select-all-btn" @click="handleSelectAll">
+                {{ isAllSelected ? '取消全选' : '全选推荐股票' }}
+              </el-button>
+            </div>
           </div>
         </div>
         <div class="form-row params-row">
-          <div class="form-item">
-            <label class="form-label">最大持仓数</label>
-            <el-input-number
-              v-model="topN"
-              :min="2"
-              :max="10"
-              size="large"
-              :controls="false"
-              class="topn-input"
-            />
-          </div>
+          
           <div class="form-item date-item">
             <label class="form-label">回测区间</label>
             <el-date-picker
@@ -56,7 +51,18 @@
               :disabled-date="disabledDate"
             />
           </div>
-          <div class="form-item btn-item">
+          <div class="form-item topn-item">
+            <label class="form-label">组合数</label>
+            <el-input-number
+              v-model="topN"
+              :min="2"
+              :max="10"
+              size="large"
+              :controls="false"
+              class="topn-input"
+            />
+          </div>
+          <div class="form-item action-row">
             <el-button type="primary" size="large" :loading="loading" class="run-btn" @click="handleRun">
               <el-icon><DataAnalysis /></el-icon>
               <span>开始分析</span>
@@ -230,6 +236,24 @@ const props = defineProps<{
 
 const recommendedStocks = computed(() => props.recommendedStocks || [])
 
+const allRecommendedCodes = computed(() => recommendedStocks.value.map((s: RecommendedStock) => cleanCode(s.stock_code)))
+const isAllSelected = computed(() => {
+  if (!allRecommendedCodes.value.length) return false
+  return allRecommendedCodes.value.every((c: string) => stockCodes.value.includes(c))
+})
+
+function handleSelectAll() {
+  if (isAllSelected.value) {
+    // 取消推荐股票，保留手动输入的
+    stockCodes.value = stockCodes.value.filter((c: string) => !allRecommendedCodes.value.includes(c))
+  } else {
+    // 全选推荐股票，去重
+    const set = new Set(stockCodes.value)
+    allRecommendedCodes.value.forEach((c: string) => set.add(c))
+    stockCodes.value = Array.from(set)
+  }
+}
+
 function cleanCode(code: string): string {
   return code.replace(/\.(SH|SZ|BJ)$/i, '')
 }
@@ -256,9 +280,6 @@ const disabledDate = (time: Date) => time.getTime() > Date.now()
 function validate(): boolean {
   // 过滤非法值（allow-create 可能产生非 6 位输入）
   stockCodes.value = stockCodes.value.filter((c: string) => /^\d{6}$/.test(c))
-  if (stockCodes.value.length > 20) {
-    stockCodes.value = stockCodes.value.slice(0, 20)
-  }
   if (stockCodes.value.length < 2) {
     ElMessage.warning('请至少选择 2 只股票')
     return false
@@ -383,14 +404,7 @@ function renderChart() {
             { offset: 1, color: 'rgba(6, 182, 212, 0.01)' }
           ])
         },
-        itemStyle: { color: '#06b6d4' },
-        markLine: {
-          silent: true,
-          symbol: 'none',
-          lineStyle: { color: '#f59e0b', width: 1.5, type: 'dashed' },
-          label: { formatter: '基准 1.0', color: '#f59e0b', fontSize: 11 },
-          data: [{ yAxis: 1 }]
-        }
+        itemStyle: { color: '#06b6d4' }
       }
     ]
   })
@@ -474,13 +488,40 @@ onBeforeUnmount(() => {
     color: rgba(226, 232, 240, 0.85);
     letter-spacing: 0.3px;
   }
+  .form-hint-row {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin-top: 4px;
+  }
   .form-hint {
     font-size: 11px;
     color: rgba(148, 163, 184, 0.8);
-    margin-top: 4px;
+  }
+  .select-all-btn {
+    font-size: 11px;
+    font-weight: 600;
+    padding: 4px 12px;
+    height: 24px;
+    border-radius: 12px;
+    background: rgba(6, 182, 212, 0.15);
+    border: 1px solid rgba(6, 182, 212, 0.4);
+    color: #06b6d4;
+    transition: all 0.2s;
+    &:hover {
+      background: rgba(6, 182, 212, 0.3);
+      border-color: #06b6d4;
+      color: #fff;
+    }
   }
   .stock-codes-item { flex: 1 1 100%; }
-  .date-item {  }
+  .date-item { flex: 1 1 auto; }
+  .topn-item {
+    flex-direction: row;
+    align-items: center;
+    gap: 8px;
+  }
+  .action-row { }
   .btn-item { align-self: flex-end; }
 
   .stock-select {
@@ -511,7 +552,7 @@ onBeforeUnmount(() => {
   }
 
   .topn-input {
-    width: 120px;
+    width: 80px;
     :deep(.el-input__wrapper) {
       background: rgba(255, 255, 255, 0.95);
       border-radius: 12px;
@@ -728,12 +769,19 @@ onBeforeUnmount(() => {
 @media (max-width: 768px) {
   .portfolio-search { padding: 18px 16px 14px; }
   .params-row {
-    flex-direction: column;
+    flex-wrap: wrap;
     gap: 10px;
-    .form-item { width: 100%; }
-    .topn-input { width: 100%; :deep(.el-input) { width: 100%; } }
+    .date-item { flex: 1 1 100%; }
+    .topn-item {
+      width: auto;
+      flex: none;
+      flex-direction: row;
+      align-items: center;
+      gap: 8px;
+    }
+    .topn-input { width: 80px; :deep(.el-input) { width: 80px; } }
     .date-range-input { width: 100%; }
-    .btn-item { width: 100%; .run-btn { width: 100%; justify-content: center; } }
+    .action-row { flex: 1; display: flex; justify-content: flex-end; }
   }
   .section-header {
     .section-title { font-size: 14px; }
