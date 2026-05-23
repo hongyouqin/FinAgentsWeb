@@ -27,7 +27,7 @@
     </div>
 
     <div class="content-wrapper">
-      <!-- 顶部 Tab：推荐策略 / 查询计算 -->
+      <!-- 顶部 Tab：推荐策略 / 查询计算 / 回测 / 组合分析 -->
       <div class="tab-switch">
         <el-radio-group v-model="activeTab" size="large" class="tab-group">
           <el-radio-button :value="'pitch'">
@@ -38,11 +38,25 @@
             <el-icon><DataAnalysis /></el-icon>
             <span class="tab-label">查询计算</span>
           </el-radio-button>
+          <el-radio-button :value="'backtest'">
+            <el-icon><Histogram /></el-icon>
+            <span class="tab-label">策略回测</span>
+          </el-radio-button>
+          <el-radio-button :value="'portfolio'">
+            <el-icon><PieChart /></el-icon>
+            <span class="tab-label">组合分析</span>
+          </el-radio-button>
         </el-radio-group>
       </div>
 
       <!-- 查询计算面板 -->
       <TetCalc v-if="activeTab === 'calc'" :initial-code="calcInitCode" />
+
+      <!-- 回测面板 -->
+      <TetBacktest v-if="activeTab === 'backtest'" />
+
+      <!-- 组合分析面板 -->
+      <TetPortfolio v-if="activeTab === 'portfolio'" :recommended-stocks="stockList" />
 
       <!-- 推荐策略面板（原内容，仅在 pitch 时展示） -->
       <template v-if="activeTab === 'pitch'">
@@ -425,17 +439,21 @@ import {
   ArrowUp,
   ArrowDown,
   Star,
-  DataAnalysis
+  DataAnalysis,
+  Histogram,
+  PieChart
 } from '@element-plus/icons-vue'
 import { strategyApi } from '@/api/strategy'
 import TetCalc from './TetCalc.vue'
+import TetBacktest from './TetBacktest.vue'
+import TetPortfolio from './TetPortfolio.vue'
 
 defineOptions({ name: 'Strategy' })
 
 const router = useRouter()
 
-// Tab 切换：pitch=推荐策略，calc=查询计算
-const activeTab = ref<'pitch' | 'calc'>('pitch')
+// Tab 切换：pitch=推荐策略，calc=查询计算，backtest=回测，portfolio=组合分析
+const activeTab = ref<'pitch' | 'calc' | 'backtest' | 'portfolio'>('pitch')
 const calcInitCode = ref<string>('')
 
 // 日期选择
@@ -874,6 +892,10 @@ onMounted(async () => {
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.06);
   display: flex;
   justify-content: center;
+  overflow-x: auto;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: none;
+  &::-webkit-scrollbar { display: none; }
 
   :deep(.el-radio-button__inner) {
     display: inline-flex;
@@ -885,6 +907,7 @@ onMounted(async () => {
     color: #475569;
     background: #f8fafc;
     transition: all 0.25s ease;
+    white-space: nowrap;
   }
   :deep(.el-radio-button__original-radio:checked + .el-radio-button__inner) {
     background: linear-gradient(135deg, #06b6d4, #0891b2);
@@ -894,10 +917,20 @@ onMounted(async () => {
   }
   .tab-label { font-size: 14px; }
 
+  @media (max-width: 640px) {
+    justify-content: flex-start;
+    padding: 8px 10px;
+    :deep(.el-radio-button__inner) {
+      padding: 8px 13px;
+      gap: 4px;
+      .tab-label { font-size: 12px; }
+    }
+  }
+
   @media (max-width: 480px) {
     :deep(.el-radio-button__inner) {
-      padding: 8px 14px;
-      .tab-label { font-size: 13px; }
+      padding: 7px 11px;
+      .tab-label { font-size: 11px; }
     }
   }
 }

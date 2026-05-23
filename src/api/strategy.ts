@@ -45,6 +45,79 @@ export interface TetChartItem {
   timing_indicator: number
 }
 
+export interface TetBacktestParams {
+  stock_code: string
+  start_date: string
+  end_date: string
+  return_equity_curve?: boolean
+}
+
+export interface EquityCurveItem {
+  date: string
+  strategy: number
+  benchmark: number
+}
+
+// 后端实际返回的列式净值曲线结构
+export interface EquityCurveColumnar {
+  date: string[]
+  strategy: number[]
+  benchmark: number[]
+}
+
+export interface TetBacktestResult {
+  total_return: number
+  annual_return: number
+  sharpe_ratio: number
+  max_drawdown: number
+  trade_count: number
+  win_rate: number
+  equity_curve: EquityCurveColumnar | null
+}
+
+// ─── 组合分析 ──────────────────────────────────
+export interface PortfolioParams {
+  start_date: string
+  end_date: string
+  top_n: number
+  return_equity_curve?: boolean
+}
+
+export interface PortfolioStockItem {
+  code: string
+  trend_score: number
+  emotion_index: number
+  anchored_trend_score: number
+  timing_indicator: number
+  hist_volatility: number
+  expected_return: number
+  action: string
+  weight_equal: number
+  weight_timing: number
+  weight_vol_trend: number
+}
+
+export interface PortfolioCurveItem {
+  date: string
+  cum_return: number
+}
+
+export interface PortfolioResult {
+  portfolio: {
+    total_count: number
+    top_n: number
+    stocks: PortfolioStockItem[]
+  }
+  backtest: {
+    total_return: number
+    annual_return: number
+    sharpe_ratio: number
+    max_drawdown: number
+    stock_count: number
+    equity_curve: PortfolioCurveItem[]
+  }
+}
+
 export const strategyApi = {
   /**
    * 获取每日推荐股票
@@ -75,5 +148,21 @@ export const strategyApi = {
    */
   trackChartClick(data: { event_type: string; stock_code: string; start_date: string; end_date: string }): Promise<any> {
     return request.post('/api/admin/stats/track/chart-click', data)
+  },
+
+  /**
+   * 单股票 TET 策略回测
+   * GET /api/tet/backtest
+   */
+  getBacktest(params: TetBacktestParams): Promise<{ success: boolean; data: TetBacktestResult }> {
+    return request.get('/api/tet/backtest', { params })
+  },
+
+  /**
+   * 多股票 TET 投资组合分析
+   * POST /api/tet/portfolio
+   */
+  getPortfolio(params: PortfolioParams, stockCodes: string[]): Promise<{ success: boolean; data: PortfolioResult }> {
+    return request.post('/api/tet/portfolio', stockCodes, { params })
   }
 }
