@@ -27,7 +27,7 @@
     </div>
 
     <div class="content-wrapper">
-      <!-- 顶部 Tab：推荐策略 / 查询计算 / 回测 / 组合分析 -->
+      <!-- 顶部 Tab：推荐策略 / 查询计算 / 回测 / 组合构建 -->
       <div class="tab-switch">
         <el-radio-group v-model="activeTab" size="large" class="tab-group">
           <el-radio-button :value="'pitch'">
@@ -44,7 +44,7 @@
           </el-radio-button>
           <el-radio-button :value="'portfolio'">
             <el-icon><PieChart /></el-icon>
-            <span class="tab-label">组合分析</span>
+            <span class="tab-label">组合构建</span>
           </el-radio-button>
         </el-radio-group>
       </div>
