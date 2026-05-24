@@ -34,16 +34,16 @@
           <span>运行回测</span>
         </el-button>
       </div>
-      <div class="search-hint">
+      <!-- <div class="search-hint">
         支持沪深A股 · TET 策略回测 · 策略 vs 沪深300基准对比 · 默认近 1 年
-      </div>
+      </div> -->
     </div>
 
     <!-- 空状态 -->
     <div v-if="!hasData && !loading" class="empty-placeholder">
       <el-icon class="empty-icon"><Histogram /></el-icon>
       <h3>输入股票代码运行回测</h3>
-      <p>系统将基于 TET 择时策略生成回测报告，对比沪深 300 基准表现</p>
+      <p>系统将基于 TET 择时策略生成回测报告</p>
     </div>
 
     <!-- 加载 -->

@@ -146,42 +146,42 @@
       <div class="holdings-table">
         <el-table :data="result.portfolio.stocks" stripe style="width: 100%">
           <el-table-column label="股票代码" prop="code" width="110" />
-          <el-table-column label="操作" width="80">
+          <el-table-column label="操作" >
             <template #default="{ row }">
               <el-tag :type="row.action === 'BUY' ? 'success' : 'danger'" size="small" effect="plain">{{ row.action }}</el-tag>
             </template>
           </el-table-column>
-          <el-table-column label="锚定趋势" width="100">
+          <el-table-column label="锚定趋势" >
             <template #default="{ row }">
               <span class="td-value" :class="getScoreClass(row.anchored_trend_score)">{{ formatNum(row.anchored_trend_score) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="择时信号" width="100">
+          <el-table-column label="择时信号" >
             <template #default="{ row }">
               <span class="td-value" :class="getTimingClass(row.timing_indicator)">{{ formatNum(row.timing_indicator) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="情绪指数" width="100">
+          <el-table-column label="情绪指数" >
             <template #default="{ row }">
               <span class="td-value">{{ formatNum(row.emotion_index) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="历史波动" width="100">
+          <el-table-column label="历史波动">
             <template #default="{ row }">
               <span class="td-value">{{ formatPercent(row.hist_volatility) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="等权" width="80">
+          <el-table-column label="等权" >
             <template #default="{ row }">
               <span class="td-weight">{{ formatPercent(row.weight_equal) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="Timing权" width="90">
+          <el-table-column label="Timing权" >
             <template #default="{ row }">
               <span class="td-weight highlight">{{ formatPercent(row.weight_timing) }}</span>
             </template>
           </el-table-column>
-          <el-table-column label="波动趋势权" width="100">
+          <el-table-column label="波动趋势权" >
             <template #default="{ row }">
               <span class="td-weight">{{ formatPercent(row.weight_vol_trend) }}</span>
             </template>
@@ -653,9 +653,7 @@ onBeforeUnmount(() => {
   .section-title { font-size: 16px; font-weight: 700; color: #1e293b; }
   .section-sub {
     font-size: 12px; color: #94a3b8;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    
     max-width: 100%;
   }
   .section-badge {

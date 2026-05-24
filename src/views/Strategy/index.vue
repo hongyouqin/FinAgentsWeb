@@ -50,16 +50,16 @@
       </div>
 
       <!-- 查询计算面板 -->
-      <TetCalc v-if="activeTab === 'calc'" :initial-code="calcInitCode" />
+      <TetCalc v-show="activeTab === 'calc'" :initial-code="calcInitCode" />
 
       <!-- 回测面板 -->
-      <TetBacktest v-if="activeTab === 'backtest'" />
+      <TetBacktest v-show="activeTab === 'backtest'" />
 
       <!-- 组合分析面板 -->
-      <TetPortfolio v-if="activeTab === 'portfolio'" :recommended-stocks="stockList" />
+      <TetPortfolio v-show="activeTab === 'portfolio'" :recommended-stocks="stockList" />
 
       <!-- 推荐策略面板（原内容，仅在 pitch 时展示） -->
-      <template v-if="activeTab === 'pitch'">
+      <div v-show="activeTab === 'pitch'">
       <!-- 指标说明卡片 -->
       <div class="indicators-guide">
         <div class="guide-header">
@@ -418,13 +418,13 @@
           </div>
         </div>
       </div>
-      </template>
+      </div>
     </div>
   </div>
 </template>
 
 <script setup lang="ts">
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, watch, nextTick } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
@@ -455,6 +455,13 @@ const router = useRouter()
 // Tab 切换：pitch=推荐策略，calc=查询计算，backtest=回测，portfolio=组合分析
 const activeTab = ref<'pitch' | 'calc' | 'backtest' | 'portfolio'>('pitch')
 const calcInitCode = ref<string>('')
+
+// v-show 切换时图表容器宽度可能为 0，需在 Tab 激活后触发 resize
+watch(activeTab, () => {
+  nextTick(() => {
+    window.dispatchEvent(new Event('resize'))
+  })
+})
 
 // 日期选择
 const selectedDate = ref<string>(formatDate(new Date()))
