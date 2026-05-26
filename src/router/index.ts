@@ -254,7 +254,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '分析报告',
           requiresAuth: true,
-          requiresAdmin: true
+          requiresAdmin: false
         }
       },
       {
@@ -264,7 +264,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: '报告详情',
           requiresAuth: true,
-          requiresAdmin: true
+          requiresAdmin: false
         }
       },
       {
