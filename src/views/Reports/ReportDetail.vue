@@ -725,7 +725,7 @@ const applyToTrading = async () => {
 
 // 返回列表
 const goBack = () => {
-  router.push('/reports')
+  router.push('/tasks')
 }
 
 // 工具函数

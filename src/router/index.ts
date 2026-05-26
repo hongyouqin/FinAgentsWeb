@@ -243,6 +243,7 @@ const routes: RouteRecordRaw[] = [
       title: '分析报告',
       icon: 'Document',
       requiresAuth: true,
+      requiresAdmin: true,
       transition: 'fade'
     },
     children: [
@@ -252,7 +253,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Reports/index.vue'),
         meta: {
           title: '分析报告',
-          requiresAuth: true
+          requiresAuth: true,
+          requiresAdmin: true
         }
       },
       {
@@ -261,7 +263,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Reports/ReportDetail.vue'),
         meta: {
           title: '报告详情',
-          requiresAuth: true
+          requiresAuth: true,
+          requiresAdmin: true
         }
       },
       {
@@ -270,7 +273,8 @@ const routes: RouteRecordRaw[] = [
         component: () => import('@/views/Reports/TokenStatistics.vue'),
         meta: {
           title: 'Token统计',
-          requiresAuth: true
+          requiresAuth: true,
+          requiresAdmin: true
         }
       }
     ]

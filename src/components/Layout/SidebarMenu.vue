@@ -31,6 +31,10 @@
       <el-icon><Cpu /></el-icon>
       <template #title>策略</template>
     </el-menu-item>
+    <el-menu-item v-if="authStore.user?.is_admin" index="/reports">
+      <el-icon><Document /></el-icon>
+      <template #title>分析报告</template>
+    </el-menu-item>
     <el-menu-item v-if="authStore.user?.is_admin" index="/statistics">
       <el-icon><DataAnalysis /></el-icon>
       <template #title>数据统计</template>
@@ -156,7 +160,7 @@ import {
   Search,
   Star,
   List,
-  /* Document 移除：不再使用顶级分析报告菜单图标 */
+  Document,
   Setting,
   InfoFilled,
   CreditCard,

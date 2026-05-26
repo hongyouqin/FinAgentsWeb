@@ -982,14 +982,15 @@ onMounted(() => {
 
   .content-wrapper {
     margin-top: -24px;
-    // padding: 0 12px;
+    padding: 0 12px;
   }
 
-  .filter-section { padding: 14px 16px; }
+  .filter-section { padding: 12px; }
 
   .filter-row {
     flex-direction: column;
     align-items: stretch;
+    gap: 8px;
 
     .search-input { min-width: unset; }
     .market-select { width: 100%; }
@@ -998,14 +999,25 @@ onMounted(() => {
 
   .filter-actions {
     justify-content: flex-end;
+    gap: 6px;
 
     .btn-text { display: none; }
   }
 
-  .list-section { padding: 16px; }
+  .list-section { padding: 12px; }
 
   .desktop-table { display: none; }
   .mobile-list { display: block; }
+
+  .report-card {
+    padding: 14px;
+
+    .card-footer {
+      gap: 6px;
+
+      .el-button { flex: 1; justify-content: center; }
+    }
+  }
 
   .pagination-wrapper {
     :deep(.el-pagination) {
@@ -1019,23 +1031,47 @@ onMounted(() => {
 
       button.btn-prev,
       button.btn-next {
-        min-width: 32px;
-        height: 32px;
-        padding: 0 6px;
+        min-width: 36px;
+        height: 36px;
+        padding: 0 8px;
       }
 
       .el-pager li {
-        min-width: 30px;
-        height: 30px;
-        line-height: 30px;
+        min-width: 32px;
+        height: 32px;
+        line-height: 32px;
         font-size: 13px;
-        margin: 0 1px;
+        margin: 0 2px;
       }
     }
   }
 }
 
 @media (max-width: 480px) {
+  .hero-section { padding: 24px 12px 48px; }
   .hero-title { font-size: 22px; }
+  .hero-subtitle { font-size: 12px; }
+
+  .content-wrapper { padding: 0 8px; }
+
+  .filter-section { padding: 10px; }
+
+  .list-section { padding: 10px; }
+
+  .report-card {
+    padding: 12px;
+    margin-bottom: 10px;
+
+    .card-title { font-size: 13px; }
+
+    .card-footer {
+      flex-wrap: wrap;
+
+      .el-button {
+        font-size: 12px;
+        padding: 6px 8px;
+      }
+    }
+  }
 }
 </style>
