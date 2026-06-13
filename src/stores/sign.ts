@@ -6,7 +6,7 @@ import { useAuthStore } from '@/stores/auth'
  * 签到余额阈值（前端成本控制）
  * 可用算力 ≥ 该阈值时，不予签到，鼓励用户先消耗现有算力。
  */
-export const SIGN_BALANCE_THRESHOLD = 10
+export const SIGN_BALANCE_THRESHOLD = 5
 
 interface SignState {
   /** 签到状态 */

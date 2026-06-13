@@ -567,6 +567,31 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/expense',
+    name: 'Expense',
+    component: () => import('@/layouts/BasicLayout.vue'),
+    meta: {
+      title: '收支账本',
+      icon: 'Wallet',
+      requiresAuth: true,
+      requiresAdmin: true,
+      transition: 'fade'
+    },
+    children: [
+      {
+        path: '',
+        name: 'ExpenseHome',
+        component: () => import('@/views/Expense/index.vue'),
+        meta: {
+          title: '收支账本',
+          requiresAuth: true,
+          requiresAdmin: true
+        }
+      }
+    ]
+  },
+
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/Error/404.vue'),

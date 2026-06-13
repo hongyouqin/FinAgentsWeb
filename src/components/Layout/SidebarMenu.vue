@@ -39,6 +39,10 @@
       <el-icon><DataAnalysis /></el-icon>
       <template #title>数据统计</template>
     </el-menu-item>
+    <el-menu-item v-if="authStore.user?.is_admin" index="/expense">
+      <el-icon><Wallet /></el-icon>
+      <template #title>收支账本</template>
+    </el-menu-item>
     <!-- <el-menu-item index="/learning">
       <el-icon><Reading /></el-icon>
       <template #title>学习中心</template>
@@ -168,6 +172,7 @@ import {
   Service,
   Cpu,
   DataAnalysis,
+  Wallet,
 } from '@element-plus/icons-vue'
 import qhyQrCode from '../../../assets/qhy.png'
 import { useAuthStore } from '@/stores/auth'
