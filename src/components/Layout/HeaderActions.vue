@@ -47,7 +47,7 @@
           </button>
         </div>
         <div class="guide-body">
-          点击这里可领取 <strong>1.5</strong> 算力，每天都能领，别忘了哦 ~
+          点击这里可领取 <strong>1</strong> 算力，每天都能领，别忘了哦 ~
         </div>
         <div class="guide-actions">
           <button class="btn-ghost" @click="dismissSignGuide">下次再说</button>

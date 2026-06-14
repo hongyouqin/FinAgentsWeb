@@ -90,7 +90,7 @@ const authStore = useAuthStore()
 const rewardAmount = computed(() => {
   const v = signStore.lastResult?.reward_points
   if (typeof v === 'number' && v > 0) return v
-  return 1.5
+  return 1
 })
 
 const handleSign = async () => {
