@@ -75,7 +75,7 @@
                     v-if="analysisForm.stockCode"
                     type="primary"
                     :loading="submitting"
-                    :disabled="submitting || !analysisForm.stockCode.trim() || !allowNewAnalysis"
+                    :disabled="submitting || !analysisForm.stockCode.trim()"
                     @click="submitAnalysis"
                     class="analyze-btn"
                   >
@@ -416,11 +416,7 @@
               <el-icon><Loading /></el-icon>
               <span>{{ progressInfo.currentStepDescription || '正在初始化...' }}</span>
             </div>
-            <!-- 超过 10 分钟提示可开始新分析 -->
-            <div v-if="progressInfo.elapsedTime >= 300" class="progress-overtime-hint">
-              <el-icon><InfoFilled /></el-icon>
-              <span>当前分析已超过 5 分钟，您可以输入新的股票代码开始新的分析</span>
-            </div>
+
           </div>
         </div>
       </transition>
@@ -728,10 +724,8 @@ const progressInfo = ref({
 })
 const pollingTimer = ref<any>(null)
 
-// 是否允许开始新分析：非运行中，或运行已超 5 分钟
-const allowNewAnalysis = computed(() =>
-  analysisStatus.value !== 'running' || progressInfo.value.elapsedTime >= 300
-)
+// 是否允许开始新分析：始终允许（仅重复股票时弹提示）
+const allowNewAnalysis = computed(() => true)
 
 // ─── sessionStorage 持久化：记录进行中的任务 ────────────────────
 const SA_TASK_KEY = 'sa_current_task_id'
@@ -980,14 +974,17 @@ const getDepthDescription = (depth: number): string => {
   return descriptions[depth - 1] || '标准分析'
 }
 
-// 提交分析
+// 提交分析（防抖：立即锁定 submitting，避免连续点击）
 const submitAnalysis = async () => {
   // 防止重复提交
   if (submitting.value) return
+  // 立即锁定，防止快速连续点击
+  submitting.value = true
 
   const stockCode = analysisForm.stockCode.trim()
   if (!stockCode) {
     ElMessage.warning('请输入股票代码')
+    submitting.value = false
     return
   }
 
@@ -995,6 +992,7 @@ const submitAnalysis = async () => {
   if (!validation.valid) {
     ElMessage.error(validation.message || '股票代码格式不正确')
     stockCodeError.value = validation.message || '股票代码格式不正确'
+    submitting.value = false
     return
   }
 
@@ -1002,6 +1000,7 @@ const submitAnalysis = async () => {
 
   if (analysisForm.selectedAnalysts.length === 0) {
     ElMessage.warning('请至少选择一个分析师')
+    submitting.value = false
     return
   }
 
@@ -1009,12 +1008,20 @@ const submitAnalysis = async () => {
   if (currentPrice.value > 0 && authStore.points < currentPrice.value) {
     ElMessage.error(`算力不足！本次分析需要 ${currentPrice.value} ⚡，当前余额 ${authStore.points} ⚡，请先前往充值`)
     router.push('/recharge')
+    submitting.value = false
     return
   }
 
-  // 如果当前有运行中的分析（超 10 分钟后允许新建），放弃旧任务的前端追踪
-  // 旧任务会在后端继续运行，用户可在任务中心查看
+  // 如果当前有运行中的分析，检查是否重复股票
   if (analysisStatus.value === 'running') {
+    const runningCode = (progressInfo.value.stockCode || '').toUpperCase()
+    const newCode = analysisForm.symbol.toUpperCase()
+    if (runningCode && runningCode === newCode) {
+      ElMessage.warning(`${analysisForm.symbol} 正在分析中，请勿重复提交`)
+      submitting.value = false
+      return
+    }
+    // 非重复股票，放弃旧任务的前端追踪，旧任务在后端继续运行
     if (pollingTimer.value) {
       clearInterval(pollingTimer.value)
       pollingTimer.value = null
@@ -1026,8 +1033,6 @@ const submitAnalysis = async () => {
     analysisResults.value = null
     ElMessage.info('旧分析任务已移至后台，可在任务中心查看')
   }
-
-  submitting.value = true
 
   try {
     const analysisDate = analysisForm.analysisDate instanceof Date
