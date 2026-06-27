@@ -122,7 +122,7 @@
         <el-input v-model="reportSearch" placeholder="搜索股票代码或名称" :prefix-icon="Search" clearable class="picker-search" />
         <div class="report-list" v-loading="loadingReports">
           <div v-if="filteredReports.length === 0" class="report-empty">暂无已完成的分析报告</div>
-          <div v-else v-for="report in filteredReports" :key="report.task_id" class="report-item" @click="startNewChat(report)">
+          <div v-else v-for="report in filteredReports" :key="report.task_id" class="report-item" @click="startNewChat(report.result_data)">
             <div class="report-stock">
               <span class="report-code">{{ report.stock_code || report.stock_symbol }}</span>
               <span class="report-name">{{ report.stock_name }}</span>
@@ -240,7 +240,8 @@ async function loadReports() {
 }
 
 async function startNewChat(report: any) {
-  const analysisId = report.task_id || report.analysis_id || report.id
+  console.log('report:1111111111', report)
+  const analysisId = report.analysis_id
   if (!analysisId) return ElMessage.warning('无效的报告ID')
   showReportPicker.value = false
   try {
@@ -253,7 +254,7 @@ onMounted(async () => {
   await loadConversations(); await loadReports()
   const convId = route.query.conversation_id as string; const analysisId = route.query.analysis_id as string
   if (convId) { currentConversationId.value = convId; currentTitle.value = '报告对话'; await loadMessages(convId) }
-  else if (analysisId) { await startNewChat({ task_id: analysisId, stock_name: route.query.stock_name || '' }) }
+  else if (analysisId) { await startNewChat({ analysis_id: analysisId, stock_name: route.query.stock_name || '' }) }
 })
 </script>
 

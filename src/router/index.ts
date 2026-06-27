@@ -585,7 +585,8 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'AI 对话',
           requiresAuth: true,
-          requiresAdmin: true
+          requiresAdmin: true,
+          hideFooter: true
         }
       }
     ]
