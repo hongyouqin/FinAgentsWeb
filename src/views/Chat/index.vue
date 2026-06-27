@@ -19,8 +19,12 @@
               @click="selectConversation(conv)">
               <div class="conv-icon"><el-icon><ChatLineSquare /></el-icon></div>
               <div class="conv-info">
-                <div class="conv-title">{{ conv.title || '报告对话' }}</div>
-                <div class="conv-time">{{ conv.created_at?.slice(0, 16).replace('T', ' ') || '' }}</div>
+                <div class="conv-title">{{ conv.stock_name || conv.stock_symbol || conv.title || '报告对话' }}</div>
+                <div class="conv-subtitle" v-if="conv.last_user_message">{{ conv.last_user_message }}</div>
+                <div class="conv-meta">
+                  <span class="conv-time">{{ conv.created_at?.slice(5, 16).replace('T', ' ') || '' }}</span>
+                  <span class="conv-rounds" v-if="conv.rounds">· {{ conv.rounds }}轮</span>
+                </div>
               </div>
               <el-button class="conv-del" text size="small" @click.stop="handleDeleteConv(conv)">
                 <el-icon><Delete /></el-icon>
@@ -49,8 +53,12 @@
             @click="selectConversation(conv)">
             <div class="conv-icon"><el-icon><ChatLineSquare /></el-icon></div>
             <div class="conv-info">
-              <div class="conv-title">{{ conv.title || '报告对话' }}</div>
-              <div class="conv-time">{{ conv.created_at?.slice(0, 16).replace('T', ' ') || '' }}</div>
+              <div class="conv-title">{{ conv.stock_name || conv.stock_symbol || conv.title || '报告对话' }}</div>
+              <div class="conv-subtitle" v-if="conv.last_user_message">{{ conv.last_user_message }}</div>
+              <div class="conv-meta">
+                <span class="conv-time">{{ conv.created_at?.slice(5, 16).replace('T', ' ') || '' }}</span>
+                <span class="conv-rounds" v-if="conv.rounds">· {{ conv.rounds }}轮</span>
+              </div>
             </div>
             <el-button class="conv-del" text size="small" @click.stop="handleDeleteConv(conv)">
               <el-icon><Delete /></el-icon>
@@ -83,9 +91,11 @@
           <p>选择一份分析报告，AI 将结合报告内容回答你的深度追问</p>
           <el-button type="primary" size="large" :icon="Plus" @click="showReportPicker = true" class="start-btn">选择报告开始对话</el-button>
           <div class="quick-tips">
-            <div class="tip-item"><el-icon><TrendCharts /></el-icon><span>追问报告中的买卖信号逻辑</span></div>
-            <div class="tip-item"><el-icon><DataAnalysis /></el-icon><span>让 AI 解释基本面分析结论</span></div>
-            <div class="tip-item"><el-icon><QuestionFilled /></el-icon><span>对比不同分析师的观点差异</span></div>
+            <div class="tip-item"><el-icon><TrendCharts /></el-icon><span>报告解读：一键解析个股分析报告内容</span></div>
+            <div class="tip-item"><el-icon><DataAnalysis /></el-icon><span>资讯查询：快速获取个股近期相关新闻</span></div>
+            <div class="tip-item"><el-icon><Coin /></el-icon><span>仓位测算：依据买入价、止损价、总资金智能计算持仓仓位</span></div>
+            <div class="tip-item"><el-icon><QuestionFilled /></el-icon><span>成本测算：均值穿透算法算出合理买入价位</span></div>
+            <div class="tip-item"><el-icon><Clock /></el-icon><span>历史回溯：调取个股完整历史行情数据</span></div>
           </div>
         </div>
 
@@ -135,6 +145,14 @@
         </div>
       </div>
     </el-dialog>
+
+    <!-- 创建对话加载中弹框 -->
+    <el-dialog v-model="creatingChat" width="300px" align-center :close-on-click-modal="false" :close-on-press-escape="false" :show-close="false">
+      <div class="creating-dialog">
+        <el-icon class="rotating"><Loading /></el-icon>
+        <span>正在创建对话...</span>
+      </div>
+    </el-dialog>
   </div>
 </template>
 
@@ -142,7 +160,7 @@
 import { ref, computed, nextTick, onMounted } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
-import { ChatDotRound, ChatLineSquare, Operation, Delete, QuestionFilled, Monitor, User, Promotion, Plus, Loading, Search, ArrowRight, TrendCharts, DataAnalysis } from '@element-plus/icons-vue'
+import { ChatDotRound, ChatLineSquare, Operation, Delete, QuestionFilled, Monitor, User, Promotion, Plus, Loading, Search, ArrowRight, TrendCharts, DataAnalysis, Coin, Clock } from '@element-plus/icons-vue'
 import chatApi from '@/api/chat'
 import { analysisApi } from '@/api/analysis'
 import type { ChatMessage, Conversation } from '@/api/chat'
@@ -166,6 +184,7 @@ const loadingList = ref(false)
 const messagesRef = ref<HTMLElement | null>(null)
 const showReportPicker = ref(false)
 const loadingReports = ref(false)
+const creatingChat = ref(false)
 const reportList = ref<any[]>([])
 const reportSearch = ref('')
 
@@ -191,9 +210,9 @@ async function selectConversation(conv: Conversation) {
   await loadMessages(conv.conversation_id)
 }
 
-async function loadMessages(convId: string) {
+async function loadMessages(convId: string, page = 1, pageSize = 20) {
   try {
-    const res = await chatApi.getConversationState(convId)
+    const res = await chatApi.getConversationState(convId, page, pageSize)
     const data = res.data ?? res
     // 兼容多种返回格式：messages / history / recent_messages
     let msgs = data.messages || data.history || data.recent_messages || []
@@ -240,14 +259,27 @@ async function loadReports() {
 }
 
 async function startNewChat(report: any) {
-  console.log('report:1111111111', report)
   const analysisId = report.analysis_id
   if (!analysisId) return ElMessage.warning('无效的报告ID')
   showReportPicker.value = false
+  creatingChat.value = true
   try {
     const res = await chatApi.startConversation(analysisId); const data = res.data ?? res; const convId = data.conversation_id || data.id
-    if (convId) { currentConversationId.value = convId; currentTitle.value = `${report.stock_name || report.stock_code || ''} 报告对话`; messages.value = []; ElMessage.success('对话已创建'); loadConversations() }
+    if (convId) {
+      currentConversationId.value = convId
+      currentTitle.value = `${report.stock_name || report.stock_code || ''} 报告对话`
+      // 插入欢迎消息，让用户知道可以做什么
+      messages.value = [{
+        role: 'assistant',
+        content: `你好！我是你的 AI 报告对话助手，已加载 **${report.stock_name || report.stock_code || '当前'}** 的分析报告。你可以向我提问以下内容：\n\n📊 **报告解读** — 一键解析个股分析报告内容\n📰 **资讯查询** — 快速获取个股近期相关新闻\n💰 **仓位测算** — 依据买入价、止损价、总资金智能计算持仓仓位\n🧮 **成本测算** — 均值穿透算法算出合理买入价位\n📈 **历史回溯** — 调取个股完整历史行情数据\n\n请随时提问，我会结合报告上下文为你解答。`,
+        timestamp: new Date().toISOString()
+      }]
+      scrollToBottom()
+      ElMessage.success('对话已创建')
+      loadConversations()
+    }
   } catch (e: any) { ElMessage.error(e?.message || '创建对话失败') }
+  finally { creatingChat.value = false }
 }
 
 onMounted(async () => {
@@ -272,7 +304,10 @@ onMounted(async () => {
   .conv-icon { width: 32px; height: 32px; border-radius: 8px; background: linear-gradient(135deg, #e0f2fe, #ede9fe); display: flex; align-items: center; justify-content: center; flex-shrink: 0; .el-icon { color: #6366f1; font-size: 15px; } }
   .conv-info { flex: 1; min-width: 0; }
   .conv-title { font-size: 13px; font-weight: 500; color: #1e293b; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .conv-time { font-size: 11px; color: #94a3b8; margin-top: 2px; }
+  .conv-subtitle { font-size: 11px; color: #94a3b8; margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .conv-meta { display: flex; align-items: center; gap: 4px; margin-top: 2px; }
+  .conv-time { font-size: 11px; color: #94a3b8; }
+  .conv-rounds { font-size: 11px; color: #94a3b8; }
   .conv-del { opacity: 0; transition: opacity 0.2s; color: #94a3b8; &:hover { color: #ef4444; } }
 }
 .chat-main { flex: 1; display: flex; flex-direction: column; min-width: 0; }
@@ -291,7 +326,7 @@ onMounted(async () => {
   p { margin: 0 0 24px; font-size: 14px; color: #64748b; max-width: 380px; line-height: 1.6; }
   .start-btn { border-radius: 12px; padding: 12px 28px; font-size: 15px; font-weight: 600; background: linear-gradient(135deg, #6366f1, #8b5cf6); border: none; box-shadow: 0 6px 20px rgba(99,102,241,0.3); &:hover { transform: translateY(-1px); box-shadow: 0 8px 24px rgba(99,102,241,0.4); } }
   .quick-tips { display: flex; flex-direction: column; gap: 10px; margin-top: 28px; width: 100%; max-width: 320px; }
-  .tip-item { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13px; color: #475569; transition: all 0.2s;
+  .tip-item { display: flex; line-height: 1.2; gap: 10px; padding: 10px 14px; background: rgba(255,255,255,0.8); border: 1px solid #e2e8f0; border-radius: 10px; font-size: 13px; color: #475569; transition: all 0.2s;
     .el-icon { color: #6366f1; font-size: 16px; flex-shrink: 0; } &:hover { border-color: #c7d2fe; background: #eef2ff; }
   }
 }
@@ -351,4 +386,10 @@ onMounted(async () => {
 }
 .sidebar-content { height: 100%; }
 .chat-drawer { :deep(.el-drawer__body) { padding: 0; } }
+.creating-dialog {
+  display: flex; align-items: center; justify-content: center; gap: 12px;
+  padding: 24px 0; font-size: 15px; color: #475569;
+  .el-icon { font-size: 22px; color: #6366f1; }
+  .rotating { animation: spin 1s linear infinite; }
+}
 </style>

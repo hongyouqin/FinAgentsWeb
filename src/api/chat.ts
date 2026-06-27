@@ -5,6 +5,11 @@ export interface Conversation {
   conversation_id: string
   analysis_id: string
   title?: string
+  stock_name?: string
+  stock_symbol?: string
+  last_user_message?: string
+  rounds?: number
+  tokens_used?: number
   created_at: string
   updated_at?: string
   message_count?: number
@@ -45,9 +50,9 @@ const chatApi = {
     })
   },
 
-  /** 获取会话状态（历史消息等） */
-  getConversationState(conversationId: string): Promise<any> {
-    return request.get(`/api/report-chat/state/${conversationId}`)
+  /** 获取会话状态（历史消息等，支持翻页） */
+  getConversationState(conversationId: string, page = 1, pageSize = 20): Promise<any> {
+    return request.get(`/api/report-chat/state/${conversationId}`, { params: { page, page_size: pageSize } })
   },
 
   /** 列出当前用户的会话列表 */
