@@ -11,6 +11,10 @@
       <el-icon><Odometer /></el-icon>
       <template #title>首页</template>
     </el-menu-item>
+    <el-menu-item v-if="authStore.user?.is_admin" index="/chat">
+      <el-icon><ChatDotRound /></el-icon>
+      <template #title>AI 对话</template>
+    </el-menu-item>
     <!-- <el-menu-item index="/dashboard">
       <el-icon><Odometer /></el-icon>
       <template #title>仪表板</template>
@@ -43,6 +47,7 @@
       <el-icon><Wallet /></el-icon>
       <template #title>收支账本</template>
     </el-menu-item>
+    
     <!-- <el-menu-item index="/learning">
       <el-icon><Reading /></el-icon>
       <template #title>学习中心</template>
@@ -173,6 +178,7 @@ import {
   Cpu,
   DataAnalysis,
   Wallet,
+  ChatDotRound,
 } from '@element-plus/icons-vue'
 import qhyQrCode from '../../../assets/qhy.png'
 import { useAuthStore } from '@/stores/auth'

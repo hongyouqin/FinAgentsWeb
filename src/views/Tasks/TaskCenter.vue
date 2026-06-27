@@ -235,7 +235,7 @@
                 </div>
               </template>
             </el-table-column>
-            <el-table-column label="操作" width="180" fixed="right">
+            <el-table-column label="操作" width="240" fixed="right">
               <template #default="{ row }">
                 <div class="action-cell">
                   <el-button
@@ -243,6 +243,7 @@
                     type="primary"
                     size="small"
                     text
+                    style="margin: 0; padding: 0;"
                     @click="openResult(row)"
                   >
                     <el-icon><View /></el-icon>
@@ -253,17 +254,29 @@
                     type="primary"
                     size="small"
                     text
-                    style="margin: 0;"
+                    style="margin: 0; padding: 0;"
                     @click="openReport(row)"
                   >
                     <el-icon><Document /></el-icon>
                     报告
                   </el-button>
                   <el-button
+                    v-if="row.status==='completed'"
+                    type="success"
+                    size="small"
+                    text
+                    style="margin: 0; padding: 0;"
+                    @click="goToChat(row)"
+                  >
+                    <el-icon><ChatDotRound /></el-icon>
+                    对话
+                  </el-button>
+                  <el-button
                     v-if="row.status==='failed'"
                     type="danger"
                     size="small"
                     text
+                    style="margin: 0; padding: 0;"
                     @click="showErrorDetail(row)"
                   >
                     <el-icon><Warning /></el-icon>
@@ -274,7 +287,7 @@
                     type="primary"
                     size="small"
                     text
-                     style="margin: 0;"
+                    style="margin: 0; padding: 0;"
                     @click="retryTask(row)"
                   >
                     <el-icon><Refresh /></el-icon>
@@ -336,6 +349,7 @@
                 v-if="row.status==='completed'"
                 type="primary"
                 size="small"
+                
                 @click="openResult(row)"
               >
                 查看结果
@@ -348,6 +362,15 @@
                 @click="openReport(row)"
               >
                 报告
+              </el-button>
+              <el-button
+                v-if="row.status==='completed'"
+                type="success"
+                size="small"
+                plain
+                @click="goToChat(row)"
+              >
+                对话
               </el-button>
               <el-button
                 v-if="row.status==='failed'"
@@ -434,7 +457,8 @@ import {
   Plus,
   RefreshRight,
   ArrowUp,
-  ArrowDown
+  ArrowDown,
+  ChatDotRound
 } from '@element-plus/icons-vue'
 import { analysisApi, type SingleAnalysisRequest } from '@/api/analysis'
 import { marked } from 'marked'
@@ -703,6 +727,12 @@ const openReport = (row: any) => {
   const id = row?.task_id || row?.analysis_id || row?.id
   if (!id) return ElMessage.warning('未找到报告ID')
   router.push({ name: 'ReportDetail', params: { id } })
+}
+
+const goToChat = (row: any) => {
+  const id = row?.task_id || row?.analysis_id || row?.id
+  if (!id) return ElMessage.warning('未找到任务ID')
+  router.push({ path: '/chat', query: { analysis_id: id, stock_name: row.stock_name || row.stock_code || '' } })
 }
 
 const retryTask = (row: any) => {
@@ -1435,7 +1465,7 @@ onUnmounted(() => {
 
 .action-cell {
   display: flex;
-  gap: 4px;
+  gap: 10px;
 }
 
 // 移动端列表

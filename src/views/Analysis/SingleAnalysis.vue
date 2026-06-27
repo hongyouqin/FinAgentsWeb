@@ -580,6 +580,12 @@
         </div>
       </transition>
     </div>
+
+    <!-- AI 对话悬浮入口（仅管理员可见） -->
+    <div v-if="authStore.user?.is_admin" class="chat-fab" @click="router.push('/chat')">
+      <el-icon><ChatDotRound /></el-icon>
+      <span class="fab-label">AI 对话</span>
+    </div>
   </div>
 </template>
 
@@ -610,7 +616,8 @@ import {
   Trophy,
   QuestionFilled,
   MagicStick,
-  Cpu
+  Cpu,
+  ChatDotRound
 } from '@element-plus/icons-vue'
 import { analysisApi, type SingleAnalysisRequest } from '@/api/analysis'
 import { stocksApi } from '@/api/stocks'
@@ -3050,6 +3057,61 @@ onUnmounted(() => {
   
   .metric .metric-value {
     font-size: 16px;
+  }
+}
+
+// AI 对话悬浮按钮
+.chat-fab {
+  position: fixed;
+  right: 24px;
+  bottom: 80px;
+  z-index: 999;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 14px 20px;
+  background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+  color: white;
+  border-radius: 50px;
+  cursor: pointer;
+  box-shadow: 0 8px 24px rgba(99, 102, 241, 0.4);
+  transition: all 0.3s ease;
+  user-select: none;
+
+  &:hover {
+    transform: translateY(-2px) scale(1.03);
+    box-shadow: 0 12px 32px rgba(99, 102, 241, 0.5);
+  }
+
+  &:active {
+    transform: translateY(0) scale(0.97);
+  }
+
+  .el-icon {
+    font-size: 20px;
+  }
+
+  .fab-label {
+    font-size: 14px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+}
+
+@media (max-width: 768px) {
+  .chat-fab {
+    right: 16px;
+    bottom: 70px;
+    padding: 12px;
+    border-radius: 50%;
+
+    .fab-label {
+      display: none;
+    }
+
+    .el-icon {
+      font-size: 22px;
+    }
   }
 }
 </style>

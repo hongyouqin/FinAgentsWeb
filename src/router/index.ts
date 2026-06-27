@@ -567,6 +567,30 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/chat',
+    name: 'Chat',
+    component: () => import('@/layouts/BasicLayout.vue'),
+    meta: {
+      title: 'AI 对话',
+      icon: 'ChatDotRound',
+      requiresAuth: true,
+      requiresAdmin: true,
+      transition: 'fade'
+    },
+    children: [
+      {
+        path: '',
+        name: 'ChatHome',
+        component: () => import('@/views/Chat/index.vue'),
+        meta: {
+          title: 'AI 对话',
+          requiresAuth: true,
+          requiresAdmin: true
+        }
+      }
+    ]
+  },
+  {
     path: '/expense',
     name: 'Expense',
     component: () => import('@/layouts/BasicLayout.vue'),
