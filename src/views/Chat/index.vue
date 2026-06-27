@@ -300,12 +300,21 @@ onMounted(async () => {
   &.assistant { .message-bubble { background: #fff; color: #334155; border: 1px solid #e2e8f0; border-radius: 16px 16px 16px 4px; } .message-avatar { background: linear-gradient(135deg, #059669, #06b6d4); color: #fff; } }
 }
 .message-avatar { width: 34px; height: 34px; border-radius: 50%; display: flex; align-items: center; justify-content: center; flex-shrink: 0; font-size: 16px; }
-.message-bubble { padding: 12px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); word-break: break-word;
+.message-bubble { padding: 12px 16px; box-shadow: 0 1px 4px rgba(0,0,0,0.04); word-break: break-word; max-width: 100%; overflow: hidden;
   &.typing { display: flex; align-items: center; gap: 4px; padding: 14px 20px; .dot { width: 8px; height: 8px; border-radius: 50%; background: #94a3b8; animation: bounce 1.4s infinite ease-in-out both; &:nth-child(1) { animation-delay: 0s; } &:nth-child(2) { animation-delay: 0.16s; } &:nth-child(3) { animation-delay: 0.32s; } } }
 }
 @keyframes bounce { 0%, 80%, 100% { transform: scale(0.6); opacity: 0.4; } 40% { transform: scale(1); opacity: 1; } }
 @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-.message-content { font-size: 14px; line-height: 1.7; :deep(p) { margin: 0 0 8px; &:last-child { margin: 0; } } :deep(code) { background: rgba(0,0,0,0.06); padding: 2px 5px; border-radius: 4px; font-size: 13px; } :deep(pre) { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; } :deep(ul), :deep(ol) { padding-left: 18px; margin: 6px 0; } }
+.message-content { font-size: 14px; line-height: 1.7; overflow-wrap: break-word; word-break: break-word;
+  :deep(p) { margin: 0 0 8px; &:last-child { margin: 0; } }
+  :deep(code) { background: rgba(0,0,0,0.06); padding: 2px 5px; border-radius: 4px; font-size: 13px; word-break: break-all; }
+  :deep(pre) { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow-x: auto; margin: 8px 0; max-width: 100%; }
+  :deep(pre code) { word-break: normal; }
+  :deep(table) { border-collapse: collapse; font-size: 13px; display: block; overflow-x: auto; max-width: 100%; }
+  :deep(th), :deep(td) { border: 1px solid #e2e8f0; padding: 6px 10px; white-space: nowrap; }
+  :deep(ul), :deep(ol) { padding-left: 18px; margin: 6px 0; }
+  :deep(img) { max-width: 100%; height: auto; border-radius: 8px; }
+}
 .message-time { font-size: 11px; color: #94a3b8; margin-top: 6px; }
 .chat-input-area { padding: 16px 20px; border-top: 1px solid #e2e8f0; background: #fff; flex-shrink: 0; }
 .input-wrapper { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto;
@@ -318,7 +327,27 @@ onMounted(async () => {
     .report-meta { display: flex; align-items: center; gap: 8px; } .report-date { font-size: 12px; color: #94a3b8; } .report-arrow { color: #94a3b8; font-size: 14px; }
   }
 }
-@media (max-width: 768px) { .chat-page { height: calc(100vh - 60px); } .chat-sidebar { display: none; } .chat-header { padding: 0 12px; .pc-only { display: none; } .mobile-only { display: inline-flex; } } .chat-messages { padding: 16px 12px; } .message-item { max-width: 92%; } .chat-input-area { padding: 12px; } .empty-state { padding: 24px 16px; .empty-visual .empty-icon { font-size: 44px; } h3 { font-size: 18px; } p { font-size: 13px; } } }
+@media (max-width: 768px) {
+  .chat-page { height: calc(100vh - 60px); }
+  .chat-sidebar { display: none; }
+  .chat-header { padding: 0 12px; .pc-only { display: none; } .mobile-only { display: inline-flex; } }
+  .chat-messages { padding: 12px 8px; }
+  .message-item { max-width: 95%; }
+  .message-avatar { width: 28px; height: 28px; font-size: 13px; }
+  .message-bubble { padding: 10px 12px; max-width: calc(100vw - 80px); overflow-x: auto; }
+  .message-content {
+    font-size: 13px;
+    :deep(pre) { font-size: 11px; padding: 8px; max-width: 100%; }
+    :deep(table) { font-size: 11px; display: block; overflow-x: auto; max-width: 100%; }
+    :deep(img) { max-width: 100%; height: auto; }
+  }
+  .chat-input-area { padding: 10px 8px; }
+  .input-wrapper { gap: 8px;
+    :deep(.el-textarea__inner) { font-size: 14px; padding: 8px 12px; }
+    .send-btn { width: 36px; height: 36px; }
+  }
+  .empty-state { padding: 24px 16px; .empty-visual .empty-icon { font-size: 44px; } h3 { font-size: 18px; } p { font-size: 13px; } }
+}
 .sidebar-content { height: 100%; }
 .chat-drawer { :deep(.el-drawer__body) { padding: 0; } }
 </style>
