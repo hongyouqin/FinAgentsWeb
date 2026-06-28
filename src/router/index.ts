@@ -574,7 +574,7 @@ const routes: RouteRecordRaw[] = [
       title: 'AI 对话',
       icon: 'ChatDotRound',
       requiresAuth: true,
-      requiresAdmin: true,
+      // requiresAdmin: true,
       transition: 'fade'
     },
     children: [
@@ -585,7 +585,7 @@ const routes: RouteRecordRaw[] = [
         meta: {
           title: 'AI 对话',
           requiresAuth: true,
-          requiresAdmin: true,
+          // requiresAdmin: true,
           hideFooter: true
         }
       }

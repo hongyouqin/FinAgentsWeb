@@ -11,7 +11,8 @@
       <el-icon><Odometer /></el-icon>
       <template #title>首页</template>
     </el-menu-item>
-    <el-menu-item v-if="authStore.user?.is_admin" index="/chat">
+    <!-- v-if="authStore.user?.is_admin" -->
+    <el-menu-item  index="/chat">
       <el-icon><ChatDotRound /></el-icon>
       <template #title>AI 对话</template>
     </el-menu-item>

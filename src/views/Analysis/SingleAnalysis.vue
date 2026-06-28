@@ -581,8 +581,8 @@
       </transition>
     </div>
 
-    <!-- AI 对话悬浮入口（仅管理员可见） -->
-    <div v-if="authStore.user?.is_admin" class="chat-fab" @click="router.push('/chat')">
+    <!-- AI 对话悬浮入口（仅管理员可见） v-if="authStore.user?.is_admin" -->
+    <div  class="chat-fab" @click="router.push('/chat')">
       <el-icon><ChatDotRound /></el-icon>
       <span class="fab-label">AI 对话</span>
     </div>
