@@ -111,9 +111,15 @@
               <span class="card-label">本月充值</span>
             </div>
           </div>
-        </div>
-
-        <div class="overview-cards">
+          <div class="stat-card">
+            <div class="card-icon total-recharge">
+              <el-icon><Wallet /></el-icon>
+            </div>
+            <div class="card-info">
+              <span class="card-value">{{ formatMoney(totalRecharge) }}</span>
+              <span class="card-label">总充值</span>
+            </div>
+          </div>
           <div class="stat-card">
             <div class="card-icon sign">
               <el-icon><Calendar /></el-icon>
@@ -124,6 +130,8 @@
             </div>
           </div>
         </div>
+
+        
 
         <div class="extra-info">
           <div class="extra-card">
@@ -139,6 +147,26 @@
               <span>数据更新时间</span>
             </div>
             <span class="extra-value time">{{ formatTime(stats?.generated_at) }}</span>
+          </div>
+        </div>
+
+        <!-- 月度充值统计 -->
+        <div class="monthly-recharge-section">
+          <div class="section-header">
+            <h3 class="section-title">
+              <el-icon><Coin /></el-icon>
+              月度充值统计
+            </h3>
+          </div>
+          <div v-if="monthlyRechargeLoading" class="chart-loading">
+            <el-skeleton :rows="2" animated />
+          </div>
+          <div v-else-if="!monthlyRechargeData" class="ranking-empty" style="padding: 24px; text-align: center; color: #94a3b8;">暂无数据</div>
+          <div v-else class="monthly-recharge-grid">
+            <div class="recharge-month-card">
+              <div class="month-label">{{ monthlyRechargeData.month }}</div>
+              <div class="month-amount">¥{{ formatMoney(monthlyRechargeData.monthly_recharge) }}</div>
+            </div>
           </div>
         </div>
 
@@ -251,7 +279,7 @@
                   <div v-for="(item, idx) in tetSummary.top_stocks" :key="item.stock_code" class="ranking-item">
                     <span class="rank-num" :class="{ top: idx < 3 }">{{ idx + 1 }}</span>
                     <span class="rank-name">{{ item.stock_code }}<template v-if="item.stock_name"> {{ item.stock_name }}</template></span>
-                    <span class="rank-count">{{ item.count }} 次</span>
+                    <span class="rank-count">{{ item.click_count }} 次</span>
                   </div>
                   <div v-if="!tetSummary.top_stocks?.length" class="ranking-empty">暂无数据</div>
                 </div>
@@ -265,7 +293,7 @@
                   <div v-for="(item, idx) in tetSummary.top_users" :key="item.user_id" class="ranking-item">
                     <span class="rank-num" :class="{ top: idx < 3 }">{{ idx + 1 }}</span>
                     <span class="rank-name">{{ item.username }}</span>
-                    <span class="rank-count">{{ item.count }} 次</span>
+                    <span class="rank-count">{{ item.click_count }} 次</span>
                   </div>
                   <div v-if="!tetSummary.top_users?.length" class="ranking-empty">暂无数据</div>
                 </div>
@@ -301,15 +329,17 @@ import {
   Refresh,
   Calendar,
   Pointer,
-  Sunny
+  Sunny,
+  Wallet
 } from '@element-plus/icons-vue'
 import * as echarts from 'echarts'
-import { getDashboardStats, getStatsHistory, generateStats, getSignToday, getChartClicksSummary, type TodayStats, type DailyHistoryItem, type ChartClicksSummary } from '@/api/admin'
+import { getDashboardStats, getStatsHistory, generateStats, getSignToday, getChartClicksSummary, getMonthlyRecharge, type TodayStats, type DailyHistoryItem, type ChartClicksSummary, type MonthlyRechargeItem } from '@/api/admin'
 
 defineOptions({ name: 'Statistics' })
 
 const loading = ref(true)
 const stats = ref<TodayStats | null>(null)
+const totalRecharge = ref(0)
 const signToday = ref<number>(0)
 
 // ─── TET 图表点击统计 ──────────────────────────
@@ -326,6 +356,10 @@ const selectedDays = ref(30)
 // ─── 更新按钮状态 ──────────────────────────────
 const generating = ref(false)
 const generateMsg = ref('')
+
+// ─── 月度充值统计 ──────────────────────────────
+const monthlyRechargeLoading = ref(false)
+const monthlyRechargeData = ref<{ month: string; monthly_recharge: number } | null>(null)
 
 const userChartRef = ref<HTMLDivElement | null>(null)
 const reportChartRef = ref<HTMLDivElement | null>(null)
@@ -418,15 +452,20 @@ const fetchDashboard = async () => {
   try {
     const res = await getDashboardStats()
     if (res.success && res.data?.today) {
-      stats.value = res.data.today
+      const today = res.data.today
+      const summary = (res.data as any).summary || {}
+      stats.value = today
+      // 总充值从 summary 中获取
+      totalRecharge.value = summary['总充值'] ?? summary.total_recharge ?? 0
     }
   } catch (err) {
     console.error('获取统计数据失败:', err)
   } finally {
     loading.value = false
-    // 并行请求签到数据和 TET 点击统计
+    // 并行请求签到数据、TET 点击统计和月度充值
     fetchSignToday()
     fetchChartClicks()
+    fetchMonthlyRecharge()
     await nextTick()
     fetchHistory()
   }
@@ -441,6 +480,20 @@ const fetchSignToday = async () => {
   } catch (err) {
     console.error('获取今日签到数据失败:', err)
     signToday.value = 0
+  }
+}
+
+const fetchMonthlyRecharge = async () => {
+  monthlyRechargeLoading.value = true
+  try {
+    const res = await getMonthlyRecharge()
+    if (res.success && res.data) {
+      monthlyRechargeData.value = res.data
+    }
+  } catch (e) {
+    console.error('获取月度充值统计失败:', e)
+  } finally {
+    monthlyRechargeLoading.value = false
   }
 }
 
@@ -953,6 +1006,11 @@ onBeforeUnmount(() => {
       color: #059669;
     }
 
+    &.total-recharge {
+      background: linear-gradient(135deg, rgba(99, 102, 241, 0.12), rgba(99, 102, 241, 0.06));
+      color: #6366f1;
+    }
+
     &.daily-recharge {
       background: linear-gradient(135deg, rgba(16, 185, 129, 0.12), rgba(16, 185, 129, 0.06));
       color: #10b981;
@@ -1046,6 +1104,52 @@ onBeforeUnmount(() => {
   margin-bottom: 24px;
   padding-top: 8px;
   border-top: 1px solid #e0f2fe;
+}
+
+.monthly-recharge-section {
+  margin-bottom: 24px;
+  padding-top: 8px;
+  border-top: 1px solid #e0f2fe;
+}
+
+.monthly-recharge-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.recharge-month-card {
+  background: #fff;
+  border-radius: 12px;
+  padding: 16px;
+  text-align: center;
+  border: 1px solid #f1f5f9;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #c7d2fe;
+    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+  }
+
+  .month-label {
+    font-size: 13px;
+    color: #64748b;
+    margin-bottom: 6px;
+    font-weight: 500;
+  }
+
+  .month-amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: #059669;
+    margin-bottom: 4px;
+  }
+
+  .month-count {
+    font-size: 12px;
+    color: #94a3b8;
+  }
 }
 
 .tet-overview-cards {

@@ -107,7 +107,10 @@
             </div>
             <div class="message-bubble">
               <div class="message-content" v-html="renderMarkdown(msg.content)"></div>
-              <div class="message-time" v-if="msg.timestamp">{{ formatMsgTime(msg.timestamp) }}</div>
+              <div class="message-footer">
+                <span class="message-time" v-if="msg.timestamp">{{ formatMsgTime(msg.timestamp) }}</span>
+                <span class="message-cost" v-if="msg.cost">消耗：{{ msg.cost.unit }} {{ msg.cost.amount }}<template v-if="msg.cost.total_tokens"> · {{ msg.cost.total_tokens }} tokens</template></span>
+              </div>
             </div>
           </div>
         </template>
@@ -220,7 +223,8 @@ async function loadMessages(convId: string, page = 1, pageSize = 20) {
     messages.value = msgs.map((m: any) => ({
       role: m.role,
       content: m.content || m.text_preview || m.text || '',
-      timestamp: m.timestamp || m.created_at || ''
+      timestamp: m.timestamp || m.created_at || '',
+      cost: m.cost != null ? { amount: m.cost, unit: '⚡', total_tokens: m.tokens?.total } : undefined
     }))
     scrollToBottom()
   } catch (e) { console.error('加载消息失败:', e) }
@@ -233,7 +237,8 @@ async function handleSend() {
   inputText.value = ''; scrollToBottom(); sending.value = true
   try {
     const res = await chatApi.sendMessage(currentConversationId.value, text); const data = res.data ?? res
-    messages.value.push({ role: 'assistant', content: data.reply || data.content || data.message || data.msg || '', timestamp: new Date().toISOString() })
+    const cost = data.cost ? { amount: data.cost.amount, unit: data.cost.unit || '⚡', total_tokens: data.cost.total_tokens } : undefined
+    messages.value.push({ role: 'assistant', content: data.reply || data.content || data.message || data.msg || '', timestamp: new Date().toISOString(), cost })
     scrollToBottom()
   } catch (e: any) { ElMessage.error(e?.message || '发送失败'); messages.value.pop() }
   finally { sending.value = false }
@@ -351,7 +356,9 @@ onMounted(async () => {
   :deep(ul), :deep(ol) { padding-left: 18px; margin: 6px 0; }
   :deep(img) { max-width: 100%; height: auto; border-radius: 8px; }
 }
-.message-time { font-size: 11px; color: #94a3b8; margin-top: 6px; }
+.message-footer { display: flex; align-items: center; gap: 10px; margin-top: 6px; }
+.message-time { font-size: 11px; color: #94a3b8; }
+.message-cost { font-size: 11px; color: #f59e0b; font-weight: 500; }
 .chat-input-area { padding: 16px 20px; border-top: 1px solid #e2e8f0; background: #fff; flex-shrink: 0; }
 .input-wrapper { display: flex; align-items: flex-end; gap: 10px; max-width: 800px; margin: 0 auto;
   :deep(.el-textarea__inner) { border-radius: 12px; padding: 10px 14px; font-size: 14px; box-shadow: 0 0 0 1px #e2e8f0 inset; transition: box-shadow 0.2s; &:focus { box-shadow: 0 0 0 2px #6366f1 inset; } }

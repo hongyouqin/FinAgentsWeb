@@ -19,6 +19,7 @@ export interface ChatMessage {
   role: 'user' | 'assistant'
   content: string
   timestamp?: string
+  cost?: { amount: number; unit: string; total_tokens?: number }
 }
 
 export interface ConversationState {

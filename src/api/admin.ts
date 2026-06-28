@@ -127,3 +127,17 @@ export interface ChartClicksSummary {
 export function getChartClicksSummary(days: number = 30): Promise<ApiResponse<ChartClicksSummary>> {
   return ApiClient.get<ChartClicksSummary>('/api/admin/stats/tracking/chart-clicks/summary', { days })
 }
+
+// ─── 月度充值统计 ────────────────────────
+
+export interface MonthlyRechargeItem {
+  month: string
+  monthly_recharge: number
+}
+
+/**
+ * 获取月度充值统计
+ */
+export function getMonthlyRecharge(): Promise<ApiResponse<MonthlyRechargeItem>> {
+  return ApiClient.get<MonthlyRechargeItem>('/api/admin/stats/monthly-recharge')
+}
