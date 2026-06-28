@@ -157,15 +157,25 @@
               <el-icon><Coin /></el-icon>
               月度充值统计
             </h3>
+            <el-date-picker
+              v-model="selectedMonth"
+              type="month"
+              placeholder="选择月份"
+              format="YYYY-MM"
+              value-format="YYYY-MM"
+              size="small"
+              :clearable="false"
+              @change="onMonthChange"
+              style="width: 140px;"
+            />
           </div>
           <div v-if="monthlyRechargeLoading" class="chart-loading">
-            <el-skeleton :rows="2" animated />
+            <el-skeleton :rows="1" animated />
           </div>
-          <div v-else-if="!monthlyRechargeData" class="ranking-empty" style="padding: 24px; text-align: center; color: #94a3b8;">暂无数据</div>
-          <div v-else class="monthly-recharge-grid">
+          <div v-else class="monthly-recharge-display">
             <div class="recharge-month-card">
-              <div class="month-label">{{ monthlyRechargeData.month }}</div>
-              <div class="month-amount">¥{{ formatMoney(monthlyRechargeData.monthly_recharge) }}</div>
+              <div class="month-label">{{ monthlyRechargeData?.month || selectedMonth }}</div>
+              <div class="month-amount">{{ formatMoney(monthlyRechargeData?.monthly_recharge) }}</div>
             </div>
           </div>
         </div>
@@ -360,6 +370,12 @@ const generateMsg = ref('')
 // ─── 月度充值统计 ──────────────────────────────
 const monthlyRechargeLoading = ref(false)
 const monthlyRechargeData = ref<{ month: string; monthly_recharge: number } | null>(null)
+const selectedMonth = ref(new Date().toISOString().slice(0, 7))
+
+function onMonthChange(val: string) {
+  selectedMonth.value = val
+  fetchMonthlyRecharge(val)
+}
 
 const userChartRef = ref<HTMLDivElement | null>(null)
 const reportChartRef = ref<HTMLDivElement | null>(null)
@@ -483,10 +499,10 @@ const fetchSignToday = async () => {
   }
 }
 
-const fetchMonthlyRecharge = async () => {
+const fetchMonthlyRecharge = async (month?: string) => {
   monthlyRechargeLoading.value = true
   try {
-    const res = await getMonthlyRecharge()
+    const res = await getMonthlyRecharge(month)
     if (res.success && res.data) {
       monthlyRechargeData.value = res.data
     }
@@ -1112,43 +1128,35 @@ onBeforeUnmount(() => {
   border-top: 1px solid #e0f2fe;
 }
 
-.monthly-recharge-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
-  gap: 12px;
+.monthly-recharge-display {
   margin-top: 12px;
 }
 
 .recharge-month-card {
-  background: #fff;
+  background: linear-gradient(135deg, #f0fdf4, #ecfdf5);
   border-radius: 12px;
-  padding: 16px;
-  text-align: center;
-  border: 1px solid #f1f5f9;
+  padding: 20px 24px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border: 1px solid #bbf7d0;
   transition: all 0.2s;
 
   &:hover {
-    border-color: #c7d2fe;
-    box-shadow: 0 4px 12px rgba(99, 102, 241, 0.08);
+    border-color: #86efac;
+    box-shadow: 0 4px 12px rgba(5, 150, 105, 0.08);
   }
 
   .month-label {
-    font-size: 13px;
+    font-size: 14px;
     color: #64748b;
-    margin-bottom: 6px;
     font-weight: 500;
   }
 
   .month-amount {
-    font-size: 18px;
+    font-size: 22px;
     font-weight: 700;
     color: #059669;
-    margin-bottom: 4px;
-  }
-
-  .month-count {
-    font-size: 12px;
-    color: #94a3b8;
   }
 }
 

@@ -137,7 +137,8 @@ export interface MonthlyRechargeItem {
 
 /**
  * 获取月度充值统计
+ * @param month 查询月份，格式 YYYY-MM，不传则查本月
  */
-export function getMonthlyRecharge(): Promise<ApiResponse<MonthlyRechargeItem>> {
-  return ApiClient.get<MonthlyRechargeItem>('/api/admin/stats/monthly-recharge')
+export function getMonthlyRecharge(month?: string): Promise<ApiResponse<MonthlyRechargeItem>> {
+  return ApiClient.get<MonthlyRechargeItem>('/api/admin/stats/monthly-recharge', month ? { month } : {})
 }
