@@ -38,6 +38,11 @@ export interface ChatModel {
 
 // ---- API ----
 const chatApi = {
+  /** 通过 task_id 获取报告信息（含 analysis_id） */
+  getReportByTask(taskId: string): Promise<any> {
+    return request.get(`/api/reports/by-task/${taskId}`)
+  },
+
   /** 创建新的报告对话会话 */
   startConversation(analysisId: string): Promise<any> {
     return request.post('/api/report-chat/start', { analysis_id: analysisId })

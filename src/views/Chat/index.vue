@@ -135,7 +135,7 @@
         <el-input v-model="reportSearch" placeholder="搜索股票代码或名称" :prefix-icon="Search" clearable class="picker-search" />
         <div class="report-list" v-loading="loadingReports">
           <div v-if="filteredReports.length === 0" class="report-empty">暂无已完成的分析报告</div>
-          <div v-else v-for="report in filteredReports" :key="report.task_id" class="report-item" @click="startNewChat(report.result_data)">
+          <div v-else v-for="report in filteredReports" :key="report.task_id" class="report-item" @click="startNewChat(report)">
             <div class="report-stock">
               <span class="report-code">{{ report.stock_code || report.stock_symbol }}</span>
               <span class="report-name">{{ report.stock_name }}</span>
@@ -209,11 +209,11 @@ async function loadConversations() {
 }
 
 async function selectConversation(conv: Conversation) {
-  currentConversationId.value = conv.conversation_id; currentTitle.value = conv.title || '报告对话'; showSidebar.value = false
-  await loadMessages(conv.conversation_id)
+  currentConversationId.value = conv.conversation_id; currentTitle.value = conv.stock_name || conv.title || '报告对话'; showSidebar.value = false
+  await loadMessages(conv.conversation_id, 1, 20, conv.stock_name || conv.stock_symbol || '')
 }
 
-async function loadMessages(convId: string, page = 1, pageSize = 20) {
+async function loadMessages(convId: string, page = 1, pageSize = 20, stockName = '') {
   try {
     const res = await chatApi.getConversationState(convId, page, pageSize)
     const data = res.data ?? res
@@ -226,6 +226,14 @@ async function loadMessages(convId: string, page = 1, pageSize = 20) {
       timestamp: m.timestamp || m.created_at || '',
       cost: m.cost != null ? { amount: m.cost, unit: '⚡', total_tokens: m.tokens?.total } : undefined
     }))
+    // 如果没有历史消息，插入默认欢迎消息
+    if (messages.value.length === 0) {
+      messages.value = [{
+        role: 'assistant',
+        content: `你好！我是你的 AI 报告对话助手，已加载 **${stockName || '当前'}** 的分析报告。你可以向我提问以下内容：\n\n📊 **报告解读** — 一键解析个股分析报告内容\n📰 **资讯查询** — 快速获取个股近期相关新闻\n💰 **仓位测算** — 依据买入价、止损价、总资金智能计算持仓仓位\n🧮 **成本测算** — 均值穿透算法算出合理买入价位\n📈 **历史回溯** — 调取个股完整历史行情数据\n\n请随时提问，我会结合报告上下文为你解答。`,
+        timestamp: new Date().toISOString()
+      }]
+    }
     scrollToBottom()
   } catch (e) { console.error('加载消息失败:', e) }
 }
@@ -264,19 +272,26 @@ async function loadReports() {
 }
 
 async function startNewChat(report: any) {
-  const analysisId = report.analysis_id
-  if (!analysisId) return ElMessage.warning('无效的报告ID')
+  const taskId = report.task_id
+  if (!taskId) return ElMessage.warning('无效的任务ID')
   showReportPicker.value = false
   creatingChat.value = true
   try {
+    // 先通过 task_id 获取 analysis_id
+    const reportRes = await chatApi.getReportByTask(taskId)
+    const reportData = reportRes.data ?? reportRes
+    const analysisId = reportData.analysis_id
+    if (!analysisId) { ElMessage.warning('未找到对应的分析报告'); return }
+    // 创建对话会话
     const res = await chatApi.startConversation(analysisId); const data = res.data ?? res; const convId = data.conversation_id || data.id
     if (convId) {
       currentConversationId.value = convId
-      currentTitle.value = `${report.stock_name || report.stock_code || ''} 报告对话`
+      const stockName = report.stock_name || reportData.stock_name || report.stock_code || reportData.stock_symbol || ''
+      currentTitle.value = `${stockName} 报告对话`
       // 插入欢迎消息，让用户知道可以做什么
       messages.value = [{
         role: 'assistant',
-        content: `你好！我是你的 AI 报告对话助手，已加载 **${report.stock_name || report.stock_code || '当前'}** 的分析报告。你可以向我提问以下内容：\n\n📊 **报告解读** — 一键解析个股分析报告内容\n📰 **资讯查询** — 快速获取个股近期相关新闻\n💰 **仓位测算** — 依据买入价、止损价、总资金智能计算持仓仓位\n🧮 **成本测算** — 均值穿透算法算出合理买入价位\n📈 **历史回溯** — 调取个股完整历史行情数据\n\n请随时提问，我会结合报告上下文为你解答。`,
+        content: `你好！我是你的 AI 报告对话助手，已加载 **${stockName || '当前'}** 的分析报告。你可以向我提问以下内容：\n\n📊 **报告解读** — 一键解析个股分析报告内容\n📰 **资讯查询** — 快速获取个股近期相关新闻\n💰 **仓位测算** — 依据买入价、止损价、总资金智能计算持仓仓位\n🧮 **成本测算** — 均值穿透算法算出合理买入价位\n📈 **历史回溯** — 调取个股完整历史行情数据\n\n请随时提问，我会结合报告上下文为你解答。`,
         timestamp: new Date().toISOString()
       }]
       scrollToBottom()
@@ -289,9 +304,9 @@ async function startNewChat(report: any) {
 
 onMounted(async () => {
   await loadConversations(); await loadReports()
-  const convId = route.query.conversation_id as string; const analysisId = route.query.analysis_id as string
+  const convId = route.query.conversation_id as string; const task_id = route.query.task_id as string
   if (convId) { currentConversationId.value = convId; currentTitle.value = '报告对话'; await loadMessages(convId) }
-  else if (analysisId) { await startNewChat({ analysis_id: analysisId, stock_name: route.query.stock_name || '' }) }
+  else if (task_id) { await startNewChat({ task_id: task_id, stock_name: route.query.stock_name || '' }) }
 })
 </script>
 

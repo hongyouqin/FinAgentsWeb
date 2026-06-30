@@ -730,9 +730,9 @@ const openReport = (row: any) => {
 }
 
 const goToChat = (row: any) => {
-  const id = row.result_data?.analysis_id || row?.analysis_id || row?.id
+  const id = row?.task_id || row?.analysis_id || row?.id
   if (!id) return ElMessage.warning('未找到任务ID')
-  router.push({ path: '/chat', query: { analysis_id: id, stock_name: row.stock_name || row.stock_code || '' } })
+  router.push({ path: '/chat', query: { task_id: id, stock_name: row.stock_name || row.stock_code || '' } })
 }
 
 const retryTask = (row: any) => {
