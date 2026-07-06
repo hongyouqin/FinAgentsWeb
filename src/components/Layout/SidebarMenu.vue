@@ -16,6 +16,10 @@
       <el-icon><ChatDotRound /></el-icon>
       <template #title>AI 对话</template>
     </el-menu-item>
+    <el-menu-item index="/overview">
+      <el-icon><Calendar /></el-icon>
+      <template #title>数据概览</template>
+    </el-menu-item>
     <!-- <el-menu-item index="/dashboard">
       <el-icon><Odometer /></el-icon>
       <template #title>仪表板</template>
@@ -180,6 +184,7 @@ import {
   DataAnalysis,
   Wallet,
   ChatDotRound,
+  Calendar
 } from '@element-plus/icons-vue'
 import qhyQrCode from '../../../assets/qhy.png'
 import { useAuthStore } from '@/stores/auth'

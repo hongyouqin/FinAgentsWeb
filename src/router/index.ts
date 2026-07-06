@@ -617,6 +617,29 @@ const routes: RouteRecordRaw[] = [
   },
 
   {
+    path: '/overview',
+    name: 'Overview',
+    component: () => import('@/layouts/BasicLayout.vue'),
+    meta: {
+      title: '数据概览',
+      icon: 'Calendar',
+      requiresAuth: true,
+      transition: 'fade'
+    },
+    children: [
+      {
+        path: '',
+        name: 'OverviewHome',
+        component: () => import('@/views/Overview/index.vue'),
+        meta: {
+          title: '数据概览',
+          requiresAuth: true
+        }
+      }
+    ]
+  },
+
+  {
     path: '/:pathMatch(.*)*',
     name: 'NotFound',
     component: () => import('@/views/Error/404.vue'),
