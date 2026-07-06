@@ -56,6 +56,13 @@
       </div>
     </el-popover>
 
+    <!-- 联系客服 -->
+    <el-tooltip content="联系客服" placement="bottom">
+      <el-button type="text" @click="openWechatService" class="action-btn service-btn">
+        <el-icon><Service /></el-icon>
+      </el-button>
+    </el-tooltip>
+
     <!-- 全屏切换（移动端隐藏） -->
     <el-tooltip content="全屏" placement="bottom">
       <el-button type="text" @click="toggleFullscreen" class="action-btn fullscreen-btn">
@@ -103,6 +110,8 @@
         </div>
       </el-scrollbar>
     </el-drawer>
+    <!-- 企业微信客服弹框 -->
+    <WechatServiceDialog ref="wechatServiceRef" />
   </div>
 </template>
 
@@ -115,6 +124,7 @@ import { useSignStore } from '@/stores/sign'
 import { useRouter, useRoute } from 'vue-router'
 import { storeToRefs } from 'pinia'
 import weixin from '@/utils/weixin'
+import WechatServiceDialog from '@/components/WechatServiceDialog.vue'
 import {
   Sunny,
   Moon,
@@ -123,7 +133,8 @@ import {
   QuestionFilled,
   Calendar,
   Present,
-  Close
+  Close,
+  Service
 } from '@element-plus/icons-vue'
 
 const router = useRouter()
@@ -138,6 +149,12 @@ const drawerVisible = ref(false)
 const filter = ref<'all' | 'unread'>('all')
 let timerCount: any = null
 let timerList: any = null
+
+// 企业微信客服弹框
+const wechatServiceRef = ref<InstanceType<typeof import('@/components/WechatServiceDialog.vue').default> | null>(null)
+const openWechatService = () => {
+  wechatServiceRef.value?.open()
+}
 
 // ─── 签到引导气泡 ──────────────────────────────────────
 const signGuideVisible = ref(false)

@@ -87,19 +87,22 @@
       </footer>
     </div>
 
-    <!-- 回到顶部 -->
-    <el-backtop :right="40" :bottom="40" />
-
-    <!-- 算力记录弹框（全局挂载，UserProfile 和 Recharge 页面均可调用） -->
-    <TxDialog />
-
     <!-- 签到弹窗（全局挂载） -->
     <SignDialog />
+
+    <!-- 企业微信客服弹框（全局挂载） -->
+    <WechatServiceDialog ref="wechatServiceRef" />
+
+    <!-- 右下角悬浮客服按钮 -->
+    <el-backtop :right="40" :bottom="40" />
+    <button class="float-service-btn" @click="openWechatService" title="联系客服">
+      <el-icon><Service /></el-icon>
+    </button>
   </div>
 </template>
 
 <script setup lang="ts">
-import { computed, onMounted } from 'vue'
+import { computed, onMounted, ref } from 'vue'
 import { useAppStore } from '@/stores/app'
 import SidebarMenu from '@/components/Layout/SidebarMenu.vue'
 import UserProfile from '@/components/Layout/UserProfile.vue'
@@ -109,11 +112,18 @@ import AppFooter from '@/components/Layout/AppFooter.vue'
 import Logo from '@/components/Logo.vue'
 import TxDialog from '@/components/TxDialog.vue'
 import SignDialog from '@/components/Global/SignDialog.vue'
-import { Expand, Fold } from '@element-plus/icons-vue'
+import WechatServiceDialog from '@/components/WechatServiceDialog.vue'
+import { Expand, Fold, Service } from '@element-plus/icons-vue'
 
 const appStore = useAppStore()
 const route = useRoute()
 const { width } = useWindowSize()
+
+// 企业微信客服弹框
+const wechatServiceRef = ref<InstanceType<typeof import('@/components/WechatServiceDialog.vue').default> | null>(null)
+const openWechatService = () => {
+  wechatServiceRef.value?.open()
+}
 
 // 需要缓存的组件
 const keepAliveComponents = computed(() => [
@@ -333,6 +343,43 @@ watch(() => route.fullPath, () => {
 
   .header {
     padding: 0 16px;
+  }
+
+  .float-service-btn {
+    right: 16px;
+    bottom: 16px;
+  }
+}
+
+.float-service-btn {
+  position: fixed;
+  right: 24px;
+  bottom: 454px;
+  width: 48px;
+  height: 48px;
+  border-radius: 50%;
+  border: none;
+  background: linear-gradient(135deg, #06b6d4, #0891b2);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  box-shadow: 0 4px 14px rgba(6, 182, 212, 0.35);
+  z-index: 998;
+  transition: all 0.3s ease;
+
+  .el-icon {
+    font-size: 22px;
+  }
+
+  &:hover {
+    transform: translateY(-3px) scale(1.05);
+    box-shadow: 0 8px 24px rgba(6, 182, 212, 0.45);
+  }
+
+  &:active {
+    transform: scale(0.96);
   }
 }
 

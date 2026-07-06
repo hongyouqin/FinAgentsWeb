@@ -3064,7 +3064,7 @@ onUnmounted(() => {
 .chat-fab {
   position: fixed;
   right: 24px;
-  bottom: 80px;
+  bottom: 140px;
   z-index: 999;
   display: flex;
   align-items: center;
@@ -3101,7 +3101,7 @@ onUnmounted(() => {
 @media (max-width: 768px) {
   .chat-fab {
     right: 16px;
-    bottom: 70px;
+    bottom: 100px;
     padding: 12px;
     border-radius: 50%;
 

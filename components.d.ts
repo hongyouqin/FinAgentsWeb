@@ -105,6 +105,7 @@ declare module 'vue' {
     TaskResultDialog: typeof import('./src/components/Global/TaskResultDialog.vue')['default']
     TxDialog: typeof import('./src/components/TxDialog.vue')['default']
     UserProfile: typeof import('./src/components/Layout/UserProfile.vue')['default']
+    WechatServiceDialog: typeof import('./src/components/WechatServiceDialog.vue')['default']
   }
   export interface GlobalDirectives {
     vLoading: typeof import('element-plus/es')['ElLoadingDirective']

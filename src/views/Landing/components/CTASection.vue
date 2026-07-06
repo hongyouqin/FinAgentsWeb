@@ -2,8 +2,13 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import wechatLogin from '@/utils/wechatLogin'
+import WechatServiceDialog from '@/components/WechatServiceDialog.vue'
 
 const router = useRouter()
+const wechatServiceRef = ref<InstanceType<typeof import('@/components/WechatServiceDialog.vue').default> | null>(null)
+const openWechatService = () => {
+  wechatServiceRef.value?.open()
+}
 
 // 关键要点
 const keyPoints = ref([
@@ -141,7 +146,15 @@ const handleScrollTop = () => {
           <button class="cta-btn secondary-btn" @click="handleScrollTop">
             <span>回到顶部</span>
           </button>
+          <button class="cta-btn wechat-btn" @click="openWechatService">
+            <span>加群领福利</span>
+            <svg class="btn-icon" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M17 8h2a2 2 0 012 2v8a2 2 0 01-2 2h-2M7 8H5a2 2 0 00-2 2v8a2 2 0 002 2h2m3-6h6m-3-3v6" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </button>
         </div>
+
+        <WechatServiceDialog ref="wechatServiceRef" />
 
         <div class="trust-indicators">
           <div class="trust-item">
@@ -451,6 +464,17 @@ const handleScrollTop = () => {
     background: rgba(6, 182, 212, 0.1);
     border-color: #06b6d4;
     transform: translateY(-3px);
+  }
+}
+
+.wechat-btn {
+  background: linear-gradient(135deg, #22c55e 0%, #16a34a 100%);
+  color: #fff;
+  box-shadow: 0 10px 30px rgba(34, 197, 94, 0.35);
+
+  &:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 15px 40px rgba(34, 197, 94, 0.5);
   }
 }
 
