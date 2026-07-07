@@ -231,6 +231,37 @@
               </span>
             </div>
 
+            <!-- 预约披露日展示 -->
+            <div v-if="fetchingDisclosure" class="disclosure-info-bar loading">
+              <el-icon class="rotating"><Loading /></el-icon>
+              <span>查询预约披露日中...</span>
+            </div>
+            <div v-else-if="disclosureInfo" class="disclosure-info-bar">
+              <span class="disclosure-label">
+                <el-icon><Calendar /></el-icon>
+                <span>预约披露</span>
+              </span>
+              <span class="disclosure-item">
+                <span class="item-label">财报截止</span>
+                <span class="item-value">{{ formatScheduleDate(disclosureInfo.data_date) }}</span>
+              </span>
+              <span class="disclosure-item">
+                <span class="item-label">首次披露</span>
+                <span class="item-value">{{ formatScheduleDate(disclosureInfo.first_schedule) }}</span>
+              </span>
+              <span class="disclosure-item highlight">
+                <span class="item-label">最新披露</span>
+                <span class="item-value">{{ formatScheduleDate(disclosureInfo.latest_date) }}</span>
+              </span>
+              <span
+                v-if="disclosureCountdownText"
+                class="disclosure-countdown"
+                :class="disclosureCountdownType"
+              >
+                {{ disclosureCountdownText }}
+              </span>
+            </div>
+
               <!-- 费用与余额提示 -->
             <div v-if="currentPrice > 0" class="cost-bar" :class="{ 'cost-insufficient': authStore.points < currentPrice }">
               <div class="cost-left">
@@ -610,6 +641,7 @@ import {
   Warning,
   Star,
   Clock,
+  Calendar,
   ArrowRight,
   Bell,
   Document,
@@ -621,6 +653,7 @@ import {
 } from '@element-plus/icons-vue'
 import { analysisApi, type SingleAnalysisRequest } from '@/api/analysis'
 import { stocksApi } from '@/api/stocks'
+import { getDisclosureByStock, type DisclosureCalendarItem } from '@/api/disclosureCalendar'
 import { useAppStore } from '@/stores/app'
 import { useAuthStore } from '@/stores/auth'
 import { ANALYSTS, convertAnalystNamesToIds } from '@/constants/analysts'
@@ -702,6 +735,50 @@ const stockCodeHelp = ref<string>('')
 // 股票信息（验证通过后查询）
 const stockInfo = ref<{ name: string; price: number; change_percent: number; market: string } | null>(null)
 const fetchingStock = ref(false)
+
+// 预约披露日信息（验证通过后查询）
+const disclosureInfo = ref<DisclosureCalendarItem | null>(null)
+const fetchingDisclosure = ref(false)
+
+// 格式化预约披露日期：8 位字符串 YYYYMMDD → YYYY-MM-DD
+const formatScheduleDate = (val: string): string => {
+  if (!val) return '-'
+  if (/^\d{8}$/.test(val)) {
+    return `${val.slice(0, 4)}-${val.slice(4, 6)}-${val.slice(6, 8)}`
+  }
+  const d = new Date(val)
+  if (isNaN(d.getTime())) return val
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
+// 计算距今天数（按最新预约披露日）
+const daysUntilDisclosure = computed(() => {
+  if (!disclosureInfo.value?.latest_date) return null
+  const target = new Date(disclosureInfo.value.latest_date)
+  if (isNaN(target.getTime())) return null
+  const today = new Date()
+  today.setHours(0, 0, 0, 0)
+  target.setHours(0, 0, 0, 0)
+  return Math.round((target.getTime() - today.getTime()) / (24 * 60 * 60 * 1000))
+})
+
+// 倒计时文案
+const disclosureCountdownText = computed(() => {
+  const days = daysUntilDisclosure.value
+  if (days === null) return ''
+  if (days > 0) return `距今 ${days} 天`
+  if (days === 0) return '今日披露'
+  return `已披露 ${Math.abs(days)} 天`
+})
+
+// 倒计时配色（今天=红，未来=绿，过去=灰）
+const disclosureCountdownType = computed(() => {
+  const days = daysUntilDisclosure.value
+  if (days === null) return 'normal'
+  if (days === 0) return 'danger'
+  if (days > 0) return 'success'
+  return 'info'
+})
 
 // 深度选项
 const depthOptions = [
@@ -874,6 +951,9 @@ const onStockCodeInput = () => {
   stockCodeHelp.value = ''
   stockInfo.value = null
   fetchingStock.value = false
+  // 同步重置预约披露信息
+  disclosureInfo.value = null
+  fetchingDisclosure.value = false
 
   if (debounceTimer.value) clearTimeout(debounceTimer.value)
 
@@ -901,6 +981,7 @@ const validateStockCodeInput = () => {
     stockCodeError.value = ''
     stockCodeHelp.value = ''
     stockInfo.value = null
+    disclosureInfo.value = null
     return
   }
 
@@ -910,6 +991,7 @@ const validateStockCodeInput = () => {
     stockCodeError.value = validation.message || '股票代码格式不正确'
     stockCodeHelp.value = ''
     stockInfo.value = null
+    disclosureInfo.value = null
   } else {
     stockCodeError.value = ''
     stockCodeHelp.value = `✓ ${validation.market}代码格式正确`
@@ -923,8 +1005,34 @@ const validateStockCodeInput = () => {
       analysisForm.stockCode = validation.normalizedCode
     }
 
-    // 格式正确，查询股票信息
-    fetchStockInfo(validation.normalizedCode || code)
+    // 格式正确，并行查询股票行情与预约披露日
+    const targetCode = validation.normalizedCode || code
+    fetchStockInfo(targetCode)
+    fetchDisclosureInfo(targetCode)
+  }
+}
+
+// 查询预约披露日（1 对 1 客服同接口）
+const fetchDisclosureInfo = async (code: string) => {
+  // 仅 A 股代码支持预约披露查询（接口要求 6 位股票代码）
+  if (!/^\d{6}$/.test(code)) {
+    disclosureInfo.value = null
+    return
+  }
+  fetchingDisclosure.value = true
+  disclosureInfo.value = null
+  try {
+    const res = await getDisclosureByStock(code)
+    // 接口返回 ApiResponse，res.data 才是真实数据（可能为 null）
+    const d = (res as any)?.data
+    if (d && d.stock_code) {
+      disclosureInfo.value = d as DisclosureCalendarItem
+    }
+  } catch (e: any) {
+    // 未查询到披露日静默处理，不影响主流程
+    console.warn('查询预约披露日失败:', e)
+  } finally {
+    fetchingDisclosure.value = false
   }
 }
 
@@ -2300,6 +2408,102 @@ onUnmounted(() => {
     font-size: 13px;
     &.up { color: #ef4444; }
     &.down { color: #10b981; }
+  }
+}
+
+// 预约披露日展示栏
+.disclosure-info-bar {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-top: 8px;
+  padding: 8px 14px;
+  background: linear-gradient(135deg, rgba(245, 158, 11, 0.06), rgba(245, 158, 11, 0.1));
+  border: 1px solid rgba(245, 158, 11, 0.25);
+  border-radius: 10px;
+  font-size: 13px;
+  flex-wrap: wrap;
+
+  &.loading {
+    color: #64748b;
+    .el-icon { color: #f59e0b; font-size: 14px; }
+  }
+
+  .disclosure-label {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 2px 8px;
+    background: rgba(245, 158, 11, 0.12);
+    border-radius: 6px;
+    color: #d97706;
+    font-size: 12px;
+    font-weight: 600;
+
+    .el-icon {
+      font-size: 14px;
+    }
+  }
+
+  .disclosure-item {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 4px;
+
+    .item-label {
+      font-size: 12px;
+      color: #64748b;
+    }
+
+    .item-value {
+      font-size: 13px;
+      color: #1e293b;
+      font-weight: 500;
+    }
+
+    &.highlight .item-value {
+      color: #d97706;
+      font-weight: 700;
+    }
+  }
+
+  .disclosure-countdown {
+    margin-left: auto;
+    padding: 2px 10px;
+    border-radius: 12px;
+    font-size: 12px;
+    font-weight: 700;
+
+    &.success {
+      color: #059669;
+      background: rgba(5, 150, 105, 0.1);
+    }
+
+    &.danger {
+      color: #fff;
+      background: #ef4444;
+    }
+
+    &.info {
+      color: #64748b;
+      background: rgba(100, 116, 139, 0.1);
+    }
+  }
+}
+
+// 移动端适配：缩小内边距与字号
+@media (max-width: 480px) {
+  .disclosure-info-bar {
+    gap: 10px;
+    padding: 7px 10px;
+    font-size: 12px;
+
+    .disclosure-countdown {
+      margin-left: 0;
+      margin-top: 4px;
+      width: 100%;
+      text-align: center;
+    }
   }
 }
 
