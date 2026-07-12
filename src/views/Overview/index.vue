@@ -170,7 +170,7 @@
       </div>
 
       <!-- 东方财富人气榜 -->
-      <div class="rank-section">
+      <!-- <div class="rank-section">
         <div class="section-header">
           <h2 class="section-title">
             <el-icon><TrendCharts /></el-icon>
@@ -203,7 +203,7 @@
             </div>
           </div>
         </div>
-      </div>
+      </div> -->
 
       <!-- 东方财富人气榜 -->
       <div class="rank-section">
