@@ -20,6 +20,12 @@
         </div>
       </div>
       <div class="toolbar-right">
+        <el-tooltip content="查看原始报告" placement="bottom">
+          <el-button class="toolbar-btn original-btn" plain @click="openOriginalReport">
+            <el-icon><Link /></el-icon>
+            <span class="btn-text">原始报告</span>
+          </el-button>
+        </el-tooltip>
         <el-tooltip content="下载图片" placement="bottom">
           <el-button class="toolbar-btn" type="primary" plain :loading="downloading" @click="downloadImage" style="font-size: 12px; width: 40px;">
             分享
@@ -80,7 +86,7 @@ import { ref, onMounted, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import {
-  ArrowLeft, Document, Refresh, TopRight, Loading, CircleClose, Download
+  ArrowLeft, Document, Refresh, TopRight, Loading, CircleClose, Download, Link
 } from '@element-plus/icons-vue'
 import { analysisApi } from '@/api/analysis'
 import html2canvas from 'html2canvas'
@@ -195,6 +201,10 @@ const goBack = () => {
   } else {
     router.push('/analysis/single')
   }
+}
+
+const openOriginalReport = () => {
+  router.push({ name: 'ReportDetail', params: { id: taskId.value } })
 }
 
 const openInNewTab = () => {
@@ -696,6 +706,24 @@ onMounted(() => {
   }
 }
 
+.original-btn {
+  width: auto;
+  padding: 0 12px;
+  gap: 4px;
+  font-size: 12px;
+  border-color: #a5f3fc;
+  color: #0891b2;
+
+  .btn-text {
+    display: inline;
+  }
+
+  &:hover {
+    border-color: #06b6d4;
+    color: #06b6d4;
+  }
+}
+
 // ─── 加载状态 ──────────────────────────────────
 .loading-state {
   flex: 1;
@@ -815,11 +843,54 @@ onMounted(() => {
 // ─── 响应式 ───────────────────────────────────
 @media (max-width: 768px) {
   .report-toolbar {
-    padding: 0 12px;
+    padding: 0 8px;
+    height: 48px;
+    gap: 4px;
   }
 
-  .report-meta .report-id {
-    max-width: 120px;
+  .toolbar-left {
+    gap: 6px;
+    flex: 1;
+    min-width: 0;
+  }
+
+  .back-btn {
+    padding: 4px;
+    margin-left: -4px;
+
+    span {
+      display: none;
+    }
+  }
+
+  .toolbar-divider {
+    display: none;
+  }
+
+  .report-meta {
+    gap: 6px;
+
+    .meta-icon {
+      display: none;
+    }
+
+    .report-id {
+      display: none;
+    }
+
+    .date-tag {
+      display: none;
+    }
+  }
+
+  .toolbar-right {
+    gap: 4px;
+  }
+
+  .original-btn {
+    padding: 0 8px;
+    width: auto;
+    height: 32px;
   }
 
   .report-content {
@@ -835,6 +906,17 @@ onMounted(() => {
   .error-card {
     padding: 32px 24px;
     width: 100%;
+  }
+}
+
+@media (max-width: 480px) {
+  .report-toolbar {
+    height: 44px;
+    padding: 0 6px;
+  }
+
+  .toolbar-right {
+    gap: 2px;
   }
 }
 </style>
