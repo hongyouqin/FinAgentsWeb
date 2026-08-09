@@ -95,9 +95,9 @@
 
     <!-- 右下角悬浮客服按钮 -->
     <el-backtop :right="40" :bottom="40" />
-    <button class="float-service-btn" @click="openWechatService" title="联系客服">
+    <!-- <button class="float-service-btn" @click="openWechatService" title="联系客服">
       <el-icon><Service /></el-icon>
-    </button>
+    </button> -->
   </div>
 </template>
 
