@@ -123,6 +123,10 @@
                     <span class="metric-label">成分股</span>
                     <span class="metric-value">{{ item.stock_count }}只</span>
                   </div>
+                  <div class="sector-metric">
+                    <span class="metric-label">聚合日期</span>
+                    <span class="metric-value date">{{ formatDate(item.data_date) }}</span>
+                  </div>
                 </div>
                 <div class="sector-card-detail">{{ item.signal_detail }}</div>
               </div>
@@ -1322,7 +1326,8 @@ onMounted(() => {
 .sector-card-mid {
   display: flex;
   align-items: center;
-  gap: 14px;
+  flex-wrap: wrap;
+  gap: 8px 14px;
   margin-bottom: 8px;
 }
 
@@ -1354,6 +1359,13 @@ onMounted(() => {
 
     &.down {
       color: #059669;
+    }
+
+    &.date {
+      font-size: 12px;
+      font-weight: 500;
+      color: #64748b;
+      font-family: 'Roboto Mono', monospace;
     }
   }
 }
