@@ -33,6 +33,119 @@
         </div>
       </div> -->
 
+      <!-- 板块轮动 -->
+      <div class="sector-section">
+        <div class="section-header">
+          <h2 class="section-title">
+            <el-icon><Grid /></el-icon>
+            板块轮动
+          </h2>
+          <span class="section-subtitle">点击板块查看成分股</span>
+        </div>
+
+        <div v-loading="sectorLoading" class="sector-panel">
+          <div v-if="sectorList.length === 0" class="sector-empty">
+            <el-icon><Grid /></el-icon>
+            <span>暂无板块动能数据</span>
+          </div>
+
+          <template v-else>
+            <!-- 板块卡片列表 -->
+            <div class="sector-grid">
+              <div
+                v-for="item in visibleSectorList"
+                :key="item.industry"
+                class="sector-card"
+                :class="{ active: activeIndustry === item.industry }"
+                @click="selectIndustry(item.industry)"
+              >
+                <div class="sector-card-top">
+                  <span class="sector-rank" :class="{ top: item.rank <= 3 }">{{ item.rank }}</span>
+                  <span class="sector-name">{{ item.industry }}</span>
+                  <span class="sector-signal" :class="signalClass(item.signal)">{{ item.signal }}</span>
+                </div>
+                <div class="sector-card-mid">
+                  <div class="sector-metric">
+                    <span class="metric-label">动能评分</span>
+                    <span class="metric-value score">{{ formatScore(item.composite_score) }}</span>
+                  </div>
+                  <div class="sector-metric">
+                    <span class="metric-label">主力净买入</span>
+                    <span
+                      class="metric-value"
+                      :class="{ up: item.total_main_force_net > 0, down: item.total_main_force_net < 0 }"
+                    >
+                      {{ formatMoneyWan(item.total_main_force_net) }}
+                    </span>
+                  </div>
+                  <div class="sector-metric">
+                    <span class="metric-label">成分股</span>
+                    <span class="metric-value">{{ item.stock_count }}只</span>
+                  </div>
+                </div>
+                <div class="sector-card-detail">{{ item.signal_detail }}</div>
+              </div>
+            </div>
+
+            <div v-if="sectorList.length > sectorPreviewCount" class="sector-toggle">
+              <el-button link type="primary" @click="sectorExpanded = !sectorExpanded">
+                {{ sectorExpanded ? '收起' : `展开全部 ${sectorList.length} 个板块` }}
+                <el-icon>
+                  <ArrowUp v-if="sectorExpanded" />
+                  <ArrowDown v-else />
+                </el-icon>
+              </el-button>
+            </div>
+
+            <!-- 选中板块的成分股 -->
+            <div v-if="activeIndustry" class="sector-stock-block">
+              <div class="sector-stock-header">
+                <span class="stock-header-title">{{ activeIndustry }}</span>
+                <span class="stock-header-count">共 {{ sectorStockTotal }} 只</span>
+              </div>
+
+              <div v-loading="sectorStockLoading" class="sector-stock-body">
+                <div v-if="sectorStockList.length === 0 && !sectorStockLoading" class="sector-empty small">
+                  <span>该板块暂无成分股数据</span>
+                </div>
+                <div v-else class="sector-stock-grid">
+                  <div
+                    v-for="stock in sectorStockList"
+                    :key="stock.symbol"
+                    class="sector-stock-card"
+                  >
+                    <div class="sector-stock-info">
+                      <span class="sector-stock-name">{{ stock.name }}</span>
+                      <span class="sector-stock-code">{{ normalizeSymbol(stock.symbol) }}</span>
+                    </div>
+                    <el-button
+                      type="primary"
+                      size="small"
+                      class="sector-analyze-btn"
+                      @click="goToAnalysis(stock.symbol)"
+                    >
+                      分析
+                    </el-button>
+                  </div>
+                </div>
+              </div>
+
+              <div v-if="sectorStockTotal > sectorStockPageSize" class="sector-stock-pagination">
+                <el-pagination
+                  v-model:current-page="sectorStockPage"
+                  :page-size="sectorStockPageSize"
+                  :total="sectorStockTotal"
+                  layout="prev, pager, next"
+                  background
+                  small
+                  @current-change="fetchSectorStocks"
+                />
+              </div>
+            </div>
+          </template>
+        </div>
+      </div>
+
       <!-- 财报日历 -->
       <div v-loading="loading" class="calendar-section">
         <div class="section-header">
@@ -310,13 +423,18 @@
 
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
-import { Calendar, Search, Refresh, TrendCharts, ArrowRight } from '@element-plus/icons-vue'
+import { useRouter } from 'vue-router'
+import { Calendar, Search, Refresh, TrendCharts, ArrowRight, Grid, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
 import { getDisclosureCalendarList, getDisclosureByStock } from '@/api/disclosureCalendar'
 import { getStockHotByCategory, getStockHotDeal, getStockHotRank } from '@/api/stockHot'
+import { getSectorMomentumRanking, getSectorStocks } from '@/api/sectorRotation'
 import type { DisclosureCalendarItem } from '@/api/disclosureCalendar'
 import type { StockHotItem, StockHotDealItem, StockHotRankItem } from '@/api/stockHot'
+import type { SectorMomentumItem, SectorStockItem } from '@/api/sectorRotation'
 
 defineOptions({ name: 'Overview' })
+
+const router = useRouter()
 
 const loading = ref(false)
 const list = ref<DisclosureCalendarItem[]>([])
@@ -347,6 +465,23 @@ const dealList = ref<StockHotDealItem[]>([])
 // 东方财富人气榜
 const rankLoading = ref(false)
 const rankList = ref<StockHotRankItem[]>([])
+
+// 板块轮动
+const sectorLoading = ref(false)
+const sectorList = ref<SectorMomentumItem[]>([])
+const sectorExpanded = ref(false)
+const sectorPreviewCount = 6
+const visibleSectorList = computed(() =>
+  sectorExpanded.value ? sectorList.value : sectorList.value.slice(0, sectorPreviewCount)
+)
+
+// 板块成分股
+const activeIndustry = ref('')
+const sectorStockLoading = ref(false)
+const sectorStockList = ref<SectorStockItem[]>([])
+const sectorStockTotal = ref(0)
+const sectorStockPage = ref(1)
+const sectorStockPageSize = ref(20)
 
 function formatDate(val: string) {
   if (!val || val.length !== 8) return val || '-'
@@ -593,6 +728,94 @@ function formatChangePercent(val: number) {
   return `${sign}${val.toFixed(2)}%`
 }
 
+function formatScore(val: number) {
+  if (val == null) return '-'
+  return val.toFixed(1)
+}
+
+/** 接口返回的资金金额单位为万元 */
+function formatMoneyWan(val: number) {
+  if (val == null) return '-'
+  const sign = val > 0 ? '+' : val < 0 ? '-' : ''
+  const abs = Math.abs(val)
+  if (abs >= 10000) return `${sign}${(abs / 10000).toFixed(2)}亿`
+  return `${sign}${abs.toFixed(0)}万`
+}
+
+function signalClass(signal: string) {
+  const map: Record<string, string> = {
+    '真上涨': 'signal-strong',
+    '低位启动': 'signal-start',
+    '假上涨': 'signal-fake',
+    '高位出货': 'signal-exit',
+    '观望': 'signal-wait',
+    '中性': 'signal-neutral'
+  }
+  return map[signal] || 'signal-neutral'
+}
+
+/** 兼容 "000001.SZ" 与 "000001" 两种代码形式 */
+function normalizeSymbol(symbol: string) {
+  if (!symbol) return '-'
+  return symbol.split('.')[0]
+}
+
+async function fetchSectorRanking() {
+  sectorLoading.value = true
+  try {
+    const res = await getSectorMomentumRanking({ top_n: 30, days: 10 })
+    if (res.success && res.data) {
+      const ranking = res.data.ranking || (Array.isArray(res.data) ? res.data : [])
+      sectorList.value = ranking
+    }
+  } catch (e) {
+    console.error('获取板块动能排行失败:', e)
+  } finally {
+    sectorLoading.value = false
+  }
+}
+
+async function fetchSectorStocks() {
+  if (!activeIndustry.value) return
+  sectorStockLoading.value = true
+  try {
+    const res = await getSectorStocks({
+      industry: activeIndustry.value,
+      page: sectorStockPage.value,
+      page_size: sectorStockPageSize.value
+    })
+    const body = res.success && res.data ? res.data : res
+    sectorStockList.value = body?.items || []
+    sectorStockTotal.value = body?.total || 0
+  } catch (e) {
+    console.error('获取板块成分股失败:', e)
+    sectorStockList.value = []
+    sectorStockTotal.value = 0
+  } finally {
+    sectorStockLoading.value = false
+  }
+}
+
+function selectIndustry(industry: string) {
+  // 重复点击当前板块则收起成分股
+  if (activeIndustry.value === industry) {
+    activeIndustry.value = ''
+    sectorStockList.value = []
+    sectorStockTotal.value = 0
+    return
+  }
+  activeIndustry.value = industry
+  sectorStockPage.value = 1
+  fetchSectorStocks()
+}
+
+function goToAnalysis(symbol: string) {
+  router.push({
+    path: '/analysis/single',
+    query: { symbol: normalizeSymbol(symbol) }
+  })
+}
+
 async function fetchStockHotRank() {
   rankLoading.value = true
   try {
@@ -616,6 +839,7 @@ onMounted(() => {
   fetchStockHot()
   fetchStockHotDeal()
   fetchStockHotRank()
+  fetchSectorRanking()
 })
 </script>
 
@@ -763,7 +987,8 @@ onMounted(() => {
 .calendar-section,
 .hot-section,
 .deal-section,
-.rank-section {
+.rank-section,
+.sector-section {
   margin-bottom: 24px;
 }
 
@@ -806,6 +1031,285 @@ onMounted(() => {
   border-radius: 12px;
   border: 1px solid #e2e8f0;
   overflow: hidden;
+}
+
+// ─── 板块轮动 ──────────────────────────────
+.sector-panel {
+  background: #fff;
+  border-radius: 12px;
+  border: 1px solid #e2e8f0;
+  padding: 16px;
+
+  @media (max-width: 768px) {
+    padding: 12px;
+  }
+}
+
+.sector-empty {
+  padding: 48px 20px;
+  text-align: center;
+  color: #94a3b8;
+  font-size: 13px;
+
+  .el-icon {
+    font-size: 36px;
+    margin-bottom: 10px;
+    display: block;
+  }
+
+  &.small {
+    padding: 28px 20px;
+  }
+}
+
+.sector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
+}
+
+.sector-card {
+  border: 1px solid #e2e8f0;
+  border-radius: 10px;
+  padding: 12px 14px;
+  cursor: pointer;
+  transition: all 0.2s;
+  background: #fff;
+
+  &:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.08);
+  }
+
+  &.active {
+    border-color: #3b82f6;
+    background: #f5faff;
+    box-shadow: 0 2px 10px rgba(59, 130, 246, 0.14);
+  }
+}
+
+.sector-card-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.sector-rank {
+  flex-shrink: 0;
+  width: 22px;
+  height: 22px;
+  line-height: 22px;
+  text-align: center;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: #64748b;
+  background: #f1f5f9;
+
+  &.top {
+    color: #fff;
+    background: linear-gradient(135deg, #f59e0b, #ef4444);
+  }
+}
+
+.sector-name {
+  flex: 1;
+  min-width: 0;
+  font-size: 15px;
+  font-weight: 600;
+  color: #1e293b;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.sector-signal {
+  flex-shrink: 0;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+
+  &.signal-strong {
+    color: #dc2626;
+    background: #fef2f2;
+  }
+
+  &.signal-start {
+    color: #d97706;
+    background: #fffbeb;
+  }
+
+  &.signal-fake {
+    color: #7c3aed;
+    background: #f5f3ff;
+  }
+
+  &.signal-exit {
+    color: #059669;
+    background: #ecfdf5;
+  }
+
+  &.signal-wait,
+  &.signal-neutral {
+    color: #64748b;
+    background: #f1f5f9;
+  }
+}
+
+.sector-card-mid {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  margin-bottom: 8px;
+}
+
+.sector-metric {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  .metric-label {
+    font-size: 11px;
+    color: #94a3b8;
+    white-space: nowrap;
+  }
+
+  .metric-value {
+    font-size: 13px;
+    font-weight: 600;
+    color: #475569;
+    white-space: nowrap;
+
+    &.score {
+      color: #2563eb;
+    }
+
+    &.up {
+      color: #dc2626;
+    }
+
+    &.down {
+      color: #059669;
+    }
+  }
+}
+
+.sector-card-detail {
+  font-size: 12px;
+  color: #94a3b8;
+  line-height: 1.5;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+}
+
+.sector-toggle {
+  display: flex;
+  justify-content: center;
+  margin-top: 12px;
+}
+
+.sector-stock-block {
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid #f1f5f9;
+}
+
+.sector-stock-header {
+  display: flex;
+  align-items: baseline;
+  gap: 8px;
+  margin-bottom: 12px;
+
+  .stock-header-title {
+    font-size: 15px;
+    font-weight: 700;
+    color: #1e293b;
+  }
+
+  .stock-header-count {
+    font-size: 12px;
+    color: #94a3b8;
+  }
+}
+
+.sector-stock-body {
+  min-height: 60px;
+}
+
+.sector-stock-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+  gap: 10px;
+
+  @media (max-width: 768px) {
+    grid-template-columns: repeat(2, 1fr);
+    gap: 8px;
+  }
+
+  @media (max-width: 480px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.sector-stock-card {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 10px 12px;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  background: #fff;
+  transition: all 0.2s;
+
+  &:hover {
+    border-color: #93c5fd;
+    box-shadow: 0 2px 8px rgba(59, 130, 246, 0.08);
+  }
+}
+
+.sector-stock-info {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+
+  .sector-stock-name {
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .sector-stock-code {
+    font-size: 12px;
+    color: #94a3b8;
+    font-family: 'Roboto Mono', monospace;
+  }
+}
+
+.sector-analyze-btn {
+  flex-shrink: 0;
+  border-radius: 6px;
+}
+
+.sector-stock-pagination {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
 }
 
 .calendar-date-bar {
