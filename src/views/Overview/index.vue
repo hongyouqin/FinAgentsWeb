@@ -44,6 +44,47 @@
         </div>
 
         <div v-loading="sectorLoading" class="sector-panel">
+          <!-- 参数调节 -->
+          <div class="sector-toolbar">
+            <div class="toolbar-field">
+              <span class="field-label">板块数</span>
+              <el-select v-model="sectorTopN" size="small" class="field-select" @change="onSectorParamChange">
+                <el-option v-for="n in topNOptions" :key="n" :label="`前 ${n}`" :value="n" />
+              </el-select>
+            </div>
+            <div class="toolbar-field">
+              <span class="field-label">回溯天数</span>
+              <el-select v-model="sectorDays" size="small" class="field-select" @change="onSectorParamChange">
+                <el-option v-for="n in daysOptions" :key="n" :label="`${n} 日`" :value="n" />
+              </el-select>
+            </div>
+            <div class="toolbar-field weight-field">
+              <span class="field-label">
+                维度权重
+                <el-tooltip
+                  content="综合评分 = 资金流权重×资金流强度 + 成交额权重×成交额占比趋势，两者之和恒为 1"
+                  placement="top"
+                >
+                  <el-icon class="field-tip"><QuestionFilled /></el-icon>
+                </el-tooltip>
+              </span>
+              <div class="weight-control">
+                <span class="weight-tag flow">资金流 {{ sectorWeightFlow.toFixed(1) }}</span>
+                <el-slider
+                  v-model="sectorWeightFlow"
+                  :min="0"
+                  :max="1"
+                  :step="0.1"
+                  :show-tooltip="false"
+                  size="small"
+                  class="weight-slider"
+                  @change="onSectorParamChange"
+                />
+                <span class="weight-tag turnover">成交额 {{ sectorWeightTurnover.toFixed(1) }}</span>
+              </div>
+            </div>
+          </div>
+
           <div v-if="sectorList.length === 0" class="sector-empty">
             <el-icon><Grid /></el-icon>
             <span>暂无板块动能数据</span>
@@ -424,7 +465,7 @@
 <script setup lang="ts">
 import { ref, onMounted, computed } from 'vue'
 import { useRouter } from 'vue-router'
-import { Calendar, Search, Refresh, TrendCharts, ArrowRight, Grid, ArrowUp, ArrowDown } from '@element-plus/icons-vue'
+import { Calendar, Search, Refresh, TrendCharts, ArrowRight, Grid, ArrowUp, ArrowDown, QuestionFilled } from '@element-plus/icons-vue'
 import { getDisclosureCalendarList, getDisclosureByStock } from '@/api/disclosureCalendar'
 import { getStockHotByCategory, getStockHotDeal, getStockHotRank } from '@/api/stockHot'
 import { getSectorMomentumRanking, getSectorStocks } from '@/api/sectorRotation'
@@ -474,6 +515,15 @@ const sectorPreviewCount = 6
 const visibleSectorList = computed(() =>
   sectorExpanded.value ? sectorList.value : sectorList.value.slice(0, sectorPreviewCount)
 )
+
+// 板块动能查询参数（top_n 限 1-100，days 限 5-60）
+const topNOptions = [10, 20, 30, 50, 100]
+const daysOptions = [5, 10, 20, 30, 60]
+const sectorTopN = ref(30)
+const sectorDays = ref(10)
+const sectorWeightFlow = ref(0.5)
+// 两个维度权重之和恒为 1，否则 composite_score 会超出 0-100 量纲
+const sectorWeightTurnover = computed(() => Number((1 - sectorWeightFlow.value).toFixed(1)))
 
 // 板块成分股
 const activeIndustry = ref('')
@@ -763,16 +813,36 @@ function normalizeSymbol(symbol: string) {
 async function fetchSectorRanking() {
   sectorLoading.value = true
   try {
-    const res = await getSectorMomentumRanking({ top_n: 30, days: 10 })
+    const res = await getSectorMomentumRanking({
+      top_n: sectorTopN.value,
+      days: sectorDays.value,
+      weight_flow: sectorWeightFlow.value,
+      weight_turnover: sectorWeightTurnover.value
+    })
     if (res.success && res.data) {
       const ranking = res.data.ranking || (Array.isArray(res.data) ? res.data : [])
       sectorList.value = ranking
+    }
+    // 调整参数后原选中板块可能已不在榜单内，需收起成分股
+    if (activeIndustry.value && !sectorList.value.some((i: SectorMomentumItem) => i.industry === activeIndustry.value)) {
+      resetSectorStocks()
     }
   } catch (e) {
     console.error('获取板块动能排行失败:', e)
   } finally {
     sectorLoading.value = false
   }
+}
+
+function onSectorParamChange() {
+  sectorExpanded.value = false
+  fetchSectorRanking()
+}
+
+function resetSectorStocks() {
+  activeIndustry.value = ''
+  sectorStockList.value = []
+  sectorStockTotal.value = 0
 }
 
 async function fetchSectorStocks() {
@@ -799,9 +869,7 @@ async function fetchSectorStocks() {
 function selectIndustry(industry: string) {
   // 重复点击当前板块则收起成分股
   if (activeIndustry.value === industry) {
-    activeIndustry.value = ''
-    sectorStockList.value = []
-    sectorStockTotal.value = 0
+    resetSectorStocks()
     return
   }
   activeIndustry.value = industry
@@ -1042,6 +1110,94 @@ onMounted(() => {
 
   @media (max-width: 768px) {
     padding: 12px;
+  }
+}
+
+.sector-toolbar {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  gap: 8px 20px;
+  padding-bottom: 14px;
+  margin-bottom: 14px;
+  border-bottom: 1px solid #f1f5f9;
+
+  @media (max-width: 768px) {
+    gap: 10px 14px;
+  }
+}
+
+.toolbar-field {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+
+  .field-label {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    font-size: 12px;
+    color: #64748b;
+    white-space: nowrap;
+  }
+
+  .field-tip {
+    font-size: 13px;
+    color: #cbd5e1;
+    cursor: help;
+
+    &:hover {
+      color: #3b82f6;
+    }
+  }
+}
+
+.field-select {
+  width: 88px;
+}
+
+.weight-field {
+  @media (max-width: 768px) {
+    width: 100%;
+  }
+}
+
+.weight-control {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+
+  @media (max-width: 768px) {
+    flex: 1;
+    min-width: 0;
+  }
+}
+
+.weight-slider {
+  width: 100px;
+  flex-shrink: 0;
+
+  @media (max-width: 768px) {
+    flex: 1;
+    width: auto;
+  }
+}
+
+.weight-tag {
+  font-size: 11px;
+  font-weight: 600;
+  padding: 2px 7px;
+  border-radius: 6px;
+  white-space: nowrap;
+
+  &.flow {
+    color: #2563eb;
+    background: #eff6ff;
+  }
+
+  &.turnover {
+    color: #7c3aed;
+    background: #f5f3ff;
   }
 }
 
