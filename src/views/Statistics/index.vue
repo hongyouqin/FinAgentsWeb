@@ -120,7 +120,7 @@
               <span class="card-label">总充值</span>
             </div>
           </div>
-          <div class="stat-card">
+          <!-- <div class="stat-card">
             <div class="card-icon sign">
               <el-icon><Calendar /></el-icon>
             </div>
@@ -128,7 +128,7 @@
               <span class="card-value">{{ formatNumber(signToday) }}</span>
               <span class="card-label">今日签到</span>
             </div>
-          </div>
+          </div> -->
         </div>
 
         
